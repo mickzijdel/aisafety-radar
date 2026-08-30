@@ -56,10 +56,66 @@ def test_extraction_importance_bounds():
         Extraction(**{**good, "claim_type": "vibes"})
 
 
+def _walk_schema(node):
+    """Yield every dict node in a JSON schema tree, including the root."""
+    if isinstance(node, dict):
+        yield node
+        for value in node.values():
+            yield from _walk_schema(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _walk_schema(value)
+
+
 def test_extraction_schema_forbids_additional_properties():
     schema = Extraction.json_schema()
     assert schema["additionalProperties"] is False
     assert "item_id" in schema["required"]
+    objects = [n for n in _walk_schema(schema) if n.get("type") == "object" and "properties" in n]
+    assert objects, "expected at least the root object"
+    for node in objects:
+        assert node["additionalProperties"] is False
+        assert set(node["required"]) == set(node["properties"])
+
+
+def test_extraction_schema_omits_api_unsupported_keywords():
+    schema = Extraction.json_schema()
+    unsupported = {
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "pattern",
+        "format",
+        "uniqueItems",
+    }
+    for node in _walk_schema(schema):
+        assert not (unsupported & node.keys()), f"unsupported keyword in {node}"
+
+
+def test_extraction_still_enforces_constraints_client_side():
+    good = dict(
+        item_id="x",
+        summary="s",
+        key_quotes=[],
+        author_stated_status=None,
+        claim_type="exploratory",
+        novelty=None,
+        discussion_signal=None,
+        deadline=None,
+        entities=[],
+        slugs=["interp"],
+        importance=3,
+    )
+    with pytest.raises(ValidationError):
+        Extraction(**{**good, "importance": 6})
+    with pytest.raises(ValidationError):
+        Extraction(**{**good, "key_quotes": ["a", "b", "c"]})
 
 
 def test_slugs_include_review_additions():

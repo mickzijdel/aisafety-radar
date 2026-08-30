@@ -163,11 +163,36 @@ class Usage(Strict):
         )
 
 
+# Validation keywords the API's json_schema output format does not accept. Passing one through
+# risks a 400, or a constraint that silently does nothing. `_strict_schema` strips them; the
+# pydantic Field constraints that produce them stay, so model_validate still enforces them on the
+# parsed response.
+_UNSUPPORTED_KEYWORDS = frozenset(
+    {
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "pattern",
+        "format",
+        "uniqueItems",
+    }
+)
+
+
 def _strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """Set additionalProperties: false on every object and require every property.
 
     The API's json_schema format needs both; pydantic emits neither for optional fields.
+    Keywords the format rejects are dropped from every node on the way through.
     """
+    for keyword in _UNSUPPORTED_KEYWORDS & schema.keys():
+        del schema[keyword]
     if schema.get("type") == "object" and "properties" in schema:
         schema["additionalProperties"] = False
         schema["required"] = list(schema["properties"].keys())
