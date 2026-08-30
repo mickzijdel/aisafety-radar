@@ -103,6 +103,7 @@ character training) ·
 `funding` funders and funding rounds ·
 `programmes` training, fellowships, courses ·
 `community` forums, newsletters, community spaces ·
+`culture` field culture, epistemic norms, community dynamics, meta-discussion about the field ·
 `events` conferences, workshops, deadlines
 
 **Careers**
@@ -126,6 +127,7 @@ skills/aisafety-radar/
     13-map-glossary.md          map: terms, disambiguated entities, canonical spellings
     14-map-readings.md          map: canonical readings per area, verbatim links
     15-careers.md               map + weekly: paths, 80k profiles, advisors, entry programmes, jobs
+    16-map-field-context.md     map: norms, culture, jargon, history, hiring realities (the "context" newcomers lack)
     20-current-state.md         rolling: 30-day synthesis per area, active debates
     30-today.md                 daily: executive summary and top items across sources
     31-today-forums.md          daily: LW / AF / EAF posts and discussion movers, full detail
@@ -234,9 +236,51 @@ them. Structure:
    its next known deadline pulled from the weekly events and training feed.
 5. **This week on the job board**: the 80k job board filtered to AI safety, via its Algolia
    index (weekly).
+6. **Context, not just skills**: a pointer into `16-map-field-context.md` with the short version
+   of gergo's argument that experienced professionals get rejected early for lacking
+   *context* (landscape, concepts, culture, hiring practices) rather than skills, and the
+   reading list from that thread.
 
 Every dated line carries the date of the feed it came from, so the agent can tell a person how
 fresh a deadline is.
+
+### 4.6 Field context appendix
+
+`16-map-field-context.md` covers the unspoken assumptions of the field: what a newcomer, or an
+agent advising one, needs in order to read the forums correctly and to be legible to the
+people in it. Two EA Forum posts frame it: jenn's
+[AI Safety Acculturation is Neglected](https://forum.effectivealtruism.org/posts/JeBP3WdqBGyafcwfD/ai-safety-acculturation-is-neglected)
+(the rationalist / professional culture gap, and the funding-gatekeeping dynamic behind it)
+and gergo's
+[Why experienced professionals fail to land high-impact roles](https://forum.effectivealtruism.org/posts/b82SLXwEHRCs3TFJA/why-experienced-professionals-fail-to-land-high-impact-roles)
+(the "context" checklist). Sections:
+
+1. **Epistemic norms and how people write**: reasoning transparency, epistemic status headers,
+   cruxes and double crux, scout mindset, steelmanning, calibrated language and explicit
+   probabilities, updating, inside versus outside view, ask versus guess culture, karma and
+   agreement voting, why people publish disagreements in public. Each norm gets a one-paragraph
+   definition, the canonical source, and a line on how to apply it when writing for this
+   audience.
+2. **Concepts and jargon**: x-risk, s-risk, p(doom), takeoff, timelines, ITN, expected value,
+   theories of change, cause prioritisation, bottlenecks, existential security, long
+   reflection, moral patienthood, and the rest of gergo's list. Definitions are pulled from
+   the forum wikis (section 5.9) so they stay current; the list of slugs is curated.
+3. **History and culture**: the rationalist origins and the relationship with EA, the FTX
+   collapse and its effects, the distancing between AI safety and EA, the funding ecosystem
+   and who gates what, the Berkeley scene, the rationalist/professional gap and the
+   acculturation ideas proposed for bridging it.
+4. **Thought leaders and critics**: the people whose positions shape the discourse and the
+   prominent opponents, each with one line on their position and a link.
+5. **Hiring realities**: closed rounds, volunteer work turning into paid work, contracts
+   through conference networking, unofficial work as a route in, why applying only through
+   job boards halves your chances. Cross-referenced from `15-careers.md`.
+6. **The professional half**: what the rationalist side tends to miss (institutional
+   legibility, tacit procedural knowledge, standing relationships). This section is
+   explicitly marked as thin until people from that side contribute.
+
+Sections 1 to 4 also inform the extractor: the `epistemic_status` field exists because these
+norms exist, and the glossary in `13-map-glossary.md` links into section 2 rather than
+repeating it.
 
 ## 5. Sources
 
@@ -313,6 +357,16 @@ X-Risk Daily `https://buttondown.com/x-risk-daily/rss` (verified: the RSS `descr
 the complete briefing, and the archive pages are server-rendered without a Cloudflare
 challenge). X-Risk Weekly comes through the same feed. AI Safety Newsletter and the aisafety.com
 events and training roundup are imported the same way.
+
+### 5.9 Concepts and norms (monthly)
+
+Forum wiki entries, verified 2026-08-30: EA Forum via GraphQL
+`tags(input:{terms:{view:"tagBySlug", slug:"reasoning-transparency"}}){results{name postCount description{markdown}}}`
+(note: `tag(input:{selector:{slug:...}})` does not exist there); LessWrong via the agent API
+`GET https://www.lesswrong.com/api/tag/<slug>` (Markdown, wiki content plus tagged posts). A
+curated list of slugs drives a monthly refresh of the definitions in `16-map-field-context.md`;
+`postCount` doubles as a signal of which concepts are live. The EA Forum glossary post and
+Open Philanthropy's reasoning-transparency page are the fixed canonical readings.
 
 ## 6. Pipeline
 
@@ -618,7 +672,8 @@ changed; per-area sub-packs for agents that only care about, say, governance.
    render `31-today-forums.md`, QA gates, publish. First real daily version.
 3. **Breadth**: news, labs, papers, imports, `30-today.md`, `32`, `33`, `60`, `61`.
 4. **Rolling state and weekly views**: `20`, `40`, `41`, `50`.
-5. **Map and careers**: hand-curated first pass of `10`-`15`, drift reports, 80k scraping.
+5. **Map, careers and field context**: hand-curated first pass of `10`-`16`, drift reports,
+   80k scraping, wiki-driven concept definitions.
 6. **Portability**: Codex manifests, `.agents/skills` docs, eval suite, README install matrix,
    GitHub Pages with `llms.txt`.
 
