@@ -112,7 +112,8 @@ class PostsLedger:
         return sorted(self._days)
 
     def entries(self, day: date) -> dict[str, LedgerEntry]:
-        return self._days.get(day, {})
+        """That day's post map, as a copy: mutating the result must not touch the ledger."""
+        return dict(self._days.get(day, {}))
 
     def latest_before(self, day: date) -> date | None:
         earlier = [d for d in self._days if d < day]
@@ -125,6 +126,11 @@ class PostsLedger:
 
         The day is rebuilt from scratch, so re-running the same day replaces it rather than
         merging with a half-finished earlier attempt.
+
+        `last_commented` only covers the posts the comment refresh looked at (the 14-day window),
+        so a missing key means "no news", not "no comments ever": a refetched post keeps the
+        timestamp the previous day recorded. An explicit None is treated the same as an absent
+        key for that reason. Only a real datetime overwrites what is already known.
         """
         today: dict[str, LedgerEntry] = {}
         prev_day = self.latest_before(day)
@@ -132,6 +138,11 @@ class PostsLedger:
             for pid, e in self._days[prev_day].items():
                 today[pid] = e.model_copy(update={"carried": True})
         for item in items:
+            # `today` still holds the carried entry for this post, if there was one.
+            known = today.get(item.id)
+            commented_at = last_commented.get(item.id)
+            if commented_at is None and known is not None:
+                commented_at = known.last_commented_at
             today[item.id] = LedgerEntry(
                 post_id=item.id,
                 url=item.url,
@@ -140,7 +151,7 @@ class PostsLedger:
                 score=item.score,
                 agreement=item.agreement,
                 comment_count=item.comment_count,
-                last_commented_at=last_commented.get(item.id),
+                last_commented_at=commented_at,
             )
         self._days[day] = today
         cutoff = day - timedelta(days=self.keep_days - 1)

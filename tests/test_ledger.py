@@ -147,6 +147,59 @@ def test_snapshot_overwrites_a_carried_entry_when_the_post_reappears(tmp_path):
     assert (moves[0].new_comments, moves[0].score_before) == (8, 10)
 
 
+def test_snapshot_keeps_yesterdays_last_commented_at_when_the_map_omits_the_post(tmp_path):
+    """The daily run only builds `last_commented` for the 14-day window posts.
+
+    A post refetched outside that window must not lose the timestamp of its last known comment.
+    """
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    commented_at = datetime(2026, 8, 29, 8, tzinfo=UTC)
+    ledger.snapshot(date(2026, 8, 29), [make_item(id="lw:a")], {"lw:a": commented_at})
+    ledger.snapshot(date(2026, 8, 30), [make_item(id="lw:a", comment_count=9)], {})
+
+    entry = ledger.entries(date(2026, 8, 30))["lw:a"]
+    assert entry.last_commented_at == commented_at
+    assert entry.carried is False and entry.comment_count == 9
+
+
+def test_snapshot_last_commented_at_falls_back_across_an_explicit_none(tmp_path):
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    commented_at = datetime(2026, 8, 29, 8, tzinfo=UTC)
+    ledger.snapshot(date(2026, 8, 29), [make_item(id="lw:a")], {"lw:a": commented_at})
+    # Present-and-None is treated the same as absent: it carries no information to overwrite with.
+    ledger.snapshot(date(2026, 8, 30), [make_item(id="lw:a")], {"lw:a": None})
+
+    assert ledger.entries(date(2026, 8, 30))["lw:a"].last_commented_at == commented_at
+
+
+def test_snapshot_prefers_a_fresh_last_commented_at_over_yesterdays(tmp_path):
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    old = datetime(2026, 8, 29, 8, tzinfo=UTC)
+    fresh = datetime(2026, 8, 30, 11, tzinfo=UTC)
+    ledger.snapshot(date(2026, 8, 29), [make_item(id="lw:a")], {"lw:a": old})
+    ledger.snapshot(date(2026, 8, 30), [make_item(id="lw:a")], {"lw:a": fresh})
+
+    assert ledger.entries(date(2026, 8, 30))["lw:a"].last_commented_at == fresh
+
+
+def test_snapshot_leaves_last_commented_at_none_for_a_first_seen_post(tmp_path):
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    ledger.snapshot(date(2026, 8, 29), [], {})
+    ledger.snapshot(date(2026, 8, 30), [make_item(id="lw:new")], {})
+
+    assert ledger.entries(date(2026, 8, 30))["lw:new"].last_commented_at is None
+
+
+def test_entries_returns_a_copy(tmp_path):
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    ledger.snapshot(date(2026, 8, 30), [make_item(id="lw:a")], {})
+
+    ledger.entries(date(2026, 8, 30)).clear()
+    ledger.entries(date(2026, 8, 31))["lw:ghost"] = object()
+    assert set(ledger.entries(date(2026, 8, 30))) == {"lw:a"}
+    assert ledger.entries(date(2026, 8, 31)) == {}
+
+
 def test_save_roundtrips_every_entry_field(tmp_path):
     ledger = PostsLedger(tmp_path / "ledger.json").load()
     item = make_item(
