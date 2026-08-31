@@ -154,6 +154,14 @@ def test_provenance_accepts_an_item_url_written_without_its_scheme():
     assert not gate_provenance({"a.md": "www.lesswrong.com/posts/other/x"}, [item]).passed
 
 
+def test_provenance_reports_the_offending_url_as_the_file_spells_it():
+    # The comparison folds case; the report must not, or the reader of a blocked run is sent to
+    # look up a path that may not exist in the case the detail prints.
+    item = make_item(markdown="no links")
+    res = gate_provenance({"a.md": "**https://Evil.Example/Steal**."}, [item])
+    assert res.details == ["a.md: URL not in any source: Evil.Example/Steal"]
+
+
 def test_provenance_reports_one_detail_per_offending_url():
     # The scheme-ful and bare patterns both match a fully-written URL; that is one problem.
     item = make_item()
@@ -195,6 +203,55 @@ def test_provenance_finds_no_links_to_object_to_in_the_goldens():
     assert res.passed, res.details
 
 
+# Four shapes of a *sourced* link the gate used to reject. Each one blocks the whole pack, which
+# is the worse of the two failures this gate can have: a false positive withholds a correct digest
+# for a day, and there is no way for the run to recover from it on its own.
+@pytest.mark.parametrize(
+    ("label", "source", "written"),
+    [
+        ("host case differs from the source", "see WWW.Example.com/Paper", "www.example.com/Paper"),
+        ("written in upper case", "see www.example.com/Paper", "WWW.EXAMPLE.COM/Paper"),
+        ("scheme dropped, case kept", "see https://Host.Example/X", "host.example/X"),
+        ("wrapped in bold at line end", "see https://host.example/x", "**host.example/x**"),
+        ("wrapped in single emphasis", "see https://host.example/x", "*host.example/x*"),
+    ],
+)
+def test_provenance_accepts_a_sourced_link_however_it_is_written(label, source, written):
+    item = make_item(markdown=source)
+    res = gate_provenance({"a.md": written}, [item])
+    assert res.passed, (label, res.details)
+
+
+@pytest.mark.parametrize(
+    ("label", "written"),
+    [
+        ("bold", "**evil.example/x**"),
+        ("upper case", "WWW.EVIL.EXAMPLE/x"),
+        ("emphasis", "*https://evil.example/x*"),
+    ],
+)
+def test_provenance_still_flags_an_invented_link_in_those_same_shapes(label, written):
+    item = make_item(markdown="see https://host.example/x")
+    res = gate_provenance({"a.md": written}, [item])
+    assert not res.passed and res.blocking, label
+    assert "evil.example" in res.details[0].lower(), label
+
+
+@pytest.mark.parametrize(
+    ("label", "field"),
+    [("title", "title"), ("author", "author"), ("affiliation", "author_affiliation")],
+)
+def test_provenance_allows_a_link_the_fetched_metadata_itself_carries(label, field):
+    # Spec 6.8 gate 1 allows what "appears verbatim in fetched source text", and a post's title,
+    # author name and affiliation are fetched source text: the renderer copies them onto the
+    # metadata line, so a forum user whose display name is a URL would otherwise block the pack.
+    item = make_item(**{field: "read www.example.org/launch for more"})
+    rendered = render_forums(META, build_render_items([item], [rec(item.id, 3)]), [], [])
+    assert "www.example.org/launch" in rendered, "precondition: the field reaches the pack"
+    res = gate_provenance({"31-today-forums.md": rendered}, [item])
+    assert res.passed, (label, res.details)
+
+
 def test_provenance_reports_every_offending_file_and_reference():
     item = make_item()
     res = gate_provenance(
@@ -212,7 +269,6 @@ def test_provenance_reports_every_offending_file_and_reference():
         "[P123]",  # no site prefix at all
         "[PLW:abc]",  # right shape, wrong case
         "[Plw:]",  # site prefix, no local id
-        "[Pzz:abc123]",  # unknown site
     ],
 )
 def test_provenance_flags_a_citation_that_does_not_resolve(token):
@@ -231,6 +287,25 @@ def test_provenance_does_not_read_a_bracketed_phrase_as_a_citation():
 def test_provenance_resolves_a_well_formed_citation():
     item = make_item()
     assert gate_provenance({"a.md": f"[P{item.id}]"}, [item]).passed
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "[Python:3.12]",  # the shape that blocked a pack: a colon in ordinary prose
+        "[Pytorch:2.4]",
+        "[Priority:high]",
+        "[Pzz:abc123]",  # a site the pipeline does not fetch cannot be one of its items
+        "[Part 2: the sequel]",
+    ],
+)
+def test_provenance_does_not_read_a_colon_in_prose_as_a_citation(phrase):
+    # A citation is `[P<site>:<local-id>]` for a site this pipeline actually fetches, or a bare
+    # number. Anything else in brackets is prose, and reading `[Python:3.12]` as a broken citation
+    # withheld a whole correct pack. The narrowing is deliberate: an unresolvable `[Pzz:x]` renders
+    # no link and misleads nobody, while a false positive here costs the day's publication.
+    item = make_item()
+    assert gate_provenance({"a.md": f"built on {phrase} today"}, [item]).passed
 
 
 @pytest.mark.parametrize("word", ["[PDF]", "[Paper]", "[Preprint]", "[Post](url)"])

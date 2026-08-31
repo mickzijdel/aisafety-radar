@@ -13,8 +13,13 @@ Two of the gates deserve their reasoning stated, because the obvious reading of 
   link cannot reach a metadata line. What the model does contribute is prose, and prose is
   flattened and escaped on the way out but *not* rewritten -- a `https://` inside a summary passes
   through verbatim. This gate is therefore the thing standing between a model-invented URL and a
-  published one. A URL clears it only by being an item's own URL, a URL that appears in an item's
-  source markdown, or a link back into the pack's own site.
+  published one. A URL clears it only by being an item's own URL, a URL that appears in the text
+  the fetcher brought back with an item (its markdown, title, author or affiliation), or a link
+  back into the pack's own site.
+
+  This gate's two failure modes are not symmetrical: a missed link publishes one bad URL, while a
+  false positive withholds the entire day's pack and leaves the run no way to recover. Every
+  widening in the matching below is a false positive that actually happened.
 
   The corollary is a requirement on the caller: `items` must cover everything the files render,
   discussion movers included. Movers are rendered from ledger entries rather than `Item`s, so the
@@ -34,9 +39,10 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from datetime import datetime
+from typing import get_args
 
 from pipeline.config import Settings
-from pipeline.models import GateResult, Item, Usage
+from pipeline.models import GateResult, Item, Site, Usage
 from pipeline.render import PAGES_BASE
 from pipeline.stages.scan import JudgeResult, ScanResult
 from pipeline.stages.verify import ExtractionRecord
@@ -57,6 +63,14 @@ _END = r"[^\s)\]>\"'`]"
 # it, `GPT-4.5/turbo`, `4.5/5` and `v1.2/beta` all read as links, and a false positive here blocks
 # the entire pack from publishing -- a far worse failure than the one being prevented. With it,
 # both goldens and the rendered index produce zero false positives (asserted by test).
+#
+# What that leaves through, stated rather than implied: a *scheme-less* host that is not
+# TLD-shaped still passes -- `evil.example:8080/x` (a port between the host and the slash),
+# `192.0.2.1/x` (an all-digit final label), `xn--80ak6aa92e/x` (punycode's digits), and a
+# homoglyph host whose non-ASCII characters this ASCII pattern cannot see. Each of those is caught
+# the moment it carries `https://` or `www.`, and the scan gate reads the same prose for
+# instructions, so this is a known residual rather than the only line of defence. Widening the
+# bare-host pattern to cover them is what produced the false positives above.
 _LINK_RES = (
     re.compile(rf"https?://{_END}+", re.IGNORECASE),
     re.compile(rf"\bwww\.{_END}+", re.IGNORECASE),
@@ -66,12 +80,29 @@ _LINK_RES = (
 # Anything of the shape `[P...]`, so a malformed citation is reported rather than quietly skipped
 # by a pattern that only recognises well-formed ones.
 _PID_RE = re.compile(r"\[P([^\]\s]+)\]")
+
+# The site prefixes an item id can carry, taken from the type rather than repeated here: a fourth
+# forum added to `Site` has to start resolving citations on the day it starts producing items.
+CITATION_SITES: frozenset[str] = frozenset(get_args(Site))
 _ITEM_LINE_RE = re.compile(r"^- \*\*", re.MULTILINE)
 
 _SCHEME_RE = re.compile(r"^https?://", re.IGNORECASE)
-# Sentence punctuation a URL collects at the end of a clause, plus the trailing slash, which is
-# not a distinction any source makes.
-_TRAILING = "/.,"
+# Sentence punctuation a URL collects at the end of a clause, the trailing slash (not a distinction
+# any source makes), and the markdown emphasis markers. A link at the end of a bolded run comes out
+# of `_links` as `host.example/x**`, which can never equal anything in the allowed set: the item
+# title on every rendered metadata line is wrapped in `**`, so without this a post whose title is
+# a URL blocks the pack. Stripped rather than excluded from `_END`, so that a URL with an
+# underscore *inside* it stays whole and keeps being compared in full.
+_TRAILING = "/.,*_"
+
+
+def _trim(url: str) -> str:
+    """A link with its scheme and trailing punctuation removed, but its case left alone.
+
+    This is the form a failure is *reported* in: the reader of a blocked run has to go and look
+    the link up, and a path folded to lower case may not be the path the source carries.
+    """
+    return _SCHEME_RE.sub("", url).rstrip(_TRAILING)
 
 
 def _normalise(url: str) -> str:
@@ -80,19 +111,37 @@ def _normalise(url: str) -> str:
     Dropping the scheme is what lets a legitimately scheme-less rendering of an item's own URL
     match the item it came from. It also means the gate does not distinguish `http` from `https`;
     that is deliberate -- provenance asks where a link points, not how it is fetched.
+
+    Case is folded for the same reason, on both sides: the allowed set is built through this
+    function too. Hosts are case-insensitive outright, and while paths are not, a model that
+    re-cased a path it copied out of a source was blocking the whole pack over a link that goes
+    exactly where the source's link goes.
     """
-    return _SCHEME_RE.sub("", url).rstrip(_TRAILING)
+    return _trim(url).lower()
+
+
+def _link_map(text: str) -> dict[str, str]:
+    """Every link-like token in `text`: normalised form -> the way it was first written.
+
+    The three patterns overlap by design -- a fully written URL matches the schemed pattern and
+    the bare-host one -- so matches are de-duplicated on the normalised form, or one bad link would
+    be reported two or three times. The written form is kept so a failure can name the link as the
+    file spells it rather than as the comparison spells it.
+    """
+    found = sorted(
+        (m.start(), _normalise(m.group()), _trim(m.group()))
+        for r in _LINK_RES
+        for m in r.finditer(text)
+    )
+    out: dict[str, str] = {}
+    for _, link, written in found:
+        out.setdefault(link, written)
+    return out
 
 
 def _links(text: str) -> list[str]:
-    """Every link-like token in `text`, normalised, de-duplicated, in order of appearance.
-
-    The three patterns overlap by design -- a fully written URL matches the schemed pattern and
-    the bare-host one -- so matches are de-duplicated after normalisation, or one bad link would
-    be reported two or three times.
-    """
-    found = [(m.start(), _normalise(m.group())) for r in _LINK_RES for m in r.finditer(text)]
-    return list(dict.fromkeys(link for _, link in sorted(found)))
+    """Every link-like token in `text`, normalised, de-duplicated, in order of appearance."""
+    return list(_link_map(text))
 
 
 _OWN_BASE_NORM = _normalise(OWN_BASE)
@@ -110,24 +159,40 @@ def _is_own(url: str) -> bool:
 def _is_citation(body: str) -> bool:
     """True when `[P<body>]` is trying to be a citation rather than a bracketed word.
 
-    Item ids are `<site>:<local-id>`, so a colon is the mark of intent; an all-digit body is the
-    other way a citation comes out malformed. Without this, `[PDF]`, `[Paper]` and the `[Post]`
-    of a markdown link would each fail the gate and block the pack -- prose, not broken links.
+    Item ids are `<site>:<local-id>` for one of the sites this pipeline fetches, so that prefix is
+    the mark of intent; an all-digit body is the other way a citation comes out malformed. Without
+    this, `[PDF]`, `[Paper]` and the `[Post]` of a markdown link would each fail the gate and block
+    the pack -- prose, not broken links.
+
+    A colon alone is not enough, which is the narrowing this function has been through: `[Python:
+    3.12]`, `[Pytorch:2.4]` and `[Priority:high]` are all prose with a colon in them, and each one
+    withheld an otherwise correct pack. The cost of the narrowing is that `[Pzz:abc123]`, naming a
+    site the pipeline does not fetch, now reads as prose too -- it renders no link and resolves to
+    nothing for anyone, where a false positive costs the day's publication. The prefix is compared
+    case-insensitively so a `[PLW:abc]` is still held to the ids the pack actually carries.
     """
-    return ":" in body or body.isdigit()
+    return body.split(":", 1)[0].lower() in CITATION_SITES or body.isdigit()
 
 
 def gate_provenance(rendered: dict[str, str], items: list[Item]) -> GateResult:
     """Every link and `[P<id>]` citation in the rendered files traces back to a source."""
     allowed = {_normalise(i.url) for i in items}
     for i in items:
+        # Spec 6.8 gate 1 allows a link that "appears verbatim in fetched source text", and the
+        # title, author and affiliation are fetched source text as much as the body is -- the
+        # renderer copies them onto the metadata line untouched. A post titled after a URL, or a
+        # forum user whose display name is one, would otherwise read as a model invention and
+        # block the pack over a string the pipeline itself put there.
         allowed.update(_links(i.markdown))
+        allowed.update(_links(i.title))
+        allowed.update(_links(i.author))
+        allowed.update(_links(i.author_affiliation or ""))
     ids = {i.id for i in items}
     details: list[str] = []
     for name, text in rendered.items():
-        for url in _links(text):
+        for url, written in _link_map(text).items():
             if url not in allowed and not _is_own(url):
-                details.append(f"{name}: URL not in any source: {url}")
+                details.append(f"{name}: URL not in any source: {written}")
         for pid in _PID_RE.findall(text):
             if _is_citation(pid) and pid not in ids:
                 details.append(f"{name}: unresolved item reference [P{pid}]")
