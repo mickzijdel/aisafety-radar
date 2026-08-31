@@ -32,7 +32,7 @@ from pipeline.publish import health
 from pipeline.publish.changelog import prepend, versions
 from pipeline.publish.health import ping, refusal_reason, render_issue_body, update_pinned_issue
 from pipeline.publish.manifests import bump
-from pipeline.publish.site import BUNDLES, write_latest
+from pipeline.publish.site import BUNDLES, KEEP_VERSIONS, write_latest
 from pipeline.render import APPENDIX_PURPOSE, RECIPES
 from pipeline.versioning import next_letter
 
@@ -405,6 +405,31 @@ def test_write_latest_replaces_a_stale_latest(tmp_path):
     # Both versions stay archived.
     assert (site / "versions" / "2026.08.30a" / "00-index.md").exists()
     assert (site / "versions" / "2026.08.31a" / "00-index.md").exists()
+
+
+def test_the_version_archive_keeps_the_newest_30_the_way_the_changelog_does(tmp_path):
+    """`versions/` and CHANGELOG.md describe the same list of packs, so they keep the same number
+    of them. Unbounded, `versions/` grows by a full copy of the pack every day forever in a repo
+    that is also a published site."""
+    pack = _pack(tmp_path)
+    site = tmp_path / "site"
+    for n in range(31):
+        write_latest(pack, site, f"2026.{n // 28 + 8:02d}.{n % 28 + 1:02d}a")
+    kept = sorted(p.name for p in (site / "versions").iterdir())
+    assert len(kept) == KEEP_VERSIONS == 30
+    # A pack version sorts chronologically as a string, so the oldest is the one that went.
+    assert "2026.08.01a" not in kept
+    assert kept[0] == "2026.08.02a" and kept[-1] == "2026.09.03a"
+    # The survivors are whole packs, not emptied directories.
+    assert (site / "versions" / kept[-1] / "00-index.md").read_text() == "index\n"
+
+
+def test_the_version_archive_prunes_nothing_below_the_limit(tmp_path):
+    pack = _pack(tmp_path)
+    site = tmp_path / "site"
+    for day in range(1, 4):
+        write_latest(pack, site, f"2026.08.{day:02d}a")
+    assert len(list((site / "versions").iterdir())) == 3
 
 
 def test_llms_txt_gives_every_file_a_purpose_and_a_working_relative_link(tmp_path):
