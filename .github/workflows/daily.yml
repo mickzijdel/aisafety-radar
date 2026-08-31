@@ -1,0 +1,340 @@
+# Actions are pinned to a commit SHA with the release tag in a trailing comment (supply-chain
+# safety — see the github-actions skill's security-checklist.md). Bump with `pinact run -u` and
+# verify with scripts/check_action_refs.sh (see SKILL.md › "Keeping GitHub Actions current").
+#
+# Publishing is deliberately three jobs (spec 6.9). `generate` runs the pipeline and writes the
+# pack to the `generated` branch and nowhere else; `promote` sits behind the `production`
+# environment, whose wait timer *is* the canary delay, and is the only job that moves `main`;
+# `pages` deploys the site `promote` wrote. A bad pack is therefore cancellable for the length of
+# the timer, and cancelling costs nothing already published.
+#
+# No `${{ }}` expression appears inside a `run:` body anywhere in this file — every value the
+# shell or the inline Python needs arrives through `env:` and is read from the environment. See
+# the github-actions skill's rule 4 (script injection); zizmor enforces it.
+name: daily
+
+on:
+  schedule:
+    # Not on the hour: a cron minute every other repository also picked is the minute GitHub's
+    # scheduler is most likely to delay (spec 6.9).
+    - cron: "23 5 * * *"
+  workflow_dispatch:
+
+# One daily run at a time, and never cancel the one in flight: a cancelled `generate` can leave
+# the archive repo half-pushed, and a cancelled `promote` can leave `main` ahead of the site.
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+# Default GITHUB_TOKEN to nothing; each job declares exactly what it needs.
+permissions: {}
+
+jobs:
+  # The model-retirement canary, ahead of the run rather than inside it: a retired model id
+  # fails here in ten seconds for free, instead of after the fetchers have spent an hour and the
+  # first extraction call has spent money. Skips cleanly when no key is configured (a fork, or
+  # the repo before go-live), because a canary nobody can run must not block the pipeline.
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: The configured models still exist
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "No ANTHROPIC_API_KEY configured; skipping the model canary."
+            exit 0
+          fi
+          uv run pytest tests/test_models_live.py -v
+
+  generate:
+    needs: canary
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.run.outputs.version }}
+      published: ${{ steps.run.outputs.published }}
+    steps:
+      # The workflow token has to stay in the checkout: this job force-pushes the pack to the
+      # `generated` branch at the end. `persist-credentials: false` would mean putting the token
+      # in a remote URL instead, which is strictly worse (it lands in the process table and in
+      # any `set -x` output). fetch-depth: 0 so `generated` can be reset onto a real history.
+      - name: Check out this repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: # zizmor: ignore[artipacked]
+          fetch-depth: 0
+
+      # Same reason: the deploy key has to survive the checkout so the archive push can use it.
+      - name: Check out the data repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: # zizmor: ignore[artipacked]
+          repository: mickzijdel/aisafety-radar-data
+          path: data
+          ssh-key: ${{ secrets.DATA_DEPLOY_KEY }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # The CLI's exit code is the signal (0 published, 3 a blocking gate withheld the pack,
+      # anything else a crash), so it is captured rather than allowed to fail the step: the
+      # health issue below has to be written for every one of those outcomes, and `report.json`
+      # has to be read even when the run was blocked. `jq` defaults keep this step green when
+      # the pipeline died before printing anything at all.
+      - name: Run the pipeline
+        id: run
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          status=0
+          uv run radar run --data data --out skills/aisafety-radar/references \
+            | tee report.json || status=$?
+          version=$(jq -er '.version' report.json 2>/dev/null || echo "")
+          published=$(jq -er '.published' report.json 2>/dev/null || echo "false")
+          {
+            echo "status=$status"
+            echo "version=$version"
+            echo "published=$published"
+          } >> "$GITHUB_OUTPUT"
+          echo "radar run exited $status (version '$version', published '$published')"
+
+      - name: Classify the outcome
+        id: outcome
+        if: ${{ !cancelled() }}
+        env:
+          RADAR_STATUS: ${{ steps.run.outputs.status }}
+        run: |
+          case "${RADAR_STATUS:-}" in
+            0) note="published" ;;
+            3) note="gates blocked" ;;
+            *) note="run crashed" ;;
+          esac
+          echo "note=$note" >> "$GITHUB_OUTPUT"
+
+      # Written for every outcome, including the ones where `report.json` does not exist: a run
+      # that crashed before writing a report is the run whose health matters most, and an empty
+      # body still says which run it was and that it crashed.
+      - name: Update the pinned health issue
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ secrets.HEALTH_ISSUE_TOKEN }}
+          RADAR_REPO: ${{ github.repository }}
+          RADAR_OUTCOME: ${{ steps.outcome.outputs.note }}
+          RADAR_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          uv run python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from pipeline.publish.health import render_issue_body, update_pinned_issue
+
+          try:
+              report = json.loads(Path("report.json").read_text())
+          except (OSError, ValueError):
+              report = {}
+          update_pinned_issue(
+              os.environ["RADAR_REPO"],
+              render_issue_body(
+                  report,
+                  outcome=os.environ.get("RADAR_OUTCOME") or "run crashed",
+                  run_url=os.environ.get("RADAR_RUN_URL"),
+              ),
+          )
+          PY
+
+      # The archive is pushed whatever the gates said: the day happened either way, and the next
+      # day's source medians and cost comparison read exactly these files.
+      - name: Push the day's archive
+        if: ${{ !cancelled() }}
+        env:
+          RADAR_VERSION: ${{ steps.run.outputs.version }}
+        run: |
+          cd data
+          git config user.name "aisafety-radar bot"
+          git config user.email "claude@mickzijdel.com"
+          git add -A
+          git commit -m "Archive ${RADAR_VERSION:-unknown}" || echo "nothing to commit"
+          # `origin HEAD`, not a bare `git push`: the checkout sets no upstream branch, and a
+          # bare push then fails with "no upstream" instead of pushing.
+          git push origin HEAD
+
+      # The last thing between a bad pack and the `generated` branch. Two failure modes publish
+      # an *empty* pack rather than no pack and neither trips a gate — a same-day rerun whose
+      # items are all already seen, and a per-item failure that empties the render set — so the
+      # arithmetic is checked here. `refusal_reason` is tested in tests/test_publish.py; this
+      # step is four lines so that stays true.
+      - name: Refuse an empty or blocked pack
+        run: |
+          uv run python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          from pipeline.publish.health import refusal_reason
+
+          try:
+              report = json.loads(Path("report.json").read_text())
+          except (OSError, ValueError):
+              report = {}
+          reason = refusal_reason(report)
+          if reason:
+              sys.exit(f"refusing to publish: {reason}")
+          print("pack is publishable")
+          PY
+
+      - name: Publish the pack to the generated branch
+        env:
+          RADAR_VERSION: ${{ steps.run.outputs.version }}
+        run: |
+          git config user.name "aisafety-radar bot"
+          git config user.email "claude@mickzijdel.com"
+          git checkout -B generated
+          git add skills/aisafety-radar/references
+          git commit -m "Pack $RADAR_VERSION" || echo "nothing to commit"
+          git push --force origin generated
+
+  # `environment: production` is the canary: its wait timer holds this job for long enough that a
+  # human who spots a bad pack on the `generated` branch can cancel the run before `main` moves.
+  promote:
+    needs: generate
+    if: needs.generate.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    permissions:
+      contents: write
+    steps:
+      # This job's whole purpose is to push `main`, so the token stays in the checkout.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: # zizmor: ignore[artipacked]
+          ref: main
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # --ff-only, never a merge commit: `generated` is `main` plus the pack commit, and if it is
+      # not, something pushed to `main` mid-run and this job must stop rather than guess.
+      - name: Fast-forward main from generated
+        run: |
+          git config user.name "aisafety-radar bot"
+          git config user.email "claude@mickzijdel.com"
+          git fetch origin generated
+          git merge --ff-only origin/generated
+
+      - name: Bump the manifests, changelog and site
+        env:
+          RADAR_VERSION: ${{ needs.generate.outputs.version }}
+        run: |
+          uv run python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from pipeline.publish.changelog import prepend
+          from pipeline.publish.manifests import bump
+          from pipeline.publish.site import write_latest
+          from pipeline.versioning import parse_pack_version
+
+          version = os.environ["RADAR_VERSION"]
+          # The pack's own day, not today's: a promote held overnight by the canary timer must
+          # not date the entry a day after the pack it describes.
+          day, _ = parse_pack_version(version)
+          bump(version, [Path(".claude-plugin/plugin.json"), Path(".claude-plugin/marketplace.json")])
+          pack = Path("skills/aisafety-radar/references")
+          prepend(
+              Path("CHANGELOG.md"),
+              version,
+              day,
+              [f"{p.name}: regenerated" for p in sorted(pack.glob("*.md"))],
+          )
+          write_latest(pack, Path("docs"), version)
+          PY
+
+      - name: Commit and push the publication
+        env:
+          RADAR_VERSION: ${{ needs.generate.outputs.version }}
+        run: |
+          git add -A
+          git commit -m "Publish $RADAR_VERSION"
+          git push origin main
+
+      # A dead-man's switch: it must fire only when the day actually published, so it has no
+      # `if:` and runs last. `ping` swallows its own transport errors — a Healthchecks outage is
+      # not a reason to fail a good run — but a *skipped* ping is the alarm working as designed.
+      - name: Healthchecks ping
+        env:
+          HEALTHCHECKS_URL: ${{ secrets.HEALTHCHECKS_URL }}
+        run: |
+          uv run python - <<'PY'
+          import os
+
+          from pipeline.publish.health import ping
+
+          ping(os.environ.get("HEALTHCHECKS_URL"))
+          PY
+
+  # Pages deploys in this same workflow rather than from a `push: main` trigger, so a failed
+  # deploy is visible as part of the day's run instead of as a separate red workflow nobody
+  # associates with it.
+  pages:
+    needs: promote
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: docs
+
+      - id: deploy
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

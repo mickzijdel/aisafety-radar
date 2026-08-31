@@ -1,0 +1,38 @@
+# Actions are pinned to a commit SHA with the release tag in a trailing comment (supply-chain
+# safety — see the github-actions skill's security-checklist.md). Bump with `pinact run -u`.
+#
+# `radar probe` fetches from every live source and prints a status table. It is manual-only and
+# always exits 0: the point is to see which sources answer from a GitHub runner's IP (several
+# sit behind Cloudflare), so a source that fails has to show up as a row in the summary rather
+# than as a red job with a traceback.
+name: probe
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Probe every live source
+        run: uv run radar probe --hours 168 | tee -a "$GITHUB_STEP_SUMMARY"
