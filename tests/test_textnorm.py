@@ -46,3 +46,66 @@ def test_find_numbers_and_dates():
 
 def test_truncate_tokens_approx():
     assert len(truncate_tokens_approx("a" * 1000, 10)) == 40
+
+
+# --- regression tests: verification false negatives (review round 1) ---
+
+
+def test_number_token_excludes_a_trailing_comma():
+    text = "karma rose to 145, then fell"
+    assert find_numbers_and_dates(text) == ["145"]
+    # The whole point: every token must verify back against its own source.
+    assert all(contains(text, tok) for tok in find_numbers_and_dates(text))
+
+
+def test_number_token_keeps_internal_thousands_separators():
+    assert find_numbers_and_dates("about 1,234,567 posts") == ["1,234,567"]
+
+
+def test_html_to_text_does_not_split_inline_tags():
+    text = html_to_text("<p>a <strong>45</strong>% drop</p>")
+    assert text == "a 45% drop"
+    assert contains(text, "45%")
+
+
+def test_html_to_text_separates_block_elements():
+    assert html_to_text("<li>one</li><li>two</li>") == "one two"
+    assert html_to_text("<p>one</p><p>two</p>") == "one two"
+    assert html_to_text("<p>one<br>two</p>") == "one two"
+
+
+def test_month_prefixed_words_are_not_dates():
+    assert find_numbers_and_dates("Marketing 2026 budget") == ["2026"]
+    assert find_numbers_and_dates("Mayor 2026 election") == ["2026"]
+
+
+def test_real_months_are_still_dates_in_any_case():
+    assert find_numbers_and_dates("March 2026 budget") == ["March 2026"]
+    assert find_numbers_and_dates("on 29 august 2026 exactly") == ["29 august 2026"]
+    assert find_numbers_and_dates("Sept. 2026 review") == ["Sept. 2026"]
+
+
+def test_identifiers_do_not_shed_number_fragments():
+    assert find_numbers_and_dates("GPT-4o beats v1.2.3 on COVID19 data") == []
+
+
+def test_normalize_folds_extra_dash_and_quote_variants():
+    assert normalize("non‑breaking") == "non-breaking"  # U+2011 non-breaking hyphen
+    assert normalize("hy‐phen") == "hy-phen"  # U+2010 hyphen
+    assert normalize("fig‒dash") == "fig-dash"  # U+2012 figure dash
+    assert normalize("5″ wide") == '5" wide'  # U+2033 double prime
+
+
+def test_normalize_strips_invisible_characters():
+    assert normalize("soft­hyphen") == "softhyphen"  # U+00AD soft hyphen
+    assert normalize("﻿zero​width‌‍") == "zerowidth"
+
+
+def test_contains_sees_through_dashes_and_invisibles():
+    assert contains("the non‑breaking result", "non-breaking")
+    assert contains("a soft­hyphen here", "softhyphen")
+
+
+def test_truncate_tokens_approx_treats_negative_as_zero():
+    assert truncate_tokens_approx("abcdefgh", -1) == ""
+    assert truncate_tokens_approx("abcdefgh", 0) == ""
