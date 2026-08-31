@@ -12,7 +12,7 @@ from __future__ import annotations
 from pipeline.config import Settings
 from pipeline.llm import LLM
 from pipeline.models import SLUGS, Item, TriageResult, _strict_schema
-from pipeline.textnorm import neutralize_angle_brackets, truncate_tokens_approx
+from pipeline.textnorm import data_block, truncate_tokens_approx
 
 TRIAGE_SYSTEM = f"""You triage items for an AI-safety landscape digest read by other AI agents.
 You receive ONE item: its title, source and the first part of its text, inside a data block.
@@ -34,15 +34,14 @@ _SCHEMA = _strict_schema(TriageResult.model_json_schema())
 
 def _user_message(item: Item) -> str:
     # Every interpolated string is remote-derived, the id and source included (an id embeds the
-    # remote post id), so every one of them is neutralised. The substitution is 1:1 per character
-    # and `truncate_tokens_approx` slices characters, so the 2000-character excerpt budget holds
-    # whichever side of the truncation it happens on.
-    safe = neutralize_angle_brackets
-    excerpt = safe(truncate_tokens_approx(item.text, 500))
-    return (
-        f'<item id="{safe(item.id)}" source="{safe(item.source)}">\n'
-        f"title: {safe(item.title)}\nauthor: {safe(item.author)}\nkarma: {item.score}\n"
-        f"text: {excerpt}\n</item>"
+    # remote post id), so all of them go through `data_block`, which neutralises attrs and body
+    # alike. Its substitution is 1:1 per character and `truncate_tokens_approx` slices characters,
+    # so the 2000-character excerpt budget holds whichever side of the truncation it happens on.
+    return data_block(
+        "item",
+        {"id": item.id, "source": item.source},
+        f"title: {item.title}\nauthor: {item.author}\nkarma: {item.score}\n"
+        f"text: {truncate_tokens_approx(item.text, 500)}",
     )
 
 

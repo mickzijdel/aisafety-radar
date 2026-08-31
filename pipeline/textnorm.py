@@ -146,3 +146,16 @@ def neutralize_angle_brackets(s: str) -> str:
     source, which drops the quote. That is the safe direction to fail in.
     """
     return s.translate(_ANGLE_BRACKETS)
+
+
+def data_block(tag: str, attrs: dict[str, str], body: str) -> str:
+    """Render one untrusted-data block: `<tag k="v" ...>`, the body, then `</tag>`.
+
+    Every prompt that hands the model fetched text does it through here, so no call site has to
+    remember to neutralise. Attribute values and body are both remote-derived and both go through
+    `neutralize_angle_brackets`; `tag` and the attribute names are ours and are interpolated as
+    written. The substitution is 1:1 per character, so a caller that truncated the body to a
+    character budget still fits inside it however bracket-dense the text was.
+    """
+    rendered = "".join(f' {k}="{neutralize_angle_brackets(v)}"' for k, v in attrs.items())
+    return f"<{tag}{rendered}>\n{neutralize_angle_brackets(body)}\n</{tag}>"
