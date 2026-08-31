@@ -224,7 +224,7 @@ Every daily appendix renders items from JSON with the same template. The templat
 model, writes the metadata line and the link.
 
 ```
-- **Title** · Author, Affiliation (LW · 2026-08-29 · 145 karma · 60 comments · agree 40 / disagree 12) · https://www.lesswrong.com/posts/...
+- **Title** · Author, Affiliation (LW · 2026-08-29 · 145 karma · 60 comments · agree 12) · https://www.lesswrong.com/posts/...
   Two or three sentences stating the post's actual claims, not its topic. Author's stated
   status: "Epistemic status: exploratory" (verbatim) · Claim type: exploratory.
   Discussion: contested; the strongest pushback is X (top comment by Y, 83 karma).
@@ -233,7 +233,10 @@ model, writes the metadata line and the link.
 ```
 
 Affiliation comes from the forum user profile fields when present, else from the org directory
-lookup, else is omitted. Agreement votes are rendered where the forum exposes them. Discussion
+lookup, else is omitted. Agreement votes are rendered where the forum exposes them: ForumMagnum's
+`extendedScore.agreement` is a single net score rather than an agree/disagree split, and a zero is
+rendered as absence (the segment is omitted) rather than as neutrality, because an unvoted post and
+a post whose votes cancelled are indistinguishable in it. Discussion
 movers (posts older than 24h whose comments moved) use the same template plus a
 `+31 comments since 2026-08-29` marker and the new top comment. Dated lines in events and
 careers read `closes 2026-09-15 AoE (feed 2026-08-27)`; rolling admissions are rendered as
@@ -341,7 +344,7 @@ because they shape the fetchers.
 
 | Source | Access | Notes |
 |---|---|---|
-| LessWrong | GraphQL `https://www.lesswrong.com/graphql`, no auth. Posts: `posts(input:{terms:{view:"top", after:"YYYY-MM-DD", limit:N}})`. AI tag id `sYm3HiWcfZvrGu3ui` | **verified.** Also an agent Markdown API (`/api/SKILL.md`, `/api/latest`, `/api/post/<id>/comments?sort=top`, `/api/tag/<slug>`), used for live lookup from the skill; it has no "since" parameter, so the pipeline uses GraphQL |
+| LessWrong | GraphQL `https://www.lesswrong.com/graphql`, no auth. Posts: `posts(input:{terms:{view:"top", after:"YYYY-MM-DD", limit:N}})`. AI tag id `sYm3HiWcfZvrGu3ui` | **verified.** Also an agent Markdown API (`/api/SKILL.md`, `/api/latest`, `/api/post/<id>/comments?sort=top`, `/api/tag/<slug>`), used for live lookup from the skill; it has no "since" parameter, so the pipeline uses GraphQL. LW HTML pages sit behind a Vercel bot checkpoint for datacenter egress; the GraphQL API is unaffected - never page-scrape |
 | Alignment Forum | Same GraphQL at `https://www.alignmentforum.org/graphql`; all posts (low volume, all relevant) | **verified.** Same agent API exists |
 | EA Forum | GraphQL at `https://forum-bots.effectivealtruism.org/graphql` (bot mirror, rewrite `pageUrl` back to the main domain); AI safety tag id `oNiQsBHA3i837sySD` with `filterMode:"Required"` | **verified.** `after` works on posts but is **silently ignored on comment views**; no agent API |
 
@@ -532,6 +535,14 @@ because the discussion often matters more than the post and arrives over days.
 
 Edited comments are not tracked (no ForumMagnum view sorts by `lastEditedAt`); this is an
 accepted gap.
+
+**As implemented in phase 2, narrowed by ruling.** Change detection is a `commentCount` or
+`baseScore` diff against the previous day's ledger entry: a post whose `lastCommentedAt` alone
+moved does not trigger a refresh, and neither does an edited comment. The site-wide comment pull of
+step 1 is not what drives the refresh either - the ledger diff selects the posts and step 3's
+per-post `postCommentsTop` fetch supplies the text, so the pull costs a request per post rather
+than a request per site. `comments_since` remains on the client for the phase-3 comment recorder,
+which needs the site-wide view for its own reasons.
 
 ### 6.3 Stage 1: triage and extraction (Haiku 4.5, synchronous)
 

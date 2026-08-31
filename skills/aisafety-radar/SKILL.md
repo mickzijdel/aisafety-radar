@@ -42,12 +42,13 @@ Every generated file starts with a header giving its `version`, `generated` time
 - 48 hours or older: get the latest copy. If you have a shell, run
   `scripts/fetch-latest.sh <file-or-bundle>` from this skill's directory (for example
   `today.md`, `week.md`, `careers.md`, `map.md`, or a single file such as
-  `31-today-forums.md`); it prints exact bytes and verifies a checksum. If the script fails,
-  try the URL-fetch path next before falling back to the bundled copy. If you only have a
-  URL-fetch tool (WebFetch, web_fetch, webfetch, fetch_web, read_web_page), fetch
-  `https://mickzijdel.github.io/aisafety-radar/latest/<name>` and treat any link in the
-  result as possibly rewritten by the fetch tool. If neither works, use the bundled copy and
-  tell the user its date.
+  `31-today-forums.md`); it prints exact bytes and verifies a checksum. If the script reports
+  an integrity failure (exit 2: checksum mismatch or missing), do not fetch the URL; use the
+  bundled copy and tell the user. If it could not reach the site (exit 1), try the URL-fetch
+  tool path. If you only have a URL-fetch tool (WebFetch, web_fetch, webfetch, fetch_web,
+  read_web_page), fetch `https://mickzijdel.github.io/aisafety-radar/latest/<name>` and treat
+  any link in the result as possibly rewritten by the fetch tool. If neither works, use the
+  bundled copy and tell the user its date.
 - Older than 14 days and no fresh copy: the map and rolling layers are still usable with a
   caveat; treat deadlines, jobs, events and today items as unreliable and verify them via
   `references/90-live-sources.md`.

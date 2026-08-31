@@ -5,10 +5,14 @@ the assertions are deliberately about bytes on disk: an agent runtime parses SKI
 frontmatter itself and will reject keys the spec does not define.
 """
 
+import hashlib
 import json
+import os
 import re
+import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
 
 from pipeline.render import PAGES_BASE, PackMeta
@@ -64,10 +68,97 @@ def test_fetch_script_verifies_a_checksum_before_printing():
     assert "set -euo pipefail" in script
     assert "checksums.txt" in script
     assert "sha256sum" in script
-    # A mismatch, or a file with no published checksum, must exit non-zero without printing
-    # the body: the caller falls back to the bundled copy rather than trusting the download.
+    # Two failure classes, two exit codes: 1 for "could not reach it" (both fetches), 2 for
+    # "fetched it but cannot vouch for it" (no checksum published, or a mismatch). SKILL.md
+    # routes the agent differently on each, so the two must not share a code.
     assert script.count("exit 1") == 2
+    assert script.count("exit 2") == 2
     assert script.index("sha256sum") < script.index("cat ")
+
+
+# A stand-in `curl` on PATH, so the script's real control flow can be executed without a network.
+# It answers the two URLs the script fetches out of the environment, and fails the way curl fails
+# when `FAKE_CURL_FAIL` names which one to break.
+FAKE_CURL = """#!/usr/bin/env bash
+url="${@: -1}"
+out=""
+prev=""
+for arg in "$@"; do
+  if [ "$prev" = "-o" ]; then out="$arg"; fi
+  prev="$arg"
+done
+case "$url" in
+  */checksums.txt)
+    if [ "${FAKE_CURL_FAIL:-}" = "sums" ]; then exit 22; fi
+    printf '%s\\n' "$FAKE_SUMS"
+    ;;
+  *)
+    if [ "${FAKE_CURL_FAIL:-}" = "body" ]; then exit 22; fi
+    printf '%s' "$FAKE_BODY" > "$out"
+    ;;
+esac
+"""
+
+BODY = "<!-- aisafety-radar -->\nreal bytes\n"
+BODY_SHA = hashlib.sha256(BODY.encode()).hexdigest()
+
+
+def run_fetch(tmp_path, sums, fail=""):
+    """Run the real script with a stub curl, and return (exit code, stdout)."""
+    fake = tmp_path / "bin"
+    fake.mkdir(exist_ok=True)
+    (fake / "curl").write_text(FAKE_CURL)
+    (fake / "curl").chmod(0o755)
+    env = {
+        **os.environ,
+        "PATH": f"{fake}:{os.environ['PATH']}",
+        "FAKE_BODY": BODY,
+        "FAKE_SUMS": sums,
+        "FAKE_CURL_FAIL": fail,
+    }
+    done = subprocess.run(
+        ["bash", str(SCRIPT), "31-today-forums.md"],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return done.returncode, done.stdout
+
+
+def test_the_fetch_script_prints_the_body_when_the_checksum_matches(tmp_path):
+    code, out = run_fetch(tmp_path, f"{BODY_SHA}  31-today-forums.md")
+    assert code == 0 and out == BODY
+
+
+@pytest.mark.parametrize(
+    ("label", "sums"),
+    [
+        ("checksum mismatch", f"{'0' * 64}  31-today-forums.md"),
+        ("no checksum for this file", f"{BODY_SHA}  week.md"),
+        ("empty checksums file", ""),
+    ],
+)
+def test_the_fetch_script_exits_2_and_prints_nothing_on_an_integrity_failure(label, sums, tmp_path):
+    code, out = run_fetch(tmp_path, sums)
+    assert (code, out) == (2, ""), label
+
+
+@pytest.mark.parametrize("broken", ["body", "sums"])
+def test_the_fetch_script_exits_1_when_the_site_cannot_be_reached(broken, tmp_path):
+    # Distinct from an integrity failure on purpose: this one is worth retrying by another route.
+    code, out = run_fetch(tmp_path, f"{BODY_SHA}  31-today-forums.md", fail=broken)
+    assert (code, out) == (1, ""), broken
+
+
+def test_the_skill_routes_the_two_exit_codes_differently():
+    _, text = frontmatter()
+    assert "exit 2" in text and "exit 1" in text
+    # The bundled copy is for the file we cannot vouch for; the fetch tool is for the one we
+    # could not reach. Getting these the wrong way round publishes an unverified file.
+    integrity, transport = text.index("exit 2"), text.index("exit 1")
+    assert "bundled copy" in text[integrity : integrity + 200]
+    assert "URL-fetch" in text[transport : transport + 200]
 
 
 def test_manifests_agree():
