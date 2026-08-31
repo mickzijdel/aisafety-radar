@@ -148,14 +148,23 @@ def neutralize_angle_brackets(s: str) -> str:
     return s.translate(_ANGLE_BRACKETS)
 
 
+# An attribute value sits inside our own open tag, so it must lose more than the brackets: a bare
+# `"` closes the value and lets the rest forge further attributes (`id="x" trusted="yes`), and a
+# bare `&` could reintroduce any of these as an entity. U+201D right double quotation mark and
+# U+FF06 fullwidth ampersand read as themselves to a model but are not the characters a delimiter
+# or an entity is built from.
+_ATTR_VALUE = str.maketrans({"<": "‹", ">": "›", '"': "”", "&": "＆"})
+
+
 def data_block(tag: str, attrs: dict[str, str], body: str) -> str:
     """Render one untrusted-data block: `<tag k="v" ...>`, the body, then `</tag>`.
 
     Every prompt that hands the model fetched text does it through here, so no call site has to
-    remember to neutralise. Attribute values and body are both remote-derived and both go through
-    `neutralize_angle_brackets`; `tag` and the attribute names are ours and are interpolated as
-    written. The substitution is 1:1 per character, so a caller that truncated the body to a
+    remember to neutralise. Attribute values and body are both remote-derived: a value is stripped
+    of quotes and ampersands as well as brackets, since it sits inside our own tag, while the body
+    only has to lose its brackets. `tag` and the attribute names are ours and are interpolated as
+    written. Every substitution is 1:1 per character, so a caller that truncated the body to a
     character budget still fits inside it however bracket-dense the text was.
     """
-    rendered = "".join(f' {k}="{neutralize_angle_brackets(v)}"' for k, v in attrs.items())
+    rendered = "".join(f' {k}="{v.translate(_ATTR_VALUE)}"' for k, v in attrs.items())
     return f"<{tag}{rendered}>\n{neutralize_angle_brackets(body)}\n</{tag}>"

@@ -58,6 +58,9 @@ def verify(
         for tok in find_numbers_and_dates(text or ""):
             if not contains(corpus, tok):
                 result.bad_tokens.append(tok)
+    # One wrong number repeated across summary and novelty is one problem, and the retry feedback
+    # that names it should say it once. `dict.fromkeys` keeps first-seen order.
+    result.bad_tokens = list(dict.fromkeys(result.bad_tokens))
     # A dropped quote or deadline is already repaired, so only the prose tokens -- which the caller
     # can do nothing about except ask again -- decide whether this passed.
     result.ok = not result.bad_tokens

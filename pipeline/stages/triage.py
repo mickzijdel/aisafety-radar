@@ -1,17 +1,26 @@
 """Triage: one cheap Haiku call per item, deciding relevance, section and importance.
 
-The stage is deliberately forgiving of the model. A slug typo or an out-of-range importance is
-repaired here rather than raised, because a whole item dropping out of the digest is a worse
-failure than a slightly wrong section. `_strict_schema` strips the 1-5 bound from the schema the
-API sees, so the clamp below is the only thing keeping an out-of-range answer out of
-`TriageResult.model_validate`; the prompt states the bound so the model rarely tests it.
+The stage is deliberately forgiving of the model. A slug typo, an out-of-range importance or a
+field that comes back the wrong JSON type altogether is repaired here rather than raised, because
+a whole item dropping out of the digest is a worse failure than a slightly wrong section.
+`_strict_schema` strips the 1-5 bound from the schema the API sees, so the `coerce_*` calls below
+are the only thing keeping a bad answer out of `TriageResult.model_validate`; the prompt states
+the bounds so the model rarely tests them.
 """
 
 from __future__ import annotations
 
 from pipeline.config import Settings
 from pipeline.llm import LLM
-from pipeline.models import SLUGS, Item, TriageResult, _strict_schema
+from pipeline.models import (
+    SLUGS,
+    Item,
+    TriageResult,
+    _strict_schema,
+    coerce_choice,
+    coerce_importance,
+    coerce_slugs,
+)
 from pipeline.textnorm import data_block, truncate_tokens_approx
 
 TRIAGE_SYSTEM = f"""You triage items for an AI-safety landscape digest read by other AI agents.
@@ -53,10 +62,9 @@ def triage_item(item: Item, llm: LLM, settings: Settings) -> TriageResult:
     # The id is ours, not the model's: an echoed-back typo would detach the result from its item
     # and `select` would silently drop it.
     raw["item_id"] = item.id
-    if raw.get("primary_slug") not in SLUGS:
-        raw["primary_slug"] = "community"
-    raw["secondary_slugs"] = [s for s in raw.get("secondary_slugs", []) if s in SLUGS][:2]
-    raw["importance"] = min(5, max(1, int(raw.get("importance", 1))))
+    raw["primary_slug"] = coerce_choice(raw.get("primary_slug"), SLUGS, "community")
+    raw["secondary_slugs"] = coerce_slugs(raw.get("secondary_slugs"), 2)
+    raw["importance"] = coerce_importance(raw.get("importance"))
     return TriageResult.model_validate(raw)
 
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -17,6 +17,7 @@ ClaimType = Literal[
     "question",
     "announcement",
 ]
+CLAIM_TYPES: frozenset[str] = frozenset(get_args(ClaimType))
 
 SLUGS: frozenset[str] = frozenset(
     {
@@ -72,6 +73,40 @@ SLUGS: frozenset[str] = frozenset(
 
 class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+# Repairs for the fields whose bounds `_strict_schema` has to strip before the API will accept the
+# schema (see the bottom of this module). The model is told the bounds in the prompt and mostly
+# honours them, but "mostly" is not a guarantee, and nothing here may raise: a whole item dropping
+# out of the digest is a worse failure than one wrong slug. Model output is arbitrary JSON, so a
+# field can arrive as null, a number, a list or a dict, and every one of those has to land
+# somewhere valid.
+
+
+def coerce_choice(value: Any, allowed: frozenset[str], fallback: str) -> str:
+    """`value` if it is one of `allowed`, else `fallback`."""
+    return value if isinstance(value, str) and value in allowed else fallback
+
+
+def coerce_slugs(value: Any, limit: int, fallback: tuple[str, ...] = ()) -> list[str]:
+    """The known slugs in `value`, capped at `limit`; `fallback` if none survive."""
+    known = (
+        [s for s in value if isinstance(s, str) and s in SLUGS] if isinstance(value, list) else []
+    )
+    return known[:limit] or list(fallback)
+
+
+def coerce_importance(value: Any) -> int:
+    """`value` as an int clamped to 1-5, or 1 if it is not a number at all."""
+    try:
+        return min(5, max(1, int(value)))
+    except (TypeError, ValueError):
+        return 1
+
+
+def coerce_str_list(value: Any, limit: int) -> list[str]:
+    """The strings in `value`, capped at `limit`; empty if `value` is not a list."""
+    return [s for s in value if isinstance(s, str)][:limit] if isinstance(value, list) else []
 
 
 class Item(Strict):

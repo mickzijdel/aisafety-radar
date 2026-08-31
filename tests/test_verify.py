@@ -123,3 +123,13 @@ def test_extraction_record_notes_are_not_shared_between_instances():
     a = ExtractionRecord(extraction=ex())
     a.notes.append("one")
     assert ExtractionRecord(extraction=ex()).notes == []
+
+
+def test_bad_tokens_are_deduplicated_in_first_seen_order():
+    """One wrong number repeated across two fields is one problem, and the feedback built from
+    this list should name it once."""
+    _, r = verify(
+        ex(summary="A 46% drop of 46%.", novelty="the 99% and 46% figures", discussion_signal=None),
+        SOURCE,
+    )
+    assert r.bad_tokens == ["46%", "99%"]

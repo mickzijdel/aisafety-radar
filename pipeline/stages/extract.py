@@ -1,20 +1,33 @@
 """Extraction: one Haiku call per selected item, checked against the source and retried once.
 
-The stage never returns `None` and never raises on a model that will not behave. An item whose
-prose cannot be verified twice running is degraded -- summary, novelty and discussion_signal
-blanked -- rather than dropped, because a digest entry with a title, a claim type and a verified
-quote is still worth more to a reader than a silent gap. `_strict_schema` strips the 0-2 quote and
-1-5 importance bounds from the schema the API sees, so the prompt states them and `extract` clamps
-what comes back; that clamp is the only thing between an out-of-range answer and a validation
-error.
+The stage never returns `None`, and no judgement the model makes can cost an item its place. An
+item whose prose cannot be verified twice running is degraded -- summary, novelty and
+discussion_signal blanked -- rather than dropped, because a digest entry with a title, a claim
+type and a verified quote is still worth more to a reader than a silent gap. `_strict_schema`
+strips the 0-2 quote and 1-5 importance bounds from the schema the API sees, so the prompt states
+them and `extract` repairs what comes back through the `coerce_*` helpers, which are total: a
+constrained field that arrives null, out of range, or as the wrong JSON type lands on a valid
+value rather than raising. A reply that is not a JSON object at all still fails in
+`llm.structured`, and a missing required field still fails validation; those are transport
+failures rather than model judgement, and belong to the caller.
 """
 
 from __future__ import annotations
 
 from pipeline.config import Settings
 from pipeline.llm import LLM
-from pipeline.models import SLUGS, Comment, Extraction, Item
-from pipeline.stages.verify import ExtractionRecord, verify
+from pipeline.models import (
+    CLAIM_TYPES,
+    SLUGS,
+    Comment,
+    Extraction,
+    Item,
+    coerce_choice,
+    coerce_importance,
+    coerce_slugs,
+    coerce_str_list,
+)
+from pipeline.stages.verify import ExtractionRecord, VerifyResult, verify
 from pipeline.textnorm import data_block, truncate_tokens_approx
 
 EXTRACT_SYSTEM = f"""You are an extraction engine for an AI-safety digest that other AI agents
@@ -90,14 +103,27 @@ def extract(
     # The id is ours, not the model's: an echoed-back typo would detach the extraction from the
     # item it describes.
     raw["item_id"] = item.id
-    raw["slugs"] = [s for s in raw.get("slugs", []) if s in SLUGS][:3] or ["community"]
-    raw["importance"] = min(5, max(1, int(raw.get("importance", 1))))
-    raw["key_quotes"] = list(raw.get("key_quotes", []))[:2]
+    raw["slugs"] = coerce_slugs(raw.get("slugs"), 3, ("community",))
+    raw["importance"] = coerce_importance(raw.get("importance"))
+    raw["claim_type"] = coerce_choice(raw.get("claim_type"), CLAIM_TYPES, "exploratory")
+    raw["key_quotes"] = coerce_str_list(raw.get("key_quotes"), 2)
     return Extraction.model_validate(raw)
 
 
 def _comments_text(comments: list[Comment] | None) -> str:
     return "\n".join(f"{c.author} ({c.score} karma): {c.text}" for c in comments or [])
+
+
+def _repair_notes(original: Extraction, res: VerifyResult) -> list[str]:
+    """What verification silently took off `original`, so the record says so out loud.
+
+    `original` is the extraction as the model wrote it, not the cleaned copy: the cleaned one has
+    already had the failing deadline replaced with `None`, so it can no longer name what was lost.
+    """
+    notes = [f"dropped quote: {q}" for q in res.dropped_quotes]
+    if res.deadline_dropped:
+        notes.append(f"dropped deadline: {original.deadline}")
+    return notes
 
 
 def extract_verified(
@@ -108,7 +134,7 @@ def extract_verified(
     comments_text = _comments_text(comments)
     first = extract(item, llm, settings, comments)
     cleaned, res = verify(first, item.text, comments_text)
-    notes += [f"dropped quote: {q}" for q in res.dropped_quotes]
+    notes += _repair_notes(first, res)
     if res.ok:
         return ExtractionRecord(extraction=cleaned, notes=notes)
     feedback = "These numbers or dates are not in the source; remove or correct them: " + ", ".join(
@@ -116,7 +142,7 @@ def extract_verified(
     )
     second = extract(item, llm, settings, comments, feedback=feedback)
     cleaned, res = verify(second, item.text, comments_text)
-    notes += [f"dropped quote: {q}" for q in res.dropped_quotes]
+    notes += _repair_notes(second, res)
     if res.ok:
         return ExtractionRecord(extraction=cleaned, notes=notes)
     notes.append("degraded: unverifiable tokens after retry: " + ", ".join(res.bad_tokens))
