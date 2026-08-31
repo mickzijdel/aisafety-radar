@@ -169,6 +169,16 @@ def test_header_is_a_single_html_comment_of_three_lines():
     assert "Summaries are machine-generated." in head
 
 
+def test_header_block_is_byte_for_byte_the_one_in_spec_4_1():
+    # META deliberately carries the spec's own example version and timestamps, so the rendered
+    # header and the spec's fenced block must be the same string. If either side is edited
+    # without the other, this fails.
+    fence = SPEC.read_text().split("Every generated appendix starts with the same header block:")[1]
+    items, records, movers = fixture()
+    rendered = render_forums(META, build_render_items(items, records), movers, [])
+    assert fence.split("```")[1].strip("\n") == "\n".join(rendered.split("\n")[:3])
+
+
 def test_failed_sources_are_named_in_the_lead_paragraph():
     items, records, movers = fixture()
     statuses = [
