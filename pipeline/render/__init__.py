@@ -94,6 +94,12 @@ _ENV.filters["code_list"] = _code_list
 
 SITE_LABELS = {"lw": "LW", "af": "AF", "eaf": "EAF"}
 
+# Where the pack is published. One definition, because two consumers have to agree on it: the
+# header links every appendix back to its latest version here, and the provenance gate treats
+# this prefix as the one host a rendered link may point at without coming from a source. Two
+# copies of this string would let a move break the gate open rather than break the build.
+PAGES_BASE = "https://mickzijdel.github.io/aisafety-radar"
+
 APPENDIX_PURPOSE: dict[str, str] = {
     "00-index.md": "this index and the recipes",
     "10-map-field-overview.md": "map: areas, live questions per area, who works on what",
@@ -141,7 +147,7 @@ class PackMeta:
     version: str
     generated_at: datetime
     data_through: datetime
-    latest_base: str = "https://mickzijdel.github.io/aisafety-radar/latest"
+    latest_base: str = f"{PAGES_BASE}/latest"
 
 
 @dataclass

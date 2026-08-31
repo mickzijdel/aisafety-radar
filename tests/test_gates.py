@@ -1,8 +1,12 @@
 from datetime import UTC, datetime
+from pathlib import Path
+
+import pytest
 
 from pipeline.config import load_settings
 from pipeline.models import Extraction, Usage
 from pipeline.qa.gates import (
+    OWN_BASE,
     blocking_failures,
     gate_budgets,
     gate_cost,
@@ -11,7 +15,7 @@ from pipeline.qa.gates import (
     gate_provenance,
     gate_scan,
 )
-from pipeline.render import PackMeta, build_render_items, render_all, render_forums
+from pipeline.render import PAGES_BASE, PackMeta, build_render_items, render_all, render_forums
 from pipeline.stages.comments import Mover
 from pipeline.stages.scan import JudgeResult, ScanResult
 from pipeline.stages.verify import ExtractionRecord
@@ -115,6 +119,82 @@ def test_provenance_needs_an_item_for_every_rendered_mover():
     assert gate_provenance({"31-today-forums.md": text}, [post, mover_item]).passed
 
 
+# A URL only has to be *readable* as a link to do the damage this gate exists to stop: the digest
+# is loaded into other agents' context windows, and an agent asked to "check the source" will
+# follow a bare host/path as readily as a fully-schemed one. Requiring `https://` let four shapes
+# of the same hostile link straight through.
+@pytest.mark.parametrize(
+    ("label", "written"),
+    [
+        ("control, fully schemed", "https://evil.example/x"),
+        ("uppercase scheme", "HTTPS://EVIL.EXAMPLE/x"),
+        ("mixed-case scheme", "HtTpS://evil.example/x"),
+        ("scheme-less www", "www.evil.example/x"),
+        ("bare host and path", "evil.example/x"),
+        # The bare-host pattern needs a path to tell a host from a word, so a pathless link is
+        # only caught by the scheme and www patterns. Both therefore have to carry their weight.
+        ("uppercase scheme, no path", "HTTPS://EVIL.EXAMPLE"),
+        ("www host, no path", "www.evil.example"),
+    ],
+)
+def test_provenance_flags_every_shape_of_an_unsourced_link(label, written):
+    item = make_item(markdown="no links in the source")
+    res = gate_provenance({"a.md": f"see {written} for details"}, [item])
+    assert not res.passed and res.blocking, label
+    assert "evil.example" in res.details[0].lower(), label
+
+
+def test_provenance_accepts_an_item_url_written_without_its_scheme():
+    # The flip side of scanning scheme-less tokens: a legitimate link written bare must still
+    # match the item it came from, so item URLs are indexed without their scheme too.
+    item = make_item()  # https://www.lesswrong.com/posts/abc123/x
+    assert gate_provenance({"a.md": "www.lesswrong.com/posts/abc123/x"}, [item]).passed
+    assert gate_provenance({"a.md": "at www.lesswrong.com/posts/abc123/x."}, [item]).passed
+    # And a scheme-less link the source never carried is still caught.
+    assert not gate_provenance({"a.md": "www.lesswrong.com/posts/other/x"}, [item]).passed
+
+
+def test_provenance_reports_one_detail_per_offending_url():
+    # The scheme-ful and bare patterns both match a fully-written URL; that is one problem.
+    item = make_item()
+    res = gate_provenance({"a.md": "https://evil.example/x"}, [item])
+    assert len(res.details) == 1
+
+
+@pytest.mark.parametrize(
+    "prose",
+    [
+        "the GPT-4.5/turbo results",
+        "rated 4.5/5 by reviewers",
+        "released as v1.2/beta",
+        "see pipeline/qa/gates.py and docs/spec.md",
+        "a 50/50 split at 30 km/h",
+        "dated 2026.08.30/rev2",
+    ],
+)
+def test_provenance_does_not_read_ordinary_prose_as_a_link(prose):
+    # A false positive here blocks the whole pack, so the bare-host pattern requires a
+    # TLD-shaped final label before the slash; decimals and file paths are not links.
+    item = make_item(id="lw:1", markdown="no links")
+    record = rec("lw:1", 3, summary=prose)
+    text = render_forums(META, build_render_items([item], [record]), [], [])
+    assert gate_provenance({"31-today-forums.md": text}, [item]).passed
+
+
+def test_provenance_finds_no_links_to_object_to_in_the_goldens():
+    # The zero-false-positive proof, against the bytes the renderer actually committed.
+    golden = Path(__file__).parent / "golden"
+    rendered = {p.name: p.read_text() for p in sorted(golden.glob("*.md"))}
+    assert set(rendered) == {"00-index.md", "31-today-forums.md"}, "goldens moved"
+    items = [
+        make_item(id="lw:1", url="https://www.lesswrong.com/posts/abc123/x"),
+        make_item(id="eaf:2", url="https://forum.effectivealtruism.org/posts/2/x"),
+        make_item(id="lw:9", url="https://www.lesswrong.com/posts/9/y"),
+    ]
+    res = gate_provenance(rendered, items)
+    assert res.passed, res.details
+
+
 def test_provenance_reports_every_offending_file_and_reference():
     item = make_item()
     res = gate_provenance(
@@ -123,6 +203,48 @@ def test_provenance_reports_every_offending_file_and_reference():
     )
     assert not res.passed and len(res.details) == 2
     assert any("a.md" in d for d in res.details) and any("b.md" in d for d in res.details)
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        "[Plw:nope]",  # well-formed shape, unknown id
+        "[P123]",  # no site prefix at all
+        "[PLW:abc]",  # right shape, wrong case
+        "[Plw:]",  # site prefix, no local id
+        "[Pzz:abc123]",  # unknown site
+    ],
+)
+def test_provenance_flags_a_citation_that_does_not_resolve(token):
+    item = make_item()  # lw:abc123
+    res = gate_provenance({"a.md": f"as shown {token} in the source"}, [item])
+    assert not res.passed and res.blocking
+
+
+def test_provenance_does_not_read_a_bracketed_phrase_as_a_citation():
+    # A citation is one token; `[Papers we liked]` is a sentence in brackets, and reading it as a
+    # broken citation would block the pack on ordinary prose.
+    item = make_item()
+    assert gate_provenance({"a.md": "the [Papers we liked] section"}, [item]).passed
+
+
+def test_provenance_resolves_a_well_formed_citation():
+    item = make_item()
+    assert gate_provenance({"a.md": f"[P{item.id}]"}, [item]).passed
+
+
+@pytest.mark.parametrize("word", ["[PDF]", "[Paper]", "[Preprint]", "[Post](url)"])
+def test_provenance_does_not_read_bracketed_words_as_citations(word):
+    # Widening the citation pattern must not turn ordinary bracketed prose into a blocking
+    # failure. An item id is `<site>:<local-id>`, so a colon (or an all-digit body) is what marks
+    # a token as a citation attempt rather than a word.
+    item = make_item()
+    assert gate_provenance({"a.md": f"the {word} version"}, [item]).passed
+
+
+def test_the_gate_and_the_renderer_share_one_pages_base():
+    assert OWN_BASE == f"{PAGES_BASE}/"
+    assert META.latest_base.startswith(PAGES_BASE)
 
 
 # --- budgets ------------------------------------------------------------------------------
@@ -189,6 +311,28 @@ def test_freshness_rejects_a_header_for_a_different_version():
     inside = make_item(published_at=datetime(2026, 8, 29, 12, tzinfo=UTC))
     res = gate_freshness({"a.md": HEADER}, [inside], WINDOW_START, WINDOW_END, "2026.08.30b")
     assert not res.passed and res.blocking and "a.md" in res.details[0]
+
+
+def test_freshness_does_not_accept_a_version_that_merely_starts_with_the_expected_one():
+    # The version is a prefix of the next day's suffixed version, so the match has to consume the
+    # separator too or `2026.08.30ab` passes as `2026.08.30a`.
+    inside = make_item(published_at=datetime(2026, 8, 29, 12, tzinfo=UTC))
+    longer = "\n".join(
+        render_forums(
+            PackMeta(
+                version="2026.08.30ab",
+                generated_at=META.generated_at,
+                data_through=META.data_through,
+            ),
+            [],
+            [],
+            [],
+        ).splitlines()[:3]
+    )
+    assert not gate_freshness({"a.md": longer}, [inside], WINDOW_START, WINDOW_END, VERSION).passed
+    assert gate_freshness(
+        {"a.md": longer}, [inside], WINDOW_START, WINDOW_END, "2026.08.30ab"
+    ).passed
 
 
 def test_freshness_window_is_half_open():

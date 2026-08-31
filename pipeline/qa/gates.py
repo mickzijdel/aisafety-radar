@@ -37,26 +37,62 @@ from datetime import datetime
 
 from pipeline.config import Settings
 from pipeline.models import GateResult, Item, Usage
+from pipeline.render import PAGES_BASE
 from pipeline.stages.scan import JudgeResult, ScanResult
 from pipeline.stages.verify import ExtractionRecord
 
-# Deliberately greedy up to the first delimiter markdown or prose would use to close a link, so a
-# URL inside `[x](...)`, `<...>` or a quoted string is captured without its wrapper.
-_URL_RE = re.compile(r"https?://[^\s)\]>\"']+")
-_PID_RE = re.compile(r"\[P([a-z]+:[A-Za-z0-9_-]+)\]")
-_ITEM_LINE_RE = re.compile(r"^- \*\*", re.MULTILINE)
-OWN_BASE = "https://mickzijdel.github.io/aisafety-radar/"
+OWN_BASE = f"{PAGES_BASE}/"
 
-# Punctuation a URL collects from the text around it: sentence punctuation, the closing backtick
-# of a code span (the index renders links inside one), and the trailing slash, which is not a
-# distinction any source makes. Both sides of the comparison go through `_normalise`, so a source
-# URL written with a trailing dot still matches the same URL rendered without one. Stripping only
-# ever shortens a candidate, so it cannot admit a URL that would otherwise have been flagged.
-_TRAILING = "/.,`"
+# What ends a link in running text: whitespace, the closing half of a markdown or HTML wrapper,
+# a quote, or a code-span backtick. Everything up to one of those is part of the link.
+_END = r"[^\s)\]>\"'`]"
+
+# Three shapes of the same thing. A link does not need a scheme to be followed -- an agent told to
+# "check the source" will resolve `evil.example/x` as readily as `https://evil.example/x`, and a
+# reader's client will linkify `www.evil.example/x` -- so matching only `https://` would leave the
+# gate trivially bypassable by a model that omits the scheme. The scheme is matched
+# case-insensitively for the same reason: `HTTPS://` is a working link.
+#
+# The bare-host pattern requires a TLD-shaped final label (`[a-z]{2,}`) before the slash. Without
+# it, `GPT-4.5/turbo`, `4.5/5` and `v1.2/beta` all read as links, and a false positive here blocks
+# the entire pack from publishing -- a far worse failure than the one being prevented. With it,
+# both goldens and the rendered index produce zero false positives (asserted by test).
+_LINK_RES = (
+    re.compile(rf"https?://{_END}+", re.IGNORECASE),
+    re.compile(rf"\bwww\.{_END}+", re.IGNORECASE),
+    re.compile(rf"\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{{2,}}/{_END}+", re.IGNORECASE),
+)
+
+# Anything of the shape `[P...]`, so a malformed citation is reported rather than quietly skipped
+# by a pattern that only recognises well-formed ones.
+_PID_RE = re.compile(r"\[P([^\]\s]+)\]")
+_ITEM_LINE_RE = re.compile(r"^- \*\*", re.MULTILINE)
+
+_SCHEME_RE = re.compile(r"^https?://", re.IGNORECASE)
+# Sentence punctuation a URL collects at the end of a clause, plus the trailing slash, which is
+# not a distinction any source makes.
+_TRAILING = "/.,"
 
 
 def _normalise(url: str) -> str:
-    return url.rstrip(_TRAILING)
+    """A link reduced to the form the allowed set is keyed on: no scheme, no trailing punctuation.
+
+    Dropping the scheme is what lets a legitimately scheme-less rendering of an item's own URL
+    match the item it came from. It also means the gate does not distinguish `http` from `https`;
+    that is deliberate -- provenance asks where a link points, not how it is fetched.
+    """
+    return _SCHEME_RE.sub("", url).rstrip(_TRAILING)
+
+
+def _links(text: str) -> list[str]:
+    """Every link-like token in `text`, normalised, de-duplicated, in order of appearance.
+
+    The three patterns overlap by design -- a fully written URL matches the schemed pattern and
+    the bare-host one -- so matches are de-duplicated after normalisation, or one bad link would
+    be reported two or three times.
+    """
+    found = [(m.start(), _normalise(m.group())) for r in _LINK_RES for m in r.finditer(text)]
+    return list(dict.fromkeys(link for _, link in sorted(found)))
 
 
 _OWN_BASE_NORM = _normalise(OWN_BASE)
@@ -71,20 +107,29 @@ def _is_own(url: str) -> bool:
     return url == _OWN_BASE_NORM or url.startswith(_OWN_BASE_NORM + "/")
 
 
+def _is_citation(body: str) -> bool:
+    """True when `[P<body>]` is trying to be a citation rather than a bracketed word.
+
+    Item ids are `<site>:<local-id>`, so a colon is the mark of intent; an all-digit body is the
+    other way a citation comes out malformed. Without this, `[PDF]`, `[Paper]` and the `[Post]`
+    of a markdown link would each fail the gate and block the pack -- prose, not broken links.
+    """
+    return ":" in body or body.isdigit()
+
+
 def gate_provenance(rendered: dict[str, str], items: list[Item]) -> GateResult:
-    """Every URL and `[P<id>]` reference in the rendered files traces back to a source."""
+    """Every link and `[P<id>]` citation in the rendered files traces back to a source."""
     allowed = {_normalise(i.url) for i in items}
     for i in items:
-        allowed.update(_normalise(u) for u in _URL_RE.findall(i.markdown))
+        allowed.update(_links(i.markdown))
     ids = {i.id for i in items}
     details: list[str] = []
     for name, text in rendered.items():
-        for url in _URL_RE.findall(text):
-            u = _normalise(url)
-            if u not in allowed and not _is_own(u):
-                details.append(f"{name}: URL not in any source: {u}")
+        for url in _links(text):
+            if url not in allowed and not _is_own(url):
+                details.append(f"{name}: URL not in any source: {url}")
         for pid in _PID_RE.findall(text):
-            if pid not in ids:
+            if _is_citation(pid) and pid not in ids:
                 details.append(f"{name}: unresolved item reference [P{pid}]")
     return GateResult(name="provenance", passed=not details, blocking=True, details=details)
 
@@ -123,7 +168,9 @@ def gate_freshness(
     and counting it in both would publish it twice.
     """
     details: list[str] = []
-    prefix = f"<!-- aisafety-radar · version {version}"
+    # The separator is part of the match: a version is a prefix of the next suffixed one, so
+    # stopping at the version alone would let a `2026.08.30ab` pack pass as `2026.08.30a`.
+    prefix = f"<!-- aisafety-radar · version {version} ·"
     for name, text in rendered.items():
         if not text.startswith(prefix):
             details.append(f"{name}: missing or wrong header")
