@@ -37,6 +37,7 @@ from pipeline.stages.scan import judge_record, scan_record
 from pipeline.stages.triage import triage_item
 from pipeline.stages.verify import ExtractionRecord
 from pipeline.textnorm import contains
+from tests.test_models import make_comment
 
 FIX = Path("tests/fixtures/forummagnum")
 SITES = ("lw", "af", "eaf")
@@ -340,6 +341,21 @@ def test_a_discussion_movers_url_and_date_clear_the_gates(tmp_path, monkeypatch)
     assert mover.url in rendered
     # The budget gate counts posts *and* movers, both of which render as `- **` lines.
     assert rendered.count("\n- **") == report.items_selected + 1
+
+
+def test_a_movers_top_comment_author_may_be_a_url_without_blocking_the_pack(tmp_path, monkeypatch):
+    """A commenter's display name is fetched source text, and the mover template copies it into
+    the pack. It belongs to no `Item`, though, so `run_daily` has to hand it to the provenance
+    gate itself; without that a forum user called `www.example.org/me` withholds the day."""
+    mover = _mover_from_an_older_window_post()
+    mover.top_new_comment = make_comment(
+        post_id=mover.item_id, author="read www.example.org/me for more"
+    )
+    monkeypatch.setattr("pipeline.run.refresh_comments", lambda *a, **kw: [mover])
+    report = run_daily(_inputs(tmp_path, _clients()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert "www.example.org/me" in rendered, "precondition: the name reaches the pack"
 
 
 def test_a_movers_url_without_the_window_posts_would_not_pass_provenance(tmp_path, monkeypatch):

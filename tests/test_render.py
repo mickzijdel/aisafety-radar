@@ -3,7 +3,7 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pipeline.models import Comment, Extraction, SourceStatus
+from pipeline.models import Extraction, SourceStatus
 from pipeline.render import (
     APPENDIX_PURPOSE,
     PackMeta,
@@ -15,7 +15,7 @@ from pipeline.render import (
 )
 from pipeline.stages.comments import Mover
 from pipeline.stages.verify import ExtractionRecord
-from tests.test_models import make_item
+from tests.test_models import make_comment, make_item
 
 GOLDEN = Path(__file__).parent / "golden"
 SPEC = (
@@ -30,21 +30,6 @@ META = PackMeta(
     generated_at=datetime(2026, 8, 30, 6, 14, tzinfo=UTC),
     data_through=datetime(2026, 8, 30, 5, 40, tzinfo=UTC),
 )
-
-
-def comment(author="Bob", score=83):
-    return Comment(
-        id="lw:c1",
-        post_id="lw:9",
-        site="lw",
-        author=author,
-        author_created_at=None,
-        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
-        score=score,
-        agreement=None,
-        parent_id=None,
-        text="body",
-    )
 
 
 def rec(
@@ -105,7 +90,7 @@ def fixture():
             12,
             40,
             60,
-            comment(),
+            make_comment(),
             rec("lw:9", signal="Now contested; Bob (83 karma) pushes back."),
         )
     ]
@@ -280,7 +265,7 @@ def test_mover_renders_its_new_top_comment():
             12,
             None,
             None,
-            comment(),
+            make_comment(),
             rec("lw:9"),
         )
     ]
@@ -398,7 +383,7 @@ def test_a_newline_in_a_mover_comment_author_cannot_break_its_line():
             3,
             None,
             None,
-            comment(author="Bob\n## Injected"),
+            make_comment(author="Bob\n## Injected"),
             rec("lw:9"),
         )
     ]

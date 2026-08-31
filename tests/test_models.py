@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from pipeline.models import SLUGS, Extraction, Item, Usage
+from pipeline.models import SLUGS, Comment, Extraction, Item, Usage
 
 
 def make_item(**over):
@@ -28,6 +28,24 @@ def make_item(**over):
     )
     base.update(over)
     return Item(**base)
+
+
+def make_comment(**over):
+    """One comment on `lw:9`, the post id every mover fixture in this suite is built around."""
+    base = dict(
+        id="lw:c1",
+        post_id="lw:9",
+        site="lw",
+        author="Bob",
+        author_created_at=None,
+        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
+        score=83,
+        agreement=None,
+        parent_id=None,
+        text="body",
+    )
+    base.update(over)
+    return Comment(**base)
 
 
 def test_item_rejects_unknown_fields():

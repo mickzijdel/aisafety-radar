@@ -278,8 +278,13 @@ def run_daily(inputs: RunInputs) -> RunReport:
 
     gates = [
         # Movers are rendered from ledger entries built out of the window posts, so provenance
-        # needs those items too or a mover's own link reads as unsourced.
-        gate_provenance(rendered, rendered_items + window_items),
+        # needs those items too or a mover's own link reads as unsourced. Their new top comment's
+        # author is fetched source text that belongs to no item at all, so it goes in separately.
+        gate_provenance(
+            rendered,
+            rendered_items + window_items,
+            source_text=[m.top_new_comment.author for m in movers if m.top_new_comment],
+        ),
         # Both posts and movers render as `- **` lines; the index's are recipes and are not counted.
         gate_budgets(
             rendered,

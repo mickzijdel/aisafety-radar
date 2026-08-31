@@ -27,6 +27,8 @@ Two of the gates deserve their reasoning stated, because the obvious reading of 
   unsourced. Note that this is *not* the same list `gate_freshness` wants: a mover is an older
   post by definition, so passing it to the freshness gate fails the window check on the very
   thing that made it a mover. Provenance takes posts plus movers; freshness takes today's posts.
+  A mover also renders the display name of its new top comment's author, and that string belongs
+  to no item at all, so the caller hands it in through `source_text`.
 
 * **Budgets.** The item count is taken by counting rendered `- **` lines, which is what the item
   and mover templates both emit. `expected_items` for the forums file is therefore posts *plus*
@@ -37,7 +39,7 @@ Two of the gates deserve their reasoning stated, because the obvious reading of 
 from __future__ import annotations
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import datetime
 from typing import get_args
 
@@ -170,13 +172,33 @@ def _is_citation(body: str) -> bool:
     site the pipeline does not fetch, now reads as prose too -- it renders no link and resolves to
     nothing for anyone, where a false positive costs the day's publication. The prefix is compared
     case-insensitively so a `[PLW:abc]` is still held to the ids the pack actually carries.
+
+    A site prefix alone is not enough either, and for the same reason from the other direction:
+    `[Plw]`, `[Paf]` and `[Peaf]` are the three site names with the citation's own `P` in front,
+    and a body with no colon carries no local id to resolve. Both halves of the shape are
+    therefore required -- the colon and a known site before it -- so a bracketed word can never
+    withhold a pack, while `[Plw:]` (a site prefix with the colon and nothing after it) is still a
+    citation attempt and still has to resolve.
     """
-    return body.split(":", 1)[0].lower() in CITATION_SITES or body.isdigit()
+    prefix, colon, _ = body.partition(":")
+    return (bool(colon) and prefix.lower() in CITATION_SITES) or body.isdigit()
 
 
-def gate_provenance(rendered: dict[str, str], items: list[Item]) -> GateResult:
-    """Every link and `[P<id>]` citation in the rendered files traces back to a source."""
+def gate_provenance(
+    rendered: dict[str, str], items: list[Item], source_text: Sequence[str] = ()
+) -> GateResult:
+    """Every link and `[P<id>]` citation in the rendered files traces back to a source.
+
+    `source_text` is fetched third-party text the renderer copies into the pack that belongs to no
+    `Item`: a discussion mover's new top comment renders its commenter's display name, and that
+    name arrives down the mover path, which carries a ledger entry and an archived record rather
+    than an item. It is treated exactly as an item's title or author is -- the links *inside* each
+    string are allowed, and nothing else -- so a forum user whose display name is a URL cannot
+    withhold the pack, and cannot vouch for any other link either.
+    """
     allowed = {_normalise(i.url) for i in items}
+    for text in source_text:
+        allowed.update(_links(text))
     for i in items:
         # Spec 6.8 gate 1 allows a link that "appears verbatim in fetched source text", and the
         # title, author and affiliation are fetched source text as much as the body is -- the

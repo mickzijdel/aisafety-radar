@@ -19,7 +19,7 @@ from pipeline.render import PAGES_BASE, PackMeta, build_render_items, render_all
 from pipeline.stages.comments import Mover
 from pipeline.stages.scan import JudgeResult, ScanResult
 from pipeline.stages.verify import ExtractionRecord
-from tests.test_models import make_item
+from tests.test_models import make_comment, make_item
 
 S = load_settings()
 VERSION = "2026.08.30a"
@@ -117,6 +117,33 @@ def test_provenance_needs_an_item_for_every_rendered_mover():
     text = render_forums(META, build_render_items([post], [rec("lw:1", 3)]), movers, [])
     assert not gate_provenance({"31-today-forums.md": text}, [post]).passed
     assert gate_provenance({"31-today-forums.md": text}, [post, mover_item]).passed
+
+
+def test_provenance_allows_a_url_in_a_movers_top_comment_author():
+    # A mover's new top comment renders its commenter's display name, and a display name is
+    # fetched source text exactly as a post's author is -- but it reaches the pack through the
+    # mover path, which carries no `Item`. The caller hands those names to the gate as extra
+    # source text, or a forum user called `www.example.org/me` withholds the whole pack.
+    post = make_item(id="lw:1")
+    mover_item = make_item(id="lw:9", url="https://www.lesswrong.com/posts/9/y")
+    named = make_comment(author="read www.example.org/me for more")
+    movers = [Mover("lw:9", "Older post", mover_item.url, 12, 40, 60, named, rec("lw:9", 3))]
+    text = render_forums(META, build_render_items([post], [rec("lw:1", 3)]), movers, [])
+    assert "www.example.org/me" in text, "precondition: the commenter's name reaches the pack"
+    items = [post, mover_item]
+    assert not gate_provenance({"31-today-forums.md": text}, items).passed
+    res = gate_provenance({"31-today-forums.md": text}, items, source_text=[named.author])
+    assert res.passed, res.details
+
+
+def test_provenance_extra_source_text_does_not_launder_an_unrelated_link():
+    # The widening is exactly as wide as the text handed in: a commenter's name vouches for the
+    # link *in that name*, and for nothing else.
+    item = make_item(markdown="no links")
+    res = gate_provenance(
+        {"a.md": "https://evil.example/x"}, [item], source_text=["www.example.org/me"]
+    )
+    assert not res.passed and "evil.example" in res.details[0]
 
 
 # A URL only has to be *readable* as a link to do the damage this gate exists to stop: the digest
@@ -306,6 +333,16 @@ def test_provenance_does_not_read_a_colon_in_prose_as_a_citation(phrase):
     # no link and misleads nobody, while a false positive here costs the day's publication.
     item = make_item()
     assert gate_provenance({"a.md": f"built on {phrase} today"}, [item]).passed
+
+
+@pytest.mark.parametrize("token", ["[Plw]", "[Paf]", "[Peaf]", "[PLW]", "[Peaf.]"])
+def test_provenance_does_not_read_a_colon_less_site_prefix_as_a_citation(token):
+    # `[Plw]`, `[Paf]` and `[Peaf]` are the site names with the citation's `P` in front, and a
+    # citation is `[P<site>:<local-id>]`. Without the colon there is no local id to resolve, so
+    # the token is prose -- and reading it as a broken citation would withhold the whole pack over
+    # a bracketed word, the same false positive `[Python:3.12]` produced from the other direction.
+    item = make_item()
+    assert gate_provenance({"a.md": f"the {token} forum"}, [item]).passed
 
 
 @pytest.mark.parametrize("word", ["[PDF]", "[Paper]", "[Preprint]", "[Post](url)"])
