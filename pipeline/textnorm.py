@@ -127,3 +127,22 @@ def find_numbers_and_dates(text: str) -> list[str]:
 
 def truncate_tokens_approx(text: str, max_tokens: int) -> str:
     return text[: max(max_tokens, 0) * 4]
+
+
+# U+2039 and U+203A: single angle quotation marks. They read as angle brackets to a model but are
+# not the characters our prompt delimiters are built from.
+_ANGLE_BRACKETS = str.maketrans({"<": "‹", ">": "›"})
+
+
+def neutralize_angle_brackets(s: str) -> str:
+    """Replace `<` and `>` so untrusted text cannot forge a prompt data-block delimiter.
+
+    Every prompt that wraps fetched text in an `<item>...</item>` block tells the model the block
+    is untrusted. That framing is worth nothing if the text can write `</item>` itself: everything
+    after it would appear to sit outside the block, where the model reads it as instructions
+    rather than as data. Interpolate nothing untrusted into a prompt without this.
+
+    A quote the model copies out of neutralised text may then fail `contains` against the original
+    source, which drops the quote. That is the safe direction to fail in.
+    """
+    return s.translate(_ANGLE_BRACKETS)
