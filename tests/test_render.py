@@ -320,6 +320,17 @@ def test_oneline_flattens_and_escapes_block_markers():
     assert oneline("#1 by karma") == "#1 by karma"
 
 
+def test_oneline_holds_third_party_html_to_a_guillemet():
+    # Markdown passes raw HTML through, so flattening alone leaves `<!--` able to hide the rest
+    # of the file from anything that renders the pack, and `<script>` able to run in it.
+    assert oneline("<script>alert(1)</script>") == "‹script>alert(1)‹/script>"
+    assert oneline("title <!-- hides the rest") == "title ‹!-- hides the rest"
+    assert oneline("read <https://evil.example/x>") == "read ‹https://evil.example/x>"
+    # `>` is left alone: it opens a block only at the start of a line, which the escape above
+    # already covers, and neutralising it would mangle every `->` and `>` in ordinary prose.
+    assert oneline("score > 90, so A -> B") == "score > 90, so A -> B"
+
+
 def test_injected_markdown_in_a_mover_signal_cannot_forge_a_heading_or_an_item():
     movers = [
         Mover(

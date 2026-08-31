@@ -29,9 +29,12 @@ discussion signal), and markdown gives a string no way to say "I am content, not
 summary arriving as `Contested.\\n\\n## Heading\\n\\n- **Fake post** ...` would otherwise close
 the item block and render a real heading and a counterfeit item line: precisely the forgery the
 template-owns-the-metadata-line rule (spec 6.3) exists to prevent, reintroduced one layer down.
-`oneline` flattens the value to a single line and escapes a leading block marker, so third-party
-text can only ever land *inside* the line the template put it on. Any interpolation added to a
-template needs `|oneline` unless it is a number or one of this module's own constants.
+`oneline` flattens the value to a single line, escapes a leading block marker and holds `<` to a
+guillemet, so third-party text can only ever land *inside* the line the template put it on and
+cannot act as HTML once it is there. Any interpolation added to a template needs `|oneline` unless
+it is a number or one of this module's own constants. `tests/test_hostile_render.py` pushes one
+forgery payload through every field that reaches the pack and holds the rendered shape to the
+byte counts a clean pack produces.
 """
 
 from __future__ import annotations
@@ -54,19 +57,35 @@ from pipeline.stages.verify import ExtractionRecord
 # the flattened line can do structural damage; `a - b` mid-sentence is left alone.
 _OPENS_A_BLOCK = re.compile(r"^(?:#{1,6}(?:\s|$)|[-*+](?:\s|$)|>)")
 
+# `<` held to the single-guillemet `data_block` uses on the way into a prompt. Markdown passes raw
+# HTML straight through, so this is the one character in third-party text that can still act after
+# the text has been flattened onto one line. `>` is deliberately left alone: it opens a block only
+# at the start of a line, which `_OPENS_A_BLOCK` already escapes, and neutralising it would mangle
+# the `->` and `>` that ordinary titles and prose contain.
+_ANGLE_OPEN = str.maketrans({"<": "‹"})
+
 
 def oneline(text: str | None) -> str:
-    """`text` flattened to one line, with a leading markdown block marker escaped.
+    """`text` flattened to one line, block markers escaped and angle brackets neutralised.
 
     Every prose and display value a template interpolates goes through this. Flattening is what
     stops third-party text escaping the line the template put it on; the backslash is what stops
     a *single*-line `## Heading` doing the same thing without needing a newline (an indented
     heading is still a heading: CommonMark allows up to three leading spaces, so the two-space
     indent under a metadata line is no protection).
+
+    The angle brackets are the third way out, and the one flattening does not close. Markdown
+    passes raw HTML through, so a post titled `<!-- ` hides every byte after it from anything that
+    renders the pack, and a `<script>` in an author's display name is a script tag in whatever
+    renders it. Every one of those needs a `<`, so `<` is held to `‹` -- the substitution
+    `data_block` makes on the way into a prompt -- and the file still says what the source said,
+    as text. Quotes are the one exception and do not come through here: they are the verbatim
+    slot, verified as substrings of the source, and the template contains them inside `> "..."`
+    instead.
     """
     if text is None:
         return ""
-    line = " ".join(text.split())
+    line = " ".join(text.split()).translate(_ANGLE_OPEN)
     return "\\" + line if _OPENS_A_BLOCK.match(line) else line
 
 
