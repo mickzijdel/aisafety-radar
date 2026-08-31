@@ -31,7 +31,7 @@ every agent that reads it. Pick the row for your agent.
 | Agent | How | Fresh content arrives via |
 |---|---|---|
 | Claude Code | `/plugin marketplace add mickzijdel/aisafety-radar`, then install `aisafety-radar`. A symlink of `skills/aisafety-radar` into `~/.claude/skills` also works. | Marketplace auto-update (off by default for third-party marketplaces; enable it in `/plugin`), or the fetch protocol below. |
-| Codex | `codex plugin marketplace add mickzijdel/aisafety-radar`. **Phase 6, not yet available**: the `.codex-plugin/` and `.agents/plugins/` manifests are not in the repository yet. | Bundled copy only. Codex has no page-fetch tool and its sandbox has network off by default, so the daily commit is what Codex users see; `codex plugin upgrade` or `npx skills update` refreshes it. |
+| Codex | **Phase 6, not yet available**: the `.codex-plugin/` and `.agents/plugins/` manifests are not in the repository yet. Once they are, `codex plugin marketplace add mickzijdel/aisafety-radar` (Codex reads `.agents/plugins/marketplace.json`, and `.claude-plugin/marketplace.json` as legacy), or `$skill-installer` as the alternative path. | Bundled copy only. Codex has no page-fetch tool and its sandbox has network off by default, so the daily commit is what Codex users see; `codex plugin upgrade` or `npx skills update` refreshes it. |
 | Cursor, Gemini CLI, Copilot, Amp, OpenCode, Goose, Roo, Windsurf | `npx skills add mickzijdel/aisafety-radar` or `gh skill install mickzijdel/aisafety-radar` | The fetch protocol where the agent has a shell or a fetch tool, otherwise `npx skills update` or `gh skill update`. |
 | Anything else | Fetch `https://mickzijdel.github.io/aisafety-radar/llms.txt`, the index with links to every bundle. | Direct. |
 

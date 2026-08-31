@@ -42,12 +42,14 @@ so they run after the merge rather than as part of the SDD task sequence.
    (`ANTHROPIC_API_KEY` on a $60/month capped workspace, `DATA_DEPLOY_KEY`,
    `HEALTH_ISSUE_TOKEN`, `HEALTHCHECKS_URL`), the `production` environment with a 30-minute
    wait timer, the `radar-health` label, the data repo's seed commit, Pages set to GitHub
-   Actions, and branch protection on `main` with push restrictions left off.
+   Actions, and branch protection on `main` with **no required status checks** and push
+   restrictions left off (the `promote` job pushes a SHA built in the runner that no check has
+   ever run against; spec 6.9's wording needs the matching correction in the final loop).
 4. **The live steps**: part 2 of `docs/go-live.md`. Run `probe.yml` and record the table in
    `docs/probe-results.md` (that file does not exist yet; the probe run creates it); run
    `daily.yml`; eyeball the pack on the `generated` branch during the 30-minute canary
-   window; verify Pages and `fetch-latest.sh`; install the marketplace plugin and smoke-test
-   the skill.
+   window; watch `promote`'s push step (the first push of `main` from a runner); verify Pages
+   and `fetch-latest.sh`; install the marketplace plugin and smoke-test the skill.
 5. **Write the Phase 3 plan**: news, labs, the governance set, papers, the X-Risk Daily
    import, appendices `30`, `32`, `33` and `60`, and the bundles. Feed into it whatever the
    probe found and anything that misfired in the skill smoke test.

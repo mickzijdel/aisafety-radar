@@ -38,7 +38,9 @@ Details that matter:
   repository access limited to `aisafety-radar`, repository permission **Issues: read and
   write** only. The workflow token is not used here on purpose: the health issue is written
   even when the run crashed, and a token that can only touch issues is the smallest thing
-  that can do that.
+  that can do that. Set the longest expiry the UI offers and note the renewal date somewhere
+  you will see it: an expired PAT fails exactly the step that costs the whole day's
+  publication, and it fails on an otherwise ordinary morning with nothing else wrong.
 - **`HEALTHCHECKS_URL`.** Create the check first, then copy its ping URL. Period 1 day and
   grace 3 hours means: alarm if no successful publication has pinged within 27 hours of the
   last one. The ping fires only on a real publication, and a failed ping never fails the run.
@@ -101,11 +103,26 @@ is a deliberate choice rather than an accident.
 
 Settings > Branches > Add branch ruleset (or classic protection) for `main`:
 
-- **Require status checks to pass**, and select the `ci` workflow's jobs: `lint`, `test`,
-  `versions`, `gitleaks`, `actions-lint`, `audit`, `skill`.
+- **Do not require status checks on `main`.** The `promote` job builds its commit inside the
+  runner and pushes it straight to `main`, so no check has ever run for that SHA and a
+  required-check rule rejects the push before CI could possibly satisfy it. If the ruleset UI
+  lets you scope required checks to pull requests only, that is the right setting; otherwise
+  leave required checks off `main` entirely for phase 2. CI still runs on every push and every
+  pull request, so a red build is still visible.
 - **Leave "restrict who can push" off.** The `promote` job pushes `main` with the workflow
-  token. A push restriction that does not exempt the workflow blocks every publication.
+  token, and a push restriction that does not exempt the workflow blocks every publication.
+  This is a separate rule from required checks and turning it off does not make required
+  checks safe.
 - Do not require pull requests for `main` either, for the same reason.
+- Safe things to keep on: block force pushes, block deletions, require signed commits **off**
+  (the bot does not sign).
+
+> **Watch the first `promote` push specifically.** It is the first time anything pushes `main`
+> from a runner, and a branch rule that rejects it fails the job with
+> `GH006: Protected branch update failed`. If that happens, the fix is to remove the required
+> status checks from `main` (not to loosen the push restriction, which is already off), then
+> rerun `daily.yml`. The spec's 6.9 wording implies required checks here and is being corrected
+> separately.
 
 ### 7. Tell the operator
 
@@ -119,8 +136,13 @@ Run in order. Stop at the first failure and fix it before continuing.
 
    ```bash
    gh workflow run probe.yml
-   gh run watch --exit-status
+   sleep 5 && gh run watch \
+     "$(gh run list -w probe.yml -L1 --json databaseId --jq '.[0].databaseId')" --exit-status
    ```
+
+   The run id is resolved rather than left to a bare `gh run watch`, which picks the most
+   recent run in the repository and may well be something else; the `sleep` gives the
+   dispatched run time to appear in the list at all.
 
    `radar probe` always exits 0 on purpose: a blocked source has to show up as a row in the
    job summary, not as a traceback. Copy the summary table into `docs/probe-results.md` with
@@ -134,7 +156,8 @@ Run in order. Stop at the first failure and fix it before continuing.
 
    ```bash
    gh workflow run daily.yml
-   gh run watch --exit-status
+   sleep 5 && gh run watch \
+     "$(gh run list -w daily.yml -L1 --json databaseId --jq '.[0].databaseId')" --exit-status
    ```
 
 3. **Eyeball the pack during the canary window.** When `generate` has passed and `promote` is
@@ -145,7 +168,12 @@ Run in order. Stop at the first failure and fix it before continuing.
    anything is wrong, cancel the run before the timer ends. Cancelling costs nothing that has
    already been published.
 
-4. **Verify the published site.** After `pages` completes, open
+4. **Watch the `promote` job's "Commit and push the publication" step.** This is the first
+   time anything has pushed `main` from a runner, and it is the step a branch rule rejects
+   (`GH006: Protected branch update failed`). If it fails there, remove the required status
+   checks from `main` (see part 1 step 6) and rerun `daily.yml`.
+
+5. **Verify the published site.** After `pages` completes, open
    `https://mickzijdel.github.io/aisafety-radar/latest/00-index.md` and confirm it is no
    longer the placeholder. Then, locally:
 
@@ -157,7 +185,7 @@ Run in order. Stop at the first failure and fix it before continuing.
    `latest/checksums.txt` first and exits non-zero without printing on a mismatch, so a
    successful print is also a checksum check.
 
-5. **Install the plugin and smoke-test the skill.**
+6. **Install the plugin and smoke-test the skill.**
 
    ```bash
    claude plugin marketplace add mickzijdel/aisafety-radar
@@ -168,20 +196,27 @@ Run in order. Stop at the first failure and fix it before continuing.
    `31-today-forums.md`, and answer with links. Note anything that misfires in
    `.claude/current_plan.md` as input to the phase 3 plan.
 
-6. **Watch the first scheduled run.** The cron is `23 5 * * *` UTC, deliberately off the hour
+7. **Watch the first scheduled run.** The cron is `23 5 * * *` UTC, deliberately off the hour
    because GitHub's scheduler delays popular minutes most. After it, read the pinned health
    issue (label `radar-health`) and confirm the healthchecks.io check went green.
 
 ## When something goes wrong
 
-- **No health issue appeared.** The `radar-health` label is missing, or `HEALTH_ISSUE_TOKEN`
-  lacks Issues: write on this repository.
+- **`generate` failed red at "Update the pinned health issue", nothing published and no health
+  issue exists.** The `radar-health` label is missing, or `HEALTH_ISSUE_TOKEN` lacks Issues:
+  write on this repository, or it has expired. The `gh` call is checked, so this is a hard
+  step failure rather than a quiet skip: the day is lost, and the one artefact that would have
+  explained why is the thing that failed to be written.
 - **`generate` failed at "Check out the data repository".** `DATA_DEPLOY_KEY` is wrong, is
   missing its trailing newline, or its public half is not a write deploy key on the data repo.
 - **`generate` succeeded but `promote` never started.** The run did not publish: read the
   health issue, which names the blocking gate or the refusal reason.
 - **`promote` is stuck.** That is the wait timer. Check the `production` environment's timer
   is 30 minutes and not something larger.
+- **`promote` failed at "Commit and push the publication" with `GH006: Protected branch update
+  failed`.** A branch rule on `main` rejected the push. Almost always required status checks:
+  the pushed SHA was built in the runner and no check has run for it. Remove required checks
+  from `main` (part 1 step 6) and rerun. The pack is still safe on the `generated` branch.
 - **`pages` failed after a good publication.** The `github-pages` environment does not allow
   deployments from `main`, or Pages is still set to "Deploy from a branch".
 - **The schedule stopped firing.** Check for a run parked in the `production` wait timer
