@@ -19,7 +19,9 @@ Two of the gates deserve their reasoning stated, because the obvious reading of 
   The corollary is a requirement on the caller: `items` must cover everything the files render,
   discussion movers included. Movers are rendered from ledger entries rather than `Item`s, so the
   caller has to supply an `Item` for each rendered mover or the mover's own link reads as
-  unsourced.
+  unsourced. Note that this is *not* the same list `gate_freshness` wants: a mover is an older
+  post by definition, so passing it to the freshness gate fails the window check on the very
+  thing that made it a mover. Provenance takes posts plus movers; freshness takes today's posts.
 
 * **Budgets.** The item count is taken by counting rendered `- **` lines, which is what the item
   and mover templates both emit. `expected_items` for the forums file is therefore posts *plus*

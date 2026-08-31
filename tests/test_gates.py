@@ -260,17 +260,22 @@ def test_blocking_failures_keeps_only_blocking_failures_in_order():
 
 
 def test_a_real_rendered_pack_clears_every_rendering_gate():
+    # The two item-taking gates want different lists, and a mover is what separates them: it is
+    # rendered (so provenance needs its URL) but it is an older post by definition (so freshness
+    # must not be shown it, or the window check fails on the very thing that makes it a mover).
     post = make_item(id="lw:1", published_at=datetime(2026, 8, 29, 12, tzinfo=UTC))
     mover_item = make_item(
         id="lw:9",
         url="https://www.lesswrong.com/posts/9/y",
-        published_at=datetime(2026, 8, 29, 13, tzinfo=UTC),
+        published_at=datetime(2026, 8, 20, tzinfo=UTC),
     )
     movers = [Mover("lw:9", "Older post", mover_item.url, 12, 40, 60, None, rec("lw:9", 3))]
     rendered = render_all(META, build_render_items([post], [rec("lw:1", 3)]), movers, [], tokens)
-    items = [post, mover_item]
     assert set(rendered) == {"31-today-forums.md", "00-index.md"}
-    assert gate_provenance(rendered, items).passed
-    assert gate_freshness(rendered, items, WINDOW_START, WINDOW_END, VERSION).passed
+    assert gate_provenance(rendered, [post, mover_item]).passed
+    assert gate_freshness(rendered, [post], WINDOW_START, WINDOW_END, VERSION).passed
+    assert not gate_freshness(
+        rendered, [post, mover_item], WINDOW_START, WINDOW_END, VERSION
+    ).passed
     # Only the forums file gets an expected count: the index's `- **` lines are recipes, not items.
     assert gate_budgets(rendered, S, tokens, {"31-today-forums.md": 2}).passed
