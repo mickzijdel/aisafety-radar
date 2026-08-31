@@ -663,9 +663,18 @@ leaves the previous version as `latest`.
   then fast-forwards `main`, bumps the manifest versions, regenerates `CHANGELOG.md` (last 30
   versions, changes per appendix), and deploys Pages (`latest/`, bundles, `llms.txt`) **inside
   the same workflow**, because pushes made with `GITHUB_TOKEN` do not trigger other workflows.
-  Branch protection on `main` allows only the promote job's identity to fast-forward it.
+  Branch protection on `main` carries no required status checks and no push restriction in phase
+  2: the promote job pushes a runner-built SHA daily that no check has run against, and the
+  workflow token cannot be granted a fine-grained bypass; revisit with a merge queue or deploy
+  environment in a later phase.
 - **Idempotent reruns.** Archive writes are keyed by item id and day, so a rerun overwrites
   rather than appends; the ledger is written last.
+- **Recovering an unpublished day.** The gates passing is what marks a day's items seen, and that
+  happens in `generate`, one job before `promote` moves `main`. A promotion that failed therefore
+  leaves a day whose items are already spent: re-run that run's failed `promote` job, which reads
+  the intact pack off the `generated` branch and costs no second generation. A full workflow
+  rerun would render an empty pack instead, and needs `radar run --ignore-seen` (the `ignore_seen`
+  workflow input) plus another day's API spend.
 - **Rollback.** `latest` is a symlink-style pointer in Pages to a versioned directory; reverting
   is moving the pointer, one manual workflow.
 - **Health, not issue spam.** One pinned health issue is updated in place (found by label,

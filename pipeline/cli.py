@@ -9,6 +9,12 @@ so there is nothing to render without a run.
 
 `run` exits 0 when the pack published and `BLOCKED_EXIT` when a gate withheld it; `probe` exits 0
 whatever the sources did, because its output *is* the report.
+
+`--ignore-seen` is the one recovery switch. A run whose gates passed marks its items seen, so a
+day that generated but never promoted has already spent everything it would republish, and an
+ordinary rerun of it renders an empty pack. The flag skips that filter for one run and still
+records the ids on the way out. Re-running the failed `promote` job is cheaper where that is
+possible: the pack is intact on the `generated` branch and needs no second generation.
 """
 
 from __future__ import annotations
@@ -90,6 +96,7 @@ def cmd_run(args) -> int:
             day=day,
             version=version,
             out_dir=Path(args.out),
+            ignore_seen=args.ignore_seen,
         )
     )
     print(report.model_dump_json(indent=1))
@@ -127,6 +134,11 @@ def main(argv=None) -> int:
     run.add_argument("--changelog", default="CHANGELOG.md")
     run.add_argument("--dry-run", action="store_true", help="use the canned model, no API key")
     run.add_argument("--fixtures", help="replay recorded payloads instead of the network")
+    run.add_argument(
+        "--ignore-seen",
+        action="store_true",
+        help="regenerate a day whose items are already spent (a generate that never promoted)",
+    )
     run.set_defaults(fn=cmd_run)
 
     probe = sub.add_parser("probe", help="fetch from every live source and print a status table")

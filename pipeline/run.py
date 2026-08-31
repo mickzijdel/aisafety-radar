@@ -25,8 +25,14 @@ stating, because each is easy to get subtly wrong and cheap to get right here:
 * **Files and seen ids are written last, and only if no blocking gate failed.** The archive, the
   ledger and the run report are written either way -- a run that could not publish is still a run
   that happened, and the next day's medians and cost comparison read those files -- but an item is
-  only "seen" once it has actually been published, or a blocked run would spend the day's items
-  without showing them to anyone and leave the rerun nothing to publish.
+  only "seen" once the gates have passed, or a blocked run would spend the day's items without
+  showing them to anyone and leave the rerun nothing to publish.
+
+  Note precisely where that is in the pipeline: the gates pass in the `generate` job, one job
+  *before* `promote` moves `main`, so "seen" means "cleared for publication", not "published". A
+  day whose generation succeeded and whose promotion then failed has already spent its items, and
+  regenerating it needs `ignore_seen` (`radar run --ignore-seen`). Re-running the failed `promote`
+  job is the cheaper recovery, because the pack itself is intact on the `generated` branch.
 
 Note that `archive.write_comments` is not called: phase 2 fetches comments only inside the refresh,
 which writes back extractions rather than comment rows. The comment archive is phase 3's, when the
@@ -101,6 +107,9 @@ class RunInputs:
     version: str
     out_dir: Path
     rng_seed: int = 0
+    # Regenerate a day whose items are already spent. Off by default, because the filter is what
+    # stops a rerun republishing yesterday; see the docstring's note on the seen ids.
+    ignore_seen: bool = False
 
 
 class RunReport(BaseModel):
@@ -193,7 +202,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
 
     fetched = run_all(inputs.fetchers, window)
     seen = SeenIds(archive.seen_path).load()
-    fresh = [i for i in fetched.items if i.id not in seen]
+    fresh = fetched.items if inputs.ignore_seen else [i for i in fetched.items if i.id not in seen]
     # Medians in raw fetched items per day, which is the unit `apply_floor` compares against.
     floor = apply_floor(fresh, settings.floor, day, _source_medians(archive, day))
     for note in floor.anomalies:
@@ -312,10 +321,12 @@ def run_daily(inputs: RunInputs) -> RunReport:
     )
     archive.write_run(day, report.model_dump(mode="json"))
     if published:
-        # "Seen" means published, not fetched. A run a gate blocked has shown nobody anything,
-        # and marking its items seen would make that failure permanent: the rerun that fixed the
-        # problem would find every item already spent and publish an empty pack. The archive and
-        # the ledger above are written either way, because the day happened either way.
+        # "Seen" means the gates passed, not fetched. A run a gate blocked has shown nobody
+        # anything, and marking its items seen would make that failure permanent: the rerun that
+        # fixed the problem would find every item already spent and publish an empty pack. The
+        # archive and the ledger above are written either way, because the day happened either
+        # way. Note that this is written whether or not `ignore_seen` skipped the filter: the flag
+        # is for regenerating one day, not for turning the ledger off.
         for item in fetched.items:
             seen.add(item.id)
         seen.save()

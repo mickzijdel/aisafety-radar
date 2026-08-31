@@ -44,12 +44,17 @@ so they run after the merge rather than as part of the SDD task sequence.
    wait timer, the `radar-health` label, the data repo's seed commit, Pages set to GitHub
    Actions, and branch protection on `main` with **no required status checks** and push
    restrictions left off (the `promote` job pushes a SHA built in the runner that no check has
-   ever run against; spec 6.9's wording needs the matching correction in the final loop).
+   ever run against; spec 6.9 now says this rather than implying the opposite).
 4. **The live steps**: part 2 of `docs/go-live.md`. Run `probe.yml` and record the table in
    `docs/probe-results.md` (that file does not exist yet; the probe run creates it); run
    `daily.yml`; eyeball the pack on the `generated` branch during the 30-minute canary
    window; watch `promote`'s push step (the first push of `main` from a runner); verify Pages
    and `fetch-latest.sh`; install the marketplace plugin and smoke-test the skill.
+
+   If `promote` fails, re-run **that run's failed jobs**, not the workflow: the day's items are
+   already marked seen (the gates pass in `generate`), so a fresh `daily.yml` run publishes an
+   empty pack. `gh workflow run daily.yml -f ignore_seen=true` regenerates a spent day at the
+   cost of a second generation, and is the fallback when the old run can no longer be rerun.
 5. **Write the Phase 3 plan**: news, labs, the governance set, papers, the X-Risk Daily
    import, appendices `30`, `32`, `33` and `60`, and the bundles. Feed into it whatever the
    probe found and anything that misfired in the skill smoke test.

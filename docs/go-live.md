@@ -119,10 +119,13 @@ Settings > Branches > Add branch ruleset (or classic protection) for `main`:
 
 > **Watch the first `promote` push specifically.** It is the first time anything pushes `main`
 > from a runner, and a branch rule that rejects it fails the job with
-> `GH006: Protected branch update failed`. If that happens, the fix is to remove the required
-> status checks from `main` (not to loosen the push restriction, which is already off), then
-> rerun `daily.yml`. The spec's 6.9 wording implies required checks here and is being corrected
-> separately.
+> `GH006: Protected branch update failed`. If that happens, remove the required status checks
+> from `main` (not the push restriction, which is already off), then **re-run the failed
+> `promote` job from that same run** - not the whole workflow. The pack is intact on the
+> `generated` branch and `promote` reads it from there, so the rerun costs nothing and publishes
+> the pack that was already generated. Re-running `daily.yml` instead would re-generate the day
+> (a second bill) and, worse, find every one of the day's items already marked seen by the
+> generation that succeeded, so it would publish an empty pack. Spec 6.9 says the same thing.
 
 ### 7. Tell the operator
 
@@ -171,7 +174,9 @@ Run in order. Stop at the first failure and fix it before continuing.
 4. **Watch the `promote` job's "Commit and push the publication" step.** This is the first
    time anything has pushed `main` from a runner, and it is the step a branch rule rejects
    (`GH006: Protected branch update failed`). If it fails there, remove the required status
-   checks from `main` (see part 1 step 6) and rerun `daily.yml`.
+   checks from `main` (see part 1 step 6) and re-run **the failed `promote` job only**
+   (`gh run rerun <run-id> --failed`). Do not rerun the whole workflow: see "an unpublished
+   day" below for why that publishes nothing.
 
 5. **Verify the published site.** After `pages` completes, open
    `https://mickzijdel.github.io/aisafety-radar/latest/00-index.md` and confirm it is no
@@ -216,7 +221,27 @@ Run in order. Stop at the first failure and fix it before continuing.
 - **`promote` failed at "Commit and push the publication" with `GH006: Protected branch update
   failed`.** A branch rule on `main` rejected the push. Almost always required status checks:
   the pushed SHA was built in the runner and no check has run for it. Remove required checks
-  from `main` (part 1 step 6) and rerun. The pack is still safe on the `generated` branch.
+  from `main` (part 1 step 6), then re-run **that run's failed jobs**, not the workflow:
+
+  ```bash
+  gh run rerun "$(gh run list -w daily.yml -L1 --json databaseId --jq '.[0].databaseId')" --failed
+  ```
+
+  The pack is intact on the `generated` branch, which is where `promote` reads it from, so the
+  rerun publishes the pack that was already paid for.
+- **An unpublished day: `generate` succeeded, `promote` did not, and the run is gone.** The
+  generation marked the day's items seen when its gates passed - one job before `promote` - so a
+  plain rerun of `daily.yml` fetches the same posts, filters every one of them out as already
+  seen, and publishes an empty pack (the "Refuse an empty or blocked pack" step stops it, which
+  is the day lost a second time). If re-running the old run's `promote` job is no longer
+  possible, dispatch the workflow with the recovery input instead:
+
+  ```bash
+  gh workflow run daily.yml -f ignore_seen=true
+  ```
+
+  That skips the seen-ids filter for one run and regenerates the day from scratch. It costs a
+  second full generation - another day's API spend - so it is the fallback, not the first move.
 - **`pages` failed after a good publication.** The `github-pages` environment does not allow
   deployments from `main`, or Pages is still set to "Deploy from a branch".
 - **The schedule stopped firing.** Check for a run parked in the `production` wait timer

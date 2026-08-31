@@ -229,6 +229,27 @@ def test_a_blocking_gate_failure_withholds_every_file(tmp_path):
     assert (Archive(tmp_path / "data").day_dir(day) / "run.json").exists()
 
 
+def test_ignore_seen_reruns_a_published_day_and_still_records_what_it_published(tmp_path):
+    """The other half of the seen-ids contract. A run that published *did* spend its items, so a
+    plain rerun of that day renders nothing -- which is right up until the promote job failed and
+    the day has to be generated again. `ignore_seen` is that escape hatch, and it still writes the
+    ids on the way out: skipping the filter must not stop the next day filtering."""
+    clients = _clients()
+    first = run_daily(_inputs(tmp_path, clients))
+    assert first.published and first.items_selected > 0
+    seen_path = tmp_path / "data" / "seen-ids.json"
+    assert seen_path.exists()
+
+    repeat = run_daily(_inputs(tmp_path, clients))
+    assert repeat.items_selected == 0, "an ordinary rerun has nothing left to publish"
+
+    again = run_daily(_inputs(tmp_path, clients, ignore_seen=True))
+    assert again.published, [g.details for g in again.gates if not g.passed]
+    assert again.items_selected == first.items_selected
+    assert seen_path.exists()
+    assert (tmp_path / "out" / "31-today-forums.md").read_text().count("\n- **") > 0
+
+
 def test_a_blocked_run_leaves_its_items_unseen_so_the_rerun_can_publish_them(tmp_path):
     blocked = run_daily(_inputs(tmp_path, _clients(), llm=_WritesAUrlInTheSummary()))
     assert not blocked.published

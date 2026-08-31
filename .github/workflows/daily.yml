@@ -19,6 +19,16 @@ on:
     # scheduler is most likely to delay (spec 6.9).
     - cron: "23 5 * * *"
   workflow_dispatch:
+    inputs:
+      # The recovery switch for a day that generated but never published. The gates passing is
+      # what marks a day's items seen, and that happens in `generate`, one job before `promote`
+      # moves `main` -- so a promote that failed leaves a day whose items are spent and whose
+      # ordinary rerun would render an empty pack. This costs a second full generation, so reach
+      # for a rerun of the failed `promote` job first: the pack is intact on `generated`.
+      ignore_seen:
+        description: "Regenerate a spent day (second generation, second bill)"
+        type: boolean
+        default: false
 
 # One daily run at a time, and never cancel the one in flight: a cancelled `generate` can leave
 # the archive repo half-pushed, and a cancelled `promote` can leave `main` ahead of the site.
@@ -118,10 +128,18 @@ jobs:
         id: run
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Empty on a scheduled run, "true"/"false" on a dispatch. Read from the environment
+          # rather than interpolated into the command line, like every other value in this file.
+          RADAR_IGNORE_SEEN: ${{ inputs.ignore_seen }}
         run: |
           set -o pipefail
           status=0
-          uv run radar run --data data --out skills/aisafety-radar/references \
+          extra=()
+          if [ "${RADAR_IGNORE_SEEN:-false}" = "true" ]; then
+            extra+=(--ignore-seen)
+            echo "Regenerating a spent day: --ignore-seen is set."
+          fi
+          uv run radar run --data data --out skills/aisafety-radar/references "${extra[@]}" \
             | tee report.json || status=$?
           # `// empty` so a JSON null becomes the empty string rather than the word "null",
           # which would otherwise reach a commit message as `Archive null`.

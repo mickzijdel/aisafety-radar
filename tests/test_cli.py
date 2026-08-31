@@ -58,6 +58,24 @@ def test_cli_picks_the_next_letter_from_the_changelog(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["version"] == f"{day:%Y.%m.%d}b"
 
 
+def test_cli_ignore_seen_regenerates_a_day_that_already_published(tmp_path, capsys):
+    # A published run marks its items seen, so an ordinary rerun of the same day finds nothing
+    # left to render and produces an empty pack. That is the whole recovery problem: a day whose
+    # generation succeeded but whose promote failed has no way back without this flag.
+    assert _run(tmp_path) == 0
+    first = json.loads(capsys.readouterr().out)
+    assert first["items_selected"] > 0
+
+    assert _run(tmp_path) == 0
+    stale = json.loads(capsys.readouterr().out)
+    assert stale["items_selected"] == 0
+
+    assert _run(tmp_path, "--ignore-seen") == 0
+    again = json.loads(capsys.readouterr().out)
+    assert again["items_selected"] == first["items_selected"]
+    assert (tmp_path / "out" / "31-today-forums.md").read_text().count("\n- **") > 0
+
+
 def test_cli_exits_3_when_a_blocking_gate_failed(tmp_path, monkeypatch):
     report = RunReport(
         version="2026.08.31a",
