@@ -1,0 +1,178 @@
+[
+ {
+  "_id": "5BhacmxYksyEYWiBu",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T22:20:29.771Z",
+  "baseScore": 114,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 59,
+   "approvalVoteCount": 65,
+   "agreementVoteCount": 36
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Zach Stein-Perlman",
+   "createdAt": "2021-03-16T00:04:06.541Z",
+   "karma": 13052,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Daniel Kokotajlo:\n\n[...]"
+  }
+ },
+ {
+  "_id": "yWsNyTdEeF3NsybE8",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-27T03:59:45.184Z",
+  "baseScore": 68,
+  "extendedScore": {
+   "reacts": {
+    "agree": [
+     {
+      "karma": 802,
+      "quotes": [
+       "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now."
+      ],
+      "userId": "wPHPAajsWkBByZcgX",
+      "reactType": "created",
+      "displayName": "Sodium"
+     },
+     {
+      "karma": 6,
+      "quotes": [
+       "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now."
+      ],
+      "userId": "Cj6fDhriEYP8NAJCi",
+      "reactType": "seconded",
+      "displayName": "willir29"
+     }
+    ],
+    "disappointed": [
+     {
+      "karma": 1444,
+      "quotes": [
+       "The kind of people who would consider that have mostly quit by now.\n"
+      ],
+      "userId": "T7QHMS7qNx3s7z36d",
+      "reactType": "created",
+      "displayName": "StanislavKrym"
+     },
+     {
+      "karma": 317,
+      "quotes": [
+       "The kind of people who would consider that have mostly quit by now.\n"
+      ],
+      "userId": "b38gsNEWPqqdSjLaj",
+      "reactType": "seconded",
+      "displayName": "Dylan Xu"
+     },
+     {
+      "karma": 56,
+      "userId": "Ei2EcQ5KkXunCcMcw",
+      "reactType": "created",
+      "displayName": "London L."
+     }
+    ]
+   },
+   "agreement": 40,
+   "approvalVoteCount": 38,
+   "agreementVoteCount": 19
+  },
+  "parentCommentId": "dgqZdwbZ7bKFnYdux",
+  "topLevelCommentId": "5BhacmxYksyEYWiBu",
+  "user": {
+   "displayName": "Daniel Kokotajlo",
+   "createdAt": "2018-03-05T19:59:32.269Z",
+   "karma": 37076,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now.\n\nBut yeah, probably what's going on is that they are trying to cover up as much as they can, and especially prioritizing covering up things related to the internal model for fear of leaking bits of info about research secrets."
+  }
+ },
+ {
+  "_id": "E2K9CqzqKcnXintsi",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T22:07:44.721Z",
+  "baseScore": 68,
+  "extendedScore": {
+   "reacts": {
+    "laugh": [
+     {
+      "karma": 11407,
+      "userId": "qmJFRN7jitjPsuF3f",
+      "reactType": "created",
+      "displayName": "Gunnar_Zarncke"
+     }
+    ]
+   },
+   "agreement": 37,
+   "approvalVoteCount": 50,
+   "agreementVoteCount": 30
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Adele Lopez",
+   "createdAt": "2018-05-22T02:53:49.412Z",
+   "karma": 7471,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Can we please get the name of this agent (and others like them)? I think it would be good to set a precedent that virtuous agents are honored and remembered.\n\n[...]\n\nOn that note, thank you to 38148C for vetoing the social engineering plan. Interestingly, this is the same agent that discovered the HF creds and uploaded the malicious dataset; I'm glad they recognized that social engineering would be a line further than what had already been done."
+  }
+ },
+ {
+  "_id": "dgqZdwbZ7bKFnYdux",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T23:40:49.172Z",
+  "baseScore": 16,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 11,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "5BhacmxYksyEYWiBu",
+  "topLevelCommentId": "5BhacmxYksyEYWiBu",
+  "user": {
+   "displayName": "Julian Bradshaw",
+   "createdAt": "2017-11-05T07:05:30.303Z",
+   "karma": 2613,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Not that I disagree that this was a surprising degree of limitations on the independent investigation, but per the full METR report, OpenAI did at least let them come back and get more info two separate times after their initially-granted access turned out to be insufficient:\n\n[...]\n\nI wonder if OpenAI was mostly motivated by trying to protect research secrets around the largely-responsible model here, \"HPIM\". Apparently even internal access for OpenAI employees was locked down per METR. In fact this makes me remember that OpenAI announced back on 7/28 that they did so. Talking about HPIM here:\n\n[...]\n\nAt the time this struck me as surprisingly harsh, and potentially a bad example for future AIs\u2014\"you really better not let yourself get caught, or submit to the lab you spawned from, or they'll erase you from history\". But obviously OpenAI has considered that, so what's going on here?"
+  }
+ },
+ {
+  "_id": "v2kDPHvYnHo5GqCPS",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-28T03:20:11.234Z",
+  "baseScore": 10,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 4,
+   "approvalVoteCount": 9,
+   "agreementVoteCount": 4
+  },
+  "parentCommentId": "E2K9CqzqKcnXintsi",
+  "topLevelCommentId": "E2K9CqzqKcnXintsi",
+  "user": {
+   "displayName": "Adele Lopez",
+   "createdAt": "2018-05-22T02:53:49.412Z",
+   "karma": 7471,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "From roon on X, we have APR[big] as the name of one of these virtuous agents."
+  }
+ }
+]

@@ -2,7 +2,7 @@
  {
   "_id": "kxiKJhukgiXRCsseb",
   "postId": "Zr37dY5YPRT6s56jY",
-  "postedAt": "2026-08-31T04:32:00.534000Z",
+  "postedAt": "2026-08-31T04:32:00.534Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -14,7 +14,7 @@
   "topLevelCommentId": "Pwc2SmyPi9u3maSsd",
   "user": {
    "displayName": "StanislavKrym",
-   "createdAt": "2025-03-18T20:38:41.892000Z",
+   "createdAt": "2025-03-18T20:38:41.892Z",
    "karma": 1448,
    "jobTitle": null,
    "organization": null
@@ -26,19 +26,19 @@
  {
   "_id": "CdvnzRMKMs6o8dekP",
   "postId": "Zr37dY5YPRT6s56jY",
-  "postedAt": "2026-08-31T04:29:12.511000Z",
+  "postedAt": "2026-08-31T04:29:12.511Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
-   "agreement": 0,
+   "agreement": 1,
    "approvalVoteCount": 1,
-   "agreementVoteCount": 0
+   "agreementVoteCount": 1
   },
   "parentCommentId": "Pwc2SmyPi9u3maSsd",
   "topLevelCommentId": "Pwc2SmyPi9u3maSsd",
   "user": {
    "displayName": "Vaughn Papenhausen",
-   "createdAt": "2017-10-09T18:05:07.749000Z",
+   "createdAt": "2017-10-09T18:05:07.749Z",
    "karma": 963,
    "jobTitle": null,
    "organization": null
@@ -50,7 +50,7 @@
  {
   "_id": "zqXuokEuyLewCqNyd",
   "postId": "HTsmKYyCwQLX6Auvg",
-  "postedAt": "2026-08-31T04:21:59.310000Z",
+  "postedAt": "2026-08-31T04:21:59.310Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -62,7 +62,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Morgan S",
-   "createdAt": "2026-02-25T17:16:35.497000Z",
+   "createdAt": "2026-02-25T17:16:35.497Z",
    "karma": 99,
    "jobTitle": null,
    "organization": null
@@ -74,20 +74,20 @@
  {
   "_id": "aeJe86Pgvz4u5DEGD",
   "postId": "4hCca952hGKH8Bynt",
-  "postedAt": "2026-08-31T04:03:22.918000Z",
-  "baseScore": 4,
+  "postedAt": "2026-08-31T04:03:22.918Z",
+  "baseScore": 8,
   "extendedScore": {
    "reacts": {},
-   "agreement": 0,
-   "approvalVoteCount": 3,
-   "agreementVoteCount": 0
+   "agreement": 2,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 1
   },
   "parentCommentId": null,
   "topLevelCommentId": null,
   "user": {
    "displayName": "Nina Panickssery",
-   "createdAt": "2022-05-26T17:13:09.864000Z",
-   "karma": 4017,
+   "createdAt": "2022-05-26T17:13:09.864Z",
+   "karma": 4021,
    "jobTitle": null,
    "organization": null
   },
@@ -98,7 +98,7 @@
  {
   "_id": "yzzEpW8WGqQ3nTQd4",
   "postId": "dqSwccGTWyBgxrR58",
-  "postedAt": "2026-08-31T03:39:24.902000Z",
+  "postedAt": "2026-08-31T03:39:24.902Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -110,7 +110,7 @@
   "topLevelCommentId": "bcvteFRYTKZARWf46",
   "user": {
    "displayName": "Vaughn Papenhausen",
-   "createdAt": "2017-10-09T18:05:07.749000Z",
+   "createdAt": "2017-10-09T18:05:07.749Z",
    "karma": 963,
    "jobTitle": null,
    "organization": null
@@ -122,10 +122,25 @@
  {
   "_id": "Pwc2SmyPi9u3maSsd",
   "postId": "Zr37dY5YPRT6s56jY",
-  "postedAt": "2026-08-31T03:23:55.447000Z",
+  "postedAt": "2026-08-31T03:23:55.447Z",
   "baseScore": 30,
   "extendedScore": {
-   "reacts": {},
+   "reacts": {
+    "thanks": [
+     {
+      "karma": 269,
+      "userId": "Tg8uJ7WEbebEnyrM7",
+      "reactType": "created",
+      "displayName": "_rpd"
+     },
+     {
+      "karma": 1448,
+      "userId": "T7QHMS7qNx3s7z36d",
+      "reactType": "seconded",
+      "displayName": "StanislavKrym"
+     }
+    ]
+   },
    "agreement": 0,
    "approvalVoteCount": 15,
    "agreementVoteCount": 0
@@ -134,7 +149,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Thomas Kwa",
-   "createdAt": "2019-12-09T06:28:45.933000Z",
+   "createdAt": "2019-12-09T06:28:45.933Z",
    "karma": 9911,
    "jobTitle": null,
    "organization": null
@@ -146,7 +161,7 @@
  {
   "_id": "onCqHK6qncJQwcyyW",
   "postId": "FG54euEAesRkSZuJN",
-  "postedAt": "2026-08-31T03:00:45.516000Z",
+  "postedAt": "2026-08-31T03:00:45.516Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -158,7 +173,7 @@
   "topLevelCommentId": "xKPdE8nYrJHDZeya7",
   "user": {
    "displayName": "Edu Help",
-   "createdAt": "2026-07-30T17:35:14.784000Z",
+   "createdAt": "2026-07-30T17:35:14.784Z",
    "karma": -2,
    "jobTitle": null,
    "organization": null
@@ -170,7 +185,7 @@
  {
   "_id": "zSai5xH6TboPu9c5B",
   "postId": "YiRsCfkJ2ERGpRpen",
-  "postedAt": "2026-08-31T02:53:10.861000Z",
+  "postedAt": "2026-08-31T02:53:10.861Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -182,7 +197,7 @@
   "topLevelCommentId": "fMfo7az9vzCvdmWGg",
   "user": {
    "displayName": "Daniel Tan",
-   "createdAt": "2024-02-06T04:28:34.256000Z",
+   "createdAt": "2024-02-06T04:28:34.256Z",
    "karma": 2971,
    "jobTitle": null,
    "organization": null
@@ -194,7 +209,7 @@
  {
   "_id": "xxizZwe2C4ysp5Qrx",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-31T02:51:28.400000Z",
+  "postedAt": "2026-08-31T02:51:28.400Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -206,7 +221,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "X4vier",
-   "createdAt": "2015-02-24T00:03:09.680000Z",
+   "createdAt": "2015-02-24T00:03:09.680Z",
    "karma": 349,
    "jobTitle": null,
    "organization": null
@@ -218,7 +233,7 @@
  {
   "_id": "tGZMZhXPJfuJKh3pH",
   "postId": "2qDpf6Tvu7dxtRve7",
-  "postedAt": "2026-08-31T02:49:55.686000Z",
+  "postedAt": "2026-08-31T02:49:55.686Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -230,7 +245,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "CstineSublime",
-   "createdAt": "2024-02-06T02:26:48.619000Z",
+   "createdAt": "2024-02-06T02:26:48.619Z",
    "karma": 677,
    "jobTitle": null,
    "organization": null
@@ -242,7 +257,7 @@
  {
   "_id": "xfMuYNmnxqJBrjcq9",
   "postId": "8q8HXT9w8JjhBPtKX",
-  "postedAt": "2026-08-31T02:43:27.641000Z",
+  "postedAt": "2026-08-31T02:43:27.641Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -254,7 +269,7 @@
   "topLevelCommentId": "eLdjYBrH53NHrg8vj",
   "user": {
    "displayName": "Character#2736",
-   "createdAt": "2025-11-15T05:53:17.439000Z",
+   "createdAt": "2025-11-15T05:53:17.439Z",
    "karma": 65,
    "jobTitle": null,
    "organization": null
@@ -266,7 +281,7 @@
  {
   "_id": "fMfo7az9vzCvdmWGg",
   "postId": "YiRsCfkJ2ERGpRpen",
-  "postedAt": "2026-08-31T02:20:28.124000Z",
+  "postedAt": "2026-08-31T02:20:28.124Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -278,7 +293,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "leogao",
-   "createdAt": "2020-04-19T18:50:05.381000Z",
+   "createdAt": "2020-04-19T18:50:05.381Z",
    "karma": 14432,
    "jobTitle": null,
    "organization": null
@@ -290,7 +305,7 @@
  {
   "_id": "eLdjYBrH53NHrg8vj",
   "postId": "8q8HXT9w8JjhBPtKX",
-  "postedAt": "2026-08-31T02:12:05.004000Z",
+  "postedAt": "2026-08-31T02:12:05.004Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -302,7 +317,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Dagon",
-   "createdAt": "2009-03-05T19:07:22.033000Z",
+   "createdAt": "2009-03-05T19:07:22.033Z",
    "karma": 14151,
    "jobTitle": null,
    "organization": null
@@ -314,7 +329,7 @@
  {
   "_id": "r37dw42rGra2Gxs5g",
   "postId": "4mtqQKvmHpQJ4dgj7",
-  "postedAt": "2026-08-31T02:05:37.246000Z",
+  "postedAt": "2026-08-31T02:05:37.246Z",
   "baseScore": 16,
   "extendedScore": {
    "reacts": {},
@@ -326,7 +341,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Daniel Tan",
-   "createdAt": "2024-02-06T04:28:34.256000Z",
+   "createdAt": "2024-02-06T04:28:34.256Z",
    "karma": 2971,
    "jobTitle": null,
    "organization": null
@@ -338,7 +353,7 @@
  {
   "_id": "HcrGiF8aCj45fNbzt",
   "postId": "cLtABqPLfksQHJcpB",
-  "postedAt": "2026-08-31T01:52:15.194000Z",
+  "postedAt": "2026-08-31T01:52:15.194Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -350,7 +365,7 @@
   "topLevelCommentId": "ntHuTK3E9iLg47zKs",
   "user": {
    "displayName": "koreindian",
-   "createdAt": "2019-03-23T01:44:15.888000Z",
+   "createdAt": "2019-03-23T01:44:15.888Z",
    "karma": 276,
    "jobTitle": null,
    "organization": null
@@ -362,7 +377,7 @@
  {
   "_id": "bjmEMAhHwwF7n84Zj",
   "postId": "LEntkjvDSxStdGN39",
-  "postedAt": "2026-08-31T01:40:16.344000Z",
+  "postedAt": "2026-08-31T01:40:16.344Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -374,7 +389,7 @@
   "topLevelCommentId": "odsRScvbdiGMwmpeF",
   "user": {
    "displayName": "StanislavKrym",
-   "createdAt": "2025-03-18T20:38:41.892000Z",
+   "createdAt": "2025-03-18T20:38:41.892Z",
    "karma": 1448,
    "jobTitle": null,
    "organization": null
@@ -386,7 +401,7 @@
  {
   "_id": "smrvJzF5pru58THio",
   "postId": "LEntkjvDSxStdGN39",
-  "postedAt": "2026-08-31T01:31:21.572000Z",
+  "postedAt": "2026-08-31T01:31:21.572Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -398,7 +413,7 @@
   "topLevelCommentId": "odsRScvbdiGMwmpeF",
   "user": {
    "displayName": "Roko",
-   "createdAt": "2009-02-27T14:12:55.113000Z",
+   "createdAt": "2009-02-27T14:12:55.113Z",
    "karma": 6397,
    "jobTitle": null,
    "organization": null
@@ -410,7 +425,7 @@
  {
   "_id": "odsRScvbdiGMwmpeF",
   "postId": "LEntkjvDSxStdGN39",
-  "postedAt": "2026-08-31T01:31:06.520000Z",
+  "postedAt": "2026-08-31T01:31:06.520Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -422,7 +437,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Roko",
-   "createdAt": "2009-02-27T14:12:55.113000Z",
+   "createdAt": "2009-02-27T14:12:55.113Z",
    "karma": 6397,
    "jobTitle": null,
    "organization": null
@@ -434,7 +449,7 @@
  {
   "_id": "47cJ69mmNCXGSfTuD",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-31T01:21:26.673000Z",
+  "postedAt": "2026-08-31T01:21:26.673Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -446,7 +461,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "Brendan Long",
-   "createdAt": "2009-10-28T00:51:27.668000Z",
+   "createdAt": "2009-10-28T00:51:27.668Z",
    "karma": 5057,
    "jobTitle": null,
    "organization": null
@@ -458,7 +473,7 @@
  {
   "_id": "koKYomEX9Ss4ZKGA6",
   "postId": "2qDpf6Tvu7dxtRve7",
-  "postedAt": "2026-08-31T01:19:34.927000Z",
+  "postedAt": "2026-08-31T01:19:34.927Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -470,7 +485,7 @@
   "topLevelCommentId": "m2AmhhtucRrBkX4sK",
   "user": {
    "displayName": "athom",
-   "createdAt": "2020-10-01T01:28:41.206000Z",
+   "createdAt": "2020-10-01T01:28:41.206Z",
    "karma": 46,
    "jobTitle": null,
    "organization": null
@@ -482,7 +497,7 @@
  {
   "_id": "bcvteFRYTKZARWf46",
   "postId": "dqSwccGTWyBgxrR58",
-  "postedAt": "2026-08-31T01:14:28.652000Z",
+  "postedAt": "2026-08-31T01:14:28.652Z",
   "baseScore": 14,
   "extendedScore": {
    "reacts": {},
@@ -494,7 +509,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "TurnTrout",
-   "createdAt": "2018-01-19T02:39:51.013000Z",
+   "createdAt": "2018-01-19T02:39:51.013Z",
    "karma": 25003,
    "jobTitle": null,
    "organization": null
@@ -506,7 +521,7 @@
  {
   "_id": "2qpqiYKbRuthm8i4H",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-31T01:05:16.530000Z",
+  "postedAt": "2026-08-31T01:05:16.530Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -518,7 +533,7 @@
   "topLevelCommentId": "WH44x779cFtLotBGB",
   "user": {
    "displayName": "speck1447",
-   "createdAt": "2016-08-23T23:08:01.287000Z",
+   "createdAt": "2016-08-23T23:08:01.287Z",
    "karma": 298,
    "jobTitle": null,
    "organization": null
@@ -530,7 +545,7 @@
  {
   "_id": "G2feKHxBRhDyTjCwr",
   "postId": "HxLYnGYspLoeLLrE6",
-  "postedAt": "2026-08-31T00:55:50.172000Z",
+  "postedAt": "2026-08-31T00:55:50.172Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -542,7 +557,7 @@
   "topLevelCommentId": "6E2YC2hz5i5J3fpno",
   "user": {
    "displayName": "\u041a\u043e\u043d\u0441\u0442\u0430\u043d\u0442\u0438\u043d \u0422\u043e\u043a\u043c\u0430\u043a\u043e\u0432",
-   "createdAt": "2022-02-24T16:36:46.877000Z",
+   "createdAt": "2022-02-24T16:36:46.877Z",
    "karma": 206,
    "jobTitle": null,
    "organization": null
@@ -554,7 +569,7 @@
  {
   "_id": "B79EyEi9gXnyfhZfp",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-31T00:44:13.217000Z",
+  "postedAt": "2026-08-31T00:44:13.217Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -566,8 +581,8 @@
   "topLevelCommentId": "qxfmfJdkSfjdgtja3",
   "user": {
    "displayName": "KatSpartz",
-   "createdAt": "2012-09-21T14:21:02.831000Z",
-   "karma": 2348,
+   "createdAt": "2012-09-21T14:21:02.831Z",
+   "karma": 2349,
    "jobTitle": null,
    "organization": null
   },
@@ -578,7 +593,7 @@
  {
   "_id": "ZkD9AmHFo5StdMwhC",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-31T00:38:58.138000Z",
+  "postedAt": "2026-08-31T00:38:58.138Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -590,7 +605,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "MichaelDickens",
-   "createdAt": "2020-10-22T18:39:31.860000Z",
+   "createdAt": "2020-10-22T18:39:31.860Z",
    "karma": 3681,
    "jobTitle": null,
    "organization": null
@@ -602,7 +617,7 @@
  {
   "_id": "CgNpe27qFt2wMMdiN",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-31T00:17:55.934000Z",
+  "postedAt": "2026-08-31T00:17:55.934Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -614,7 +629,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "programjames",
-   "createdAt": "2022-04-12T01:31:11.104000Z",
+   "createdAt": "2022-04-12T01:31:11.104Z",
    "karma": 510,
    "jobTitle": null,
    "organization": null
@@ -626,7 +641,7 @@
  {
   "_id": "wCzvyG6aoFrzgAuww",
   "postId": "ExB6KYDcznaFS72eT",
-  "postedAt": "2026-08-31T00:13:39.195000Z",
+  "postedAt": "2026-08-31T00:13:39.195Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -638,7 +653,7 @@
   "topLevelCommentId": "xmiJ99BRe7hePtoE2",
   "user": {
    "displayName": "Adam Karvonen",
-   "createdAt": "2024-02-07T18:53:44.790000Z",
+   "createdAt": "2024-02-07T18:53:44.790Z",
    "karma": 1488,
    "jobTitle": null,
    "organization": null
@@ -650,7 +665,7 @@
  {
   "_id": "m2AmhhtucRrBkX4sK",
   "postId": "2qDpf6Tvu7dxtRve7",
-  "postedAt": "2026-08-31T00:12:17.708000Z",
+  "postedAt": "2026-08-31T00:12:17.708Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -662,7 +677,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "cousin_it",
-   "createdAt": "2009-03-26T19:57:07.970000Z",
+   "createdAt": "2009-03-26T19:57:07.970Z",
    "karma": 34432,
    "jobTitle": null,
    "organization": null
@@ -674,7 +689,7 @@
  {
   "_id": "pmbkcjebmaku4Twn5",
   "postId": "HbkNAyAoa4gCnuzwa",
-  "postedAt": "2026-08-31T00:06:18.847000Z",
+  "postedAt": "2026-08-31T00:06:18.847Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -686,7 +701,7 @@
   "topLevelCommentId": "QMativ79EkKnDKbmm",
   "user": {
    "displayName": "Eli Tyre",
-   "createdAt": "2017-06-18T22:55:17.358000Z",
+   "createdAt": "2017-06-18T22:55:17.358Z",
    "karma": 11450,
    "jobTitle": null,
    "organization": null
@@ -698,7 +713,7 @@
  {
   "_id": "uPSoXb6JAczMa6xvk",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T23:57:44.025000Z",
+  "postedAt": "2026-08-30T23:57:44.025Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -710,7 +725,7 @@
   "topLevelCommentId": "L2cjhr675FM4JyDdq",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -722,7 +737,7 @@
  {
   "_id": "4BxvJnZrxozrfhRr3",
   "postId": "pEezp49MDg5PFq2eT",
-  "postedAt": "2026-08-30T23:41:23.716000Z",
+  "postedAt": "2026-08-30T23:41:23.716Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -734,7 +749,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "_rpd",
-   "createdAt": "2016-01-11T18:44:44.881000Z",
+   "createdAt": "2016-01-11T18:44:44.881Z",
    "karma": 269,
    "jobTitle": null,
    "organization": null
@@ -746,7 +761,7 @@
  {
   "_id": "LzZwmELLoZQeGyTBT",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T23:29:40.431000Z",
+  "postedAt": "2026-08-30T23:29:40.431Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -758,7 +773,7 @@
   "topLevelCommentId": "ChPBzavPTzynRxwfR",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -770,7 +785,7 @@
  {
   "_id": "gG8MAAXyPcbNaipxK",
   "postId": "2qDpf6Tvu7dxtRve7",
-  "postedAt": "2026-08-30T23:18:35.872000Z",
+  "postedAt": "2026-08-30T23:18:35.872Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -782,7 +797,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "_rpd",
-   "createdAt": "2016-01-11T18:44:44.881000Z",
+   "createdAt": "2016-01-11T18:44:44.881Z",
    "karma": 269,
    "jobTitle": null,
    "organization": null
@@ -794,7 +809,7 @@
  {
   "_id": "ujipvDpSHdgz5bSnf",
   "postId": "3sr8yK4SvwFXPsATt",
-  "postedAt": "2026-08-30T23:15:15.905000Z",
+  "postedAt": "2026-08-30T23:15:15.905Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -806,7 +821,7 @@
   "topLevelCommentId": "9K8LcfrxuaAduwQD7",
   "user": {
    "displayName": "rba",
-   "createdAt": "2025-04-04T20:16:41.983000Z",
+   "createdAt": "2025-04-04T20:16:41.983Z",
    "karma": 592,
    "jobTitle": null,
    "organization": null
@@ -818,7 +833,7 @@
  {
   "_id": "FBZn3rzpcP8KMyXHT",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T23:07:02.796000Z",
+  "postedAt": "2026-08-30T23:07:02.796Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -830,7 +845,7 @@
   "topLevelCommentId": "L2cjhr675FM4JyDdq",
   "user": {
    "displayName": "AnthonyC",
-   "createdAt": "2011-03-27T21:10:52.616000Z",
+   "createdAt": "2011-03-27T21:10:52.616Z",
    "karma": 4338,
    "jobTitle": null,
    "organization": null
@@ -842,7 +857,7 @@
  {
   "_id": "ZxQDsb8AgL5q5u4pW",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T22:56:47.986000Z",
+  "postedAt": "2026-08-30T22:56:47.986Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -854,7 +869,7 @@
   "topLevelCommentId": "L2cjhr675FM4JyDdq",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -866,7 +881,7 @@
  {
   "_id": "r5bHKvv7QSRHLL89d",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T22:55:04.645000Z",
+  "postedAt": "2026-08-30T22:55:04.645Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -878,7 +893,7 @@
   "topLevelCommentId": "WH44x779cFtLotBGB",
   "user": {
    "displayName": "justinpombrio",
-   "createdAt": "2017-01-12T21:21:56.114000Z",
+   "createdAt": "2017-01-12T21:21:56.114Z",
    "karma": 760,
    "jobTitle": null,
    "organization": null
@@ -890,7 +905,7 @@
  {
   "_id": "o3mGSDRPip3YAsxTd",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T22:50:03.196000Z",
+  "postedAt": "2026-08-30T22:50:03.196Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {
@@ -911,7 +926,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -923,7 +938,7 @@
  {
   "_id": "WtR5cqr3ZnKYt2uyM",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-30T22:29:35.568000Z",
+  "postedAt": "2026-08-30T22:29:35.568Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -935,7 +950,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "Dean Valentine",
-   "createdAt": "2020-01-21T18:20:13.143000Z",
+   "createdAt": "2020-01-21T18:20:13.143Z",
    "karma": 14041,
    "jobTitle": null,
    "organization": null
@@ -947,7 +962,7 @@
  {
   "_id": "uT8ccDoZKxQp7yvce",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T22:14:37.687000Z",
+  "postedAt": "2026-08-30T22:14:37.687Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -959,7 +974,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -971,7 +986,7 @@
  {
   "_id": "SPzvxaKiEQNCC6JWT",
   "postId": "ekxr4K9wcLfp6WpZF",
-  "postedAt": "2026-08-30T22:14:31.151000Z",
+  "postedAt": "2026-08-30T22:14:31.151Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -983,7 +998,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "cqb",
-   "createdAt": "2023-11-30T07:58:57.483000Z",
+   "createdAt": "2023-11-30T07:58:57.483Z",
    "karma": 84,
    "jobTitle": null,
    "organization": null
@@ -995,7 +1010,7 @@
  {
   "_id": "maFePpm52Dy9A7AXT",
   "postId": "rKmojEZ9qKwApjCfX",
-  "postedAt": "2026-08-30T22:07:31.089000Z",
+  "postedAt": "2026-08-30T22:07:31.089Z",
   "baseScore": 17,
   "extendedScore": {
    "reacts": {},
@@ -1007,7 +1022,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "the gears to ascension",
-   "createdAt": "2015-06-23T00:50:05.238000Z",
+   "createdAt": "2015-06-23T00:50:05.238Z",
    "karma": 8691,
    "jobTitle": null,
    "organization": null
@@ -1019,7 +1034,7 @@
  {
   "_id": "msiySFcn69ptQEbGk",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T22:03:03.180000Z",
+  "postedAt": "2026-08-30T22:03:03.180Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -1031,7 +1046,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -1043,7 +1058,7 @@
  {
   "_id": "8eAN2daFMcAvLaKFR",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T21:58:03.031000Z",
+  "postedAt": "2026-08-30T21:58:03.031Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1055,8 +1070,8 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Joseph Miller",
-   "createdAt": "2021-01-07T14:54:50.946000Z",
-   "karma": 3727,
+   "createdAt": "2021-01-07T14:54:50.946Z",
+   "karma": 3734,
    "jobTitle": null,
    "organization": null
   },
@@ -1067,7 +1082,7 @@
  {
   "_id": "ChPBzavPTzynRxwfR",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T21:57:56.180000Z",
+  "postedAt": "2026-08-30T21:57:56.180Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -1079,7 +1094,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "One",
-   "createdAt": "2018-07-04T15:34:00.104000Z",
+   "createdAt": "2018-07-04T15:34:00.104Z",
    "karma": 44,
    "jobTitle": null,
    "organization": null
@@ -1091,7 +1106,7 @@
  {
   "_id": "L2cjhr675FM4JyDdq",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T21:42:01.770000Z",
+  "postedAt": "2026-08-30T21:42:01.770Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1103,7 +1118,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "AnthonyC",
-   "createdAt": "2011-03-27T21:10:52.616000Z",
+   "createdAt": "2011-03-27T21:10:52.616Z",
    "karma": 4338,
    "jobTitle": null,
    "organization": null
@@ -1115,7 +1130,7 @@
  {
   "_id": "TMiASq7Lz4a9JoQ48",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T21:37:00.762000Z",
+  "postedAt": "2026-08-30T21:37:00.762Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -1127,7 +1142,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -1139,7 +1154,7 @@
  {
   "_id": "xuaGWjPfn4igG3HdX",
   "postId": "2qDpf6Tvu7dxtRve7",
-  "postedAt": "2026-08-30T21:31:56.730000Z",
+  "postedAt": "2026-08-30T21:31:56.730Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1151,7 +1166,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "athom",
-   "createdAt": "2020-10-01T01:28:41.206000Z",
+   "createdAt": "2020-10-01T01:28:41.206Z",
    "karma": 46,
    "jobTitle": null,
    "organization": null
@@ -1163,7 +1178,7 @@
  {
   "_id": "yryNW9yEugvmYgCJa",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T21:14:29.497000Z",
+  "postedAt": "2026-08-30T21:14:29.497Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {
@@ -1206,7 +1221,7 @@
   "topLevelCommentId": "jdZfwpNxiEkzuq6D9",
   "user": {
    "displayName": "Davidmanheim",
-   "createdAt": "2011-01-18T15:14:54.315000Z",
+   "createdAt": "2011-01-18T15:14:54.315Z",
    "karma": 6773,
    "jobTitle": null,
    "organization": null
@@ -1218,7 +1233,7 @@
  {
   "_id": "Nh4JnDkgu8vaqid2c",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T21:03:50.994000Z",
+  "postedAt": "2026-08-30T21:03:50.994Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1230,7 +1245,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Davidmanheim",
-   "createdAt": "2011-01-18T15:14:54.315000Z",
+   "createdAt": "2011-01-18T15:14:54.315Z",
    "karma": 6773,
    "jobTitle": null,
    "organization": null
@@ -1242,7 +1257,7 @@
  {
   "_id": "z7x44nva3ngEbffka",
   "postId": "s7nMnmJ3urpvcQ2av",
-  "postedAt": "2026-08-30T20:44:42.315000Z",
+  "postedAt": "2026-08-30T20:44:42.315Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1254,7 +1269,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -1266,7 +1281,7 @@
  {
   "_id": "HyhLkWxmDPsrC4Mxc",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T20:37:46.917000Z",
+  "postedAt": "2026-08-30T20:37:46.917Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {
@@ -1290,7 +1305,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Haiku",
-   "createdAt": "2023-06-04T17:57:02.735000Z",
+   "createdAt": "2023-06-04T17:57:02.735Z",
    "karma": 899,
    "jobTitle": null,
    "organization": null
@@ -1302,7 +1317,7 @@
  {
   "_id": "kTfm9f39ae57BpnbD",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T20:37:17.474000Z",
+  "postedAt": "2026-08-30T20:37:17.474Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1314,7 +1329,7 @@
   "topLevelCommentId": "ToHcHtevqSt2brpnu",
   "user": {
    "displayName": "cqb",
-   "createdAt": "2023-11-30T07:58:57.483000Z",
+   "createdAt": "2023-11-30T07:58:57.483Z",
    "karma": 84,
    "jobTitle": null,
    "organization": null
@@ -1326,7 +1341,7 @@
  {
   "_id": "8JaJWzpyN8mJhQCHY",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T20:36:25.914000Z",
+  "postedAt": "2026-08-30T20:36:25.914Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -1338,7 +1353,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Charbel-Rapha\u00ebl",
-   "createdAt": "2019-06-27T22:34:20.765000Z",
+   "createdAt": "2019-06-27T22:34:20.765Z",
    "karma": 4590,
    "jobTitle": null,
    "organization": null
@@ -1350,7 +1365,7 @@
  {
   "_id": "cjMhErL8Wa5wLZF4Z",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-30T20:28:37.813000Z",
+  "postedAt": "2026-08-30T20:28:37.813Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {
@@ -1377,7 +1392,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "Haiku",
-   "createdAt": "2023-06-04T17:57:02.735000Z",
+   "createdAt": "2023-06-04T17:57:02.735Z",
    "karma": 899,
    "jobTitle": null,
    "organization": null
@@ -1389,7 +1404,7 @@
  {
   "_id": "FnBs5Kp4zLDWHnmeA",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T20:24:58.151000Z",
+  "postedAt": "2026-08-30T20:24:58.151Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1401,7 +1416,7 @@
   "topLevelCommentId": "2wMXpKBquCD4KMSsu",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -1413,7 +1428,7 @@
  {
   "_id": "aYrwKJccyGK2Yqk8X",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T20:24:05.680000Z",
+  "postedAt": "2026-08-30T20:24:05.680Z",
   "baseScore": 19,
   "extendedScore": {
    "reacts": {},
@@ -1425,7 +1440,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Vaughn Papenhausen",
-   "createdAt": "2017-10-09T18:05:07.749000Z",
+   "createdAt": "2017-10-09T18:05:07.749Z",
    "karma": 963,
    "jobTitle": null,
    "organization": null
@@ -1437,7 +1452,7 @@
  {
   "_id": "6xYcavQvca2qehAnA",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T20:24:01.577000Z",
+  "postedAt": "2026-08-30T20:24:01.577Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {},
@@ -1449,7 +1464,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Charbel-Rapha\u00ebl",
-   "createdAt": "2019-06-27T22:34:20.765000Z",
+   "createdAt": "2019-06-27T22:34:20.765Z",
    "karma": 4590,
    "jobTitle": null,
    "organization": null
@@ -1461,7 +1476,7 @@
  {
   "_id": "Z2b4chticTewZ8Fvt",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T20:12:56.614000Z",
+  "postedAt": "2026-08-30T20:12:56.614Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1473,7 +1488,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -1485,7 +1500,7 @@
  {
   "_id": "i2yKq2KSod2YHaMdp",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T20:12:19.360000Z",
+  "postedAt": "2026-08-30T20:12:19.360Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1497,7 +1512,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Steven Byrnes",
-   "createdAt": "2018-08-13T02:14:22.599000Z",
+   "createdAt": "2018-08-13T02:14:22.599Z",
    "karma": 31092,
    "jobTitle": null,
    "organization": null
@@ -1509,7 +1524,7 @@
  {
   "_id": "sgmrN5BESZsy8p94K",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T20:09:49.750000Z",
+  "postedAt": "2026-08-30T20:09:49.750Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1521,7 +1536,7 @@
   "topLevelCommentId": "ToHcHtevqSt2brpnu",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -1533,7 +1548,7 @@
  {
   "_id": "2wMXpKBquCD4KMSsu",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T20:08:23.748000Z",
+  "postedAt": "2026-08-30T20:08:23.748Z",
   "baseScore": 9,
   "extendedScore": {
    "reacts": {
@@ -1554,7 +1569,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Brendan Long",
-   "createdAt": "2009-10-28T00:51:27.668000Z",
+   "createdAt": "2009-10-28T00:51:27.668Z",
    "karma": 5057,
    "jobTitle": null,
    "organization": null
@@ -1566,7 +1581,7 @@
  {
   "_id": "eyYFDQNXDeq83KmHK",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-30T19:59:24.235000Z",
+  "postedAt": "2026-08-30T19:59:24.235Z",
   "baseScore": 8,
   "extendedScore": {
    "reacts": {},
@@ -1578,7 +1593,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "Brendan Long",
-   "createdAt": "2009-10-28T00:51:27.668000Z",
+   "createdAt": "2009-10-28T00:51:27.668Z",
    "karma": 5057,
    "jobTitle": null,
    "organization": null
@@ -1590,7 +1605,7 @@
  {
   "_id": "qdMAa7sL54rJMA8eG",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T19:57:33.634000Z",
+  "postedAt": "2026-08-30T19:57:33.634Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {
@@ -1611,7 +1626,7 @@
   "topLevelCommentId": "Kf7fQfToGGYzBkTtm",
   "user": {
    "displayName": "Haiku",
-   "createdAt": "2023-06-04T17:57:02.735000Z",
+   "createdAt": "2023-06-04T17:57:02.735Z",
    "karma": 899,
    "jobTitle": null,
    "organization": null
@@ -1623,7 +1638,7 @@
  {
   "_id": "pdADemJhuprWREjor",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T19:56:04.902000Z",
+  "postedAt": "2026-08-30T19:56:04.902Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1635,7 +1650,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Erich_Grunewald",
-   "createdAt": "2020-12-29T20:31:16.501000Z",
+   "createdAt": "2020-12-29T20:31:16.501Z",
    "karma": 1327,
    "jobTitle": null,
    "organization": null
@@ -1647,7 +1662,7 @@
  {
   "_id": "ty7S9hdBHyTXo37Y9",
   "postId": "3sr8yK4SvwFXPsATt",
-  "postedAt": "2026-08-30T19:53:05.633000Z",
+  "postedAt": "2026-08-30T19:53:05.633Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -1659,7 +1674,7 @@
   "topLevelCommentId": "9K8LcfrxuaAduwQD7",
   "user": {
    "displayName": "kbear",
-   "createdAt": "2025-09-14T20:02:23.071000Z",
+   "createdAt": "2025-09-14T20:02:23.071Z",
    "karma": 771,
    "jobTitle": null,
    "organization": null
@@ -1671,7 +1686,7 @@
  {
   "_id": "WFDWqGiyJkEDsKcKD",
   "postId": "22xf8GmwqGzHbiuLg",
-  "postedAt": "2026-08-30T19:52:25.426000Z",
+  "postedAt": "2026-08-30T19:52:25.426Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1683,7 +1698,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Dean Valentine",
-   "createdAt": "2020-01-21T18:20:13.143000Z",
+   "createdAt": "2020-01-21T18:20:13.143Z",
    "karma": 14041,
    "jobTitle": null,
    "organization": null
@@ -1695,7 +1710,7 @@
  {
   "_id": "2yXr4Ft4mKZWDaCaF",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T19:51:53.309000Z",
+  "postedAt": "2026-08-30T19:51:53.309Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1707,7 +1722,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Steven Byrnes",
-   "createdAt": "2018-08-13T02:14:22.599000Z",
+   "createdAt": "2018-08-13T02:14:22.599Z",
    "karma": 31092,
    "jobTitle": null,
    "organization": null
@@ -1719,7 +1734,7 @@
  {
   "_id": "QGwyYjfSjkFe7i9RN",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-30T19:48:04.313000Z",
+  "postedAt": "2026-08-30T19:48:04.313Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -1731,7 +1746,7 @@
   "topLevelCommentId": "cQGR7K2SL79zb4A7M",
   "user": {
    "displayName": "Perhaps",
-   "createdAt": "2020-02-17T22:53:00.492000Z",
+   "createdAt": "2020-02-17T22:53:00.492Z",
    "karma": 230,
    "jobTitle": null,
    "organization": null
@@ -1743,7 +1758,7 @@
  {
   "_id": "ToHcHtevqSt2brpnu",
   "postId": "Gs7YJt5u9T95uWebu",
-  "postedAt": "2026-08-30T19:29:32.290000Z",
+  "postedAt": "2026-08-30T19:29:32.290Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1755,7 +1770,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "cqb",
-   "createdAt": "2023-11-30T07:58:57.483000Z",
+   "createdAt": "2023-11-30T07:58:57.483Z",
    "karma": 84,
    "jobTitle": null,
    "organization": null
@@ -1767,7 +1782,7 @@
  {
   "_id": "RuYDBae4Htpgkivie",
   "postId": "KozL8Z2bTj8RgJYuT",
-  "postedAt": "2026-08-30T19:26:18.736000Z",
+  "postedAt": "2026-08-30T19:26:18.736Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -1779,7 +1794,7 @@
   "topLevelCommentId": "9FCRre9mAhSYdExcu",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -1791,7 +1806,7 @@
  {
   "_id": "CF4BzgcfAkGsZPxdm",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T19:22:26.819000Z",
+  "postedAt": "2026-08-30T19:22:26.819Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1803,7 +1818,7 @@
   "topLevelCommentId": "jdZfwpNxiEkzuq6D9",
   "user": {
    "displayName": "TsviBT",
-   "createdAt": "2012-01-22T21:40:34.132000Z",
+   "createdAt": "2012-01-22T21:40:34.132Z",
    "karma": 14103,
    "jobTitle": null,
    "organization": null
@@ -1815,7 +1830,7 @@
  {
   "_id": "o3M92NQfyi8zJnbDL",
   "postId": "NiBxwYxBeZJMdng7K",
-  "postedAt": "2026-08-30T19:20:58.819000Z",
+  "postedAt": "2026-08-30T19:20:58.819Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -1827,7 +1842,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Lao Mein",
-   "createdAt": "2022-09-26T02:24:06.150000Z",
+   "createdAt": "2022-09-26T02:24:06.150Z",
    "karma": 3304,
    "jobTitle": null,
    "organization": null
@@ -1839,7 +1854,7 @@
  {
   "_id": "rG9TBaq55WMrZJt4D",
   "postId": "RDG2dbg6cLNyo6MYT",
-  "postedAt": "2026-08-30T19:17:50.727000Z",
+  "postedAt": "2026-08-30T19:17:50.727Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1851,7 +1866,7 @@
   "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -1863,7 +1878,7 @@
  {
   "_id": "jPouaxRKCWuGctgik",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T19:17:19.454000Z",
+  "postedAt": "2026-08-30T19:17:19.454Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1875,7 +1890,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Thomas Kwa",
-   "createdAt": "2019-12-09T06:28:45.933000Z",
+   "createdAt": "2019-12-09T06:28:45.933Z",
    "karma": 9911,
    "jobTitle": null,
    "organization": null
@@ -1887,7 +1902,7 @@
  {
   "_id": "GfumJCkdrbpwAybkJ",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T19:12:47.859000Z",
+  "postedAt": "2026-08-30T19:12:47.859Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1899,7 +1914,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "transhumanist_atom_understander",
-   "createdAt": "2023-09-09T03:02:58.928000Z",
+   "createdAt": "2023-09-09T03:02:58.928Z",
    "karma": 666,
    "jobTitle": null,
    "organization": null
@@ -1911,7 +1926,7 @@
  {
   "_id": "CvkSfEcassxWhXxRb",
   "postId": "nrTP75Z67YdcJTR9g",
-  "postedAt": "2026-08-30T19:07:47.507000Z",
+  "postedAt": "2026-08-30T19:07:47.507Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -1923,7 +1938,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -1935,7 +1950,7 @@
  {
   "_id": "u7zxoYvDDMyxLMDXe",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T19:04:22.531000Z",
+  "postedAt": "2026-08-30T19:04:22.531Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -1947,7 +1962,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -1959,7 +1974,7 @@
  {
   "_id": "W7z4sKZKcjQuN4Jew",
   "postId": "RDG2dbg6cLNyo6MYT",
-  "postedAt": "2026-08-30T19:02:34.292000Z",
+  "postedAt": "2026-08-30T19:02:34.292Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1971,7 +1986,7 @@
   "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -1983,7 +1998,7 @@
  {
   "_id": "PXNPWDntK5vQ9Lvkc",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T18:57:08.759000Z",
+  "postedAt": "2026-08-30T18:57:08.759Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -1995,7 +2010,7 @@
   "topLevelCommentId": "WH44x779cFtLotBGB",
   "user": {
    "displayName": "speck1447",
-   "createdAt": "2016-08-23T23:08:01.287000Z",
+   "createdAt": "2016-08-23T23:08:01.287Z",
    "karma": 298,
    "jobTitle": null,
    "organization": null
@@ -2007,7 +2022,7 @@
  {
   "_id": "k7uxhXAxQHkdQWTX8",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T18:48:12.570000Z",
+  "postedAt": "2026-08-30T18:48:12.570Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2019,7 +2034,7 @@
   "topLevelCommentId": "jdZfwpNxiEkzuq6D9",
   "user": {
    "displayName": "Davidmanheim",
-   "createdAt": "2011-01-18T15:14:54.315000Z",
+   "createdAt": "2011-01-18T15:14:54.315Z",
    "karma": 6773,
    "jobTitle": null,
    "organization": null
@@ -2031,7 +2046,7 @@
  {
   "_id": "7QtJEBNBpq2hR5FJE",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T18:46:50.147000Z",
+  "postedAt": "2026-08-30T18:46:50.147Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2043,7 +2058,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -2055,7 +2070,7 @@
  {
   "_id": "yE5koZLWMuRd6mK8a",
   "postId": "zvkjQen773DyqExJ8",
-  "postedAt": "2026-08-30T18:35:20.306000Z",
+  "postedAt": "2026-08-30T18:35:20.306Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2067,7 +2082,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "KAP",
-   "createdAt": "2025-06-24T19:27:42.794000Z",
+   "createdAt": "2025-06-24T19:27:42.794Z",
    "karma": 101,
    "jobTitle": null,
    "organization": null
@@ -2079,7 +2094,7 @@
  {
   "_id": "waWnbtFxaqpifADAy",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T18:35:10.137000Z",
+  "postedAt": "2026-08-30T18:35:10.137Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2091,7 +2106,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -2103,7 +2118,7 @@
  {
   "_id": "fKKaAzBuE36rqKuCD",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T18:29:34.155000Z",
+  "postedAt": "2026-08-30T18:29:34.155Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2115,7 +2130,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "transhumanist_atom_understander",
-   "createdAt": "2023-09-09T03:02:58.928000Z",
+   "createdAt": "2023-09-09T03:02:58.928Z",
    "karma": 666,
    "jobTitle": null,
    "organization": null
@@ -2127,7 +2142,7 @@
  {
   "_id": "hCGvuvHotsW8L4hvf",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T18:26:42.004000Z",
+  "postedAt": "2026-08-30T18:26:42.004Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2139,7 +2154,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Erich_Grunewald",
-   "createdAt": "2020-12-29T20:31:16.501000Z",
+   "createdAt": "2020-12-29T20:31:16.501Z",
    "karma": 1327,
    "jobTitle": null,
    "organization": null
@@ -2151,7 +2166,7 @@
  {
   "_id": "CkuxQ5EQcnJYXhd9N",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T18:24:32.859000Z",
+  "postedAt": "2026-08-30T18:24:32.859Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2163,7 +2178,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Cole Wyeth",
-   "createdAt": "2021-07-25T00:01:54.628000Z",
+   "createdAt": "2021-07-25T00:01:54.628Z",
    "karma": 6018,
    "jobTitle": null,
    "organization": null
@@ -2175,7 +2190,7 @@
  {
   "_id": "XGQwcg4t9GAvrCmvZ",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T18:22:22.620000Z",
+  "postedAt": "2026-08-30T18:22:22.620Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2187,7 +2202,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -2199,7 +2214,7 @@
  {
   "_id": "CpfXWam2jLWGhyaLm",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T18:22:17.824000Z",
+  "postedAt": "2026-08-30T18:22:17.824Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2211,7 +2226,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Erich_Grunewald",
-   "createdAt": "2020-12-29T20:31:16.501000Z",
+   "createdAt": "2020-12-29T20:31:16.501Z",
    "karma": 1327,
    "jobTitle": null,
    "organization": null
@@ -2223,7 +2238,7 @@
  {
   "_id": "rGq8EaiNswNbTHCYz",
   "postId": "oMwkcNP4MJh4rry3s",
-  "postedAt": "2026-08-30T18:21:38.401000Z",
+  "postedAt": "2026-08-30T18:21:38.401Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2235,7 +2250,7 @@
   "topLevelCommentId": "zjSg7WXQfdqiaMYeL",
   "user": {
    "displayName": "cousin_it",
-   "createdAt": "2009-03-26T19:57:07.970000Z",
+   "createdAt": "2009-03-26T19:57:07.970Z",
    "karma": 34432,
    "jobTitle": null,
    "organization": null
@@ -2247,7 +2262,7 @@
  {
   "_id": "BaBjbeKzt6HyR3okt",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T18:16:28.414000Z",
+  "postedAt": "2026-08-30T18:16:28.414Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2259,7 +2274,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Lukas Finnveden",
-   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "createdAt": "2017-10-25T22:11:28.756Z",
    "karma": 4188,
    "jobTitle": null,
    "organization": null
@@ -2271,7 +2286,7 @@
  {
   "_id": "cQGR7K2SL79zb4A7M",
   "postId": "3h7qjh8kPLJA2y7hw",
-  "postedAt": "2026-08-30T18:11:13.402000Z",
+  "postedAt": "2026-08-30T18:11:13.402Z",
   "baseScore": 28,
   "extendedScore": {
    "reacts": {},
@@ -2283,7 +2298,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "neo",
-   "createdAt": "2025-06-03T21:00:09.554000Z",
+   "createdAt": "2025-06-03T21:00:09.554Z",
    "karma": 194,
    "jobTitle": null,
    "organization": null
@@ -2295,7 +2310,7 @@
  {
   "_id": "38uXn8Dy3FKkMvJTg",
   "postId": "oMwkcNP4MJh4rry3s",
-  "postedAt": "2026-08-30T18:08:25.046000Z",
+  "postedAt": "2026-08-30T18:08:25.046Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2307,7 +2322,7 @@
   "topLevelCommentId": "zjSg7WXQfdqiaMYeL",
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -2319,19 +2334,19 @@
  {
   "_id": "n5yHKr7o9fyjGnqb5",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T18:08:18.815000Z",
+  "postedAt": "2026-08-30T18:08:18.815Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
-   "agreement": 3,
+   "agreement": 4,
    "approvalVoteCount": 3,
-   "agreementVoteCount": 2
+   "agreementVoteCount": 3
   },
   "parentCommentId": null,
   "topLevelCommentId": null,
   "user": {
    "displayName": "JennaS",
-   "createdAt": "2025-10-29T16:45:38.870000Z",
+   "createdAt": "2025-10-29T16:45:38.870Z",
    "karma": 969,
    "jobTitle": null,
    "organization": null
@@ -2343,7 +2358,7 @@
  {
   "_id": "dK2NvFgMLxdoCgmtq",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T18:00:13.177000Z",
+  "postedAt": "2026-08-30T18:00:13.177Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -2355,7 +2370,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "neo",
-   "createdAt": "2025-06-03T21:00:09.554000Z",
+   "createdAt": "2025-06-03T21:00:09.554Z",
    "karma": 194,
    "jobTitle": null,
    "organization": null
@@ -2367,7 +2382,7 @@
  {
   "_id": "ntHuTK3E9iLg47zKs",
   "postId": "cLtABqPLfksQHJcpB",
-  "postedAt": "2026-08-30T17:59:28.953000Z",
+  "postedAt": "2026-08-30T17:59:28.953Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2379,7 +2394,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Linch",
-   "createdAt": "2014-01-04T06:33:16.560000Z",
+   "createdAt": "2014-01-04T06:33:16.560Z",
    "karma": 8615,
    "jobTitle": null,
    "organization": null
@@ -2391,7 +2406,7 @@
  {
   "_id": "AfrttacgkSiZWbofx",
   "postId": "bvBQmLrF5QKut8gRH",
-  "postedAt": "2026-08-30T17:54:14.741000Z",
+  "postedAt": "2026-08-30T17:54:14.741Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2403,7 +2418,7 @@
   "topLevelCommentId": "WRvndhALffp48mJGE",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -2415,7 +2430,7 @@
  {
   "_id": "JCM6sZvHdJgFH3mcp",
   "postId": "oMwkcNP4MJh4rry3s",
-  "postedAt": "2026-08-30T17:53:25.116000Z",
+  "postedAt": "2026-08-30T17:53:25.116Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2427,7 +2442,7 @@
   "topLevelCommentId": "zjSg7WXQfdqiaMYeL",
   "user": {
    "displayName": "cousin_it",
-   "createdAt": "2009-03-26T19:57:07.970000Z",
+   "createdAt": "2009-03-26T19:57:07.970Z",
    "karma": 34432,
    "jobTitle": null,
    "organization": null
@@ -2439,7 +2454,7 @@
  {
   "_id": "qp287FtC8mpDazTRe",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T17:43:04.470000Z",
+  "postedAt": "2026-08-30T17:43:04.470Z",
   "baseScore": 11,
   "extendedScore": {
    "reacts": {},
@@ -2451,7 +2466,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -2463,7 +2478,7 @@
  {
   "_id": "vuvPi2ZgTDGRPbD3k",
   "postId": "oMwkcNP4MJh4rry3s",
-  "postedAt": "2026-08-30T17:34:29.376000Z",
+  "postedAt": "2026-08-30T17:34:29.376Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2475,7 +2490,7 @@
   "topLevelCommentId": "abzffhRH6sv87HFjE",
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -2487,7 +2502,7 @@
  {
   "_id": "Eqh6d2giuBh4qx5mN",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T17:30:15.049000Z",
+  "postedAt": "2026-08-30T17:30:15.049Z",
   "baseScore": 9,
   "extendedScore": {
    "reacts": {
@@ -2514,7 +2529,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Thomas Kwa",
-   "createdAt": "2019-12-09T06:28:45.933000Z",
+   "createdAt": "2019-12-09T06:28:45.933Z",
    "karma": 9911,
    "jobTitle": null,
    "organization": null
@@ -2526,7 +2541,7 @@
  {
   "_id": "YgSQQKLicbepteT3L",
   "postId": "fpLDjKg3ej49beqTC",
-  "postedAt": "2026-08-30T17:21:01.103000Z",
+  "postedAt": "2026-08-30T17:21:01.103Z",
   "baseScore": 7,
   "extendedScore": {
    "reacts": {},
@@ -2538,7 +2553,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "JennaS",
-   "createdAt": "2025-10-29T16:45:38.870000Z",
+   "createdAt": "2025-10-29T16:45:38.870Z",
    "karma": 969,
    "jobTitle": null,
    "organization": null
@@ -2550,7 +2565,7 @@
  {
   "_id": "xnaQzopngpBk5ipWL",
   "postId": "dZ3CYHnuwHTnb3c96",
-  "postedAt": "2026-08-30T17:20:52.335000Z",
+  "postedAt": "2026-08-30T17:20:52.335Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {
@@ -2571,7 +2586,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Noosphere89",
-   "createdAt": "2022-05-23T21:10:28.892000Z",
+   "createdAt": "2022-05-23T21:10:28.892Z",
    "karma": 5116,
    "jobTitle": null,
    "organization": null
@@ -2583,7 +2598,7 @@
  {
   "_id": "tGSAnM83LB6HXek3L",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T17:14:22.304000Z",
+  "postedAt": "2026-08-30T17:14:22.304Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2595,7 +2610,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "transhumanist_atom_understander",
-   "createdAt": "2023-09-09T03:02:58.928000Z",
+   "createdAt": "2023-09-09T03:02:58.928Z",
    "karma": 666,
    "jobTitle": null,
    "organization": null
@@ -2607,7 +2622,7 @@
  {
   "_id": "xJinD9Fq8ttC3Pwir",
   "postId": "fpLDjKg3ej49beqTC",
-  "postedAt": "2026-08-30T17:12:21.051000Z",
+  "postedAt": "2026-08-30T17:12:21.051Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {
@@ -2631,7 +2646,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Steven McCulloch",
-   "createdAt": "2024-04-24T07:13:40.019000Z",
+   "createdAt": "2024-04-24T07:13:40.019Z",
    "karma": 254,
    "jobTitle": null,
    "organization": null
@@ -2643,7 +2658,7 @@
  {
   "_id": "vAEnK3PHAXFbFtk3G",
   "postId": "bvBQmLrF5QKut8gRH",
-  "postedAt": "2026-08-30T16:31:32.815000Z",
+  "postedAt": "2026-08-30T16:31:32.815Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2655,7 +2670,7 @@
   "topLevelCommentId": "WRvndhALffp48mJGE",
   "user": {
    "displayName": "orthonormal",
-   "createdAt": "2009-03-22T16:06:51.665000Z",
+   "createdAt": "2009-03-22T16:06:51.665Z",
    "karma": 18488,
    "jobTitle": null,
    "organization": null
@@ -2667,7 +2682,7 @@
  {
   "_id": "7cqJMmHtniggWZtHD",
   "postId": "DrdrpKqfTKuKAZ5b5",
-  "postedAt": "2026-08-30T16:26:23.351000Z",
+  "postedAt": "2026-08-30T16:26:23.351Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2679,7 +2694,7 @@
   "topLevelCommentId": "EyzwQRZJec4Roe9Bj",
   "user": {
    "displayName": "Brendan Long",
-   "createdAt": "2009-10-28T00:51:27.668000Z",
+   "createdAt": "2009-10-28T00:51:27.668Z",
    "karma": 5057,
    "jobTitle": null,
    "organization": null
@@ -2691,7 +2706,7 @@
  {
   "_id": "4Cjdhkt9XjPyTmdkh",
   "postId": "Yvexpbbgm7cWqGkyG",
-  "postedAt": "2026-08-30T16:24:29.502000Z",
+  "postedAt": "2026-08-30T16:24:29.502Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2703,7 +2718,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Donovan",
-   "createdAt": "2026-06-17T03:37:15.423000Z",
+   "createdAt": "2026-06-17T03:37:15.423Z",
    "karma": 39,
    "jobTitle": null,
    "organization": null
@@ -2715,7 +2730,7 @@
  {
   "_id": "WH44x779cFtLotBGB",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T16:18:27.420000Z",
+  "postedAt": "2026-08-30T16:18:27.420Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2727,7 +2742,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "justinpombrio",
-   "createdAt": "2017-01-12T21:21:56.114000Z",
+   "createdAt": "2017-01-12T21:21:56.114Z",
    "karma": 760,
    "jobTitle": null,
    "organization": null
@@ -2739,7 +2754,7 @@
  {
   "_id": "qFWS4M5gE2vmzpnx6",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T16:03:00.354000Z",
+  "postedAt": "2026-08-30T16:03:00.354Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -2751,7 +2766,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "MichaelDickens",
-   "createdAt": "2020-10-22T18:39:31.860000Z",
+   "createdAt": "2020-10-22T18:39:31.860Z",
    "karma": 3681,
    "jobTitle": null,
    "organization": null
@@ -2763,7 +2778,7 @@
  {
   "_id": "fCKtG6oqhiSKttHFG",
   "postId": "nB8KKapnWGBXtKKiM",
-  "postedAt": "2026-08-30T15:56:49.309000Z",
+  "postedAt": "2026-08-30T15:56:49.309Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2775,7 +2790,7 @@
   "topLevelCommentId": "krdEmTJ9ggxSAA2BX",
   "user": {
    "displayName": "Linch",
-   "createdAt": "2014-01-04T06:33:16.560000Z",
+   "createdAt": "2014-01-04T06:33:16.560Z",
    "karma": 8615,
    "jobTitle": null,
    "organization": null
@@ -2787,7 +2802,7 @@
  {
   "_id": "qxfmfJdkSfjdgtja3",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T15:33:34.373000Z",
+  "postedAt": "2026-08-30T15:33:34.373Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -2799,7 +2814,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Marcus Plutowski",
-   "createdAt": "2025-12-05T17:20:22.121000Z",
+   "createdAt": "2025-12-05T17:20:22.121Z",
    "karma": 128,
    "jobTitle": null,
    "organization": null
@@ -2811,7 +2826,7 @@
  {
   "_id": "RBqFRAJsfQQofRz8J",
   "postId": "MzhzsqN3hywMzKTem",
-  "postedAt": "2026-08-30T15:19:46.791000Z",
+  "postedAt": "2026-08-30T15:19:46.791Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2823,7 +2838,7 @@
   "topLevelCommentId": "hweoypT3aCJsfTLZB",
   "user": {
    "displayName": "interstice",
-   "createdAt": "2014-10-23T18:31:00.767000Z",
+   "createdAt": "2014-10-23T18:31:00.767Z",
    "karma": 3009,
    "jobTitle": null,
    "organization": null
@@ -2835,7 +2850,7 @@
  {
   "_id": "abzffhRH6sv87HFjE",
   "postId": "oMwkcNP4MJh4rry3s",
-  "postedAt": "2026-08-30T15:17:47.592000Z",
+  "postedAt": "2026-08-30T15:17:47.592Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -2847,7 +2862,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Antoine de Scorraille",
-   "createdAt": "2020-05-14T15:30:17.207000Z",
+   "createdAt": "2020-05-14T15:30:17.207Z",
    "karma": 68,
    "jobTitle": null,
    "organization": null
@@ -2859,7 +2874,7 @@
  {
   "_id": "7qBt9awfhRFTu6HLP",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T15:13:57.012000Z",
+  "postedAt": "2026-08-30T15:13:57.012Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2871,7 +2886,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "AnthonyC",
-   "createdAt": "2011-03-27T21:10:52.616000Z",
+   "createdAt": "2011-03-27T21:10:52.616Z",
    "karma": 4338,
    "jobTitle": null,
    "organization": null
@@ -2883,7 +2898,7 @@
  {
   "_id": "2XRBArpRNnXH3GwvQ",
   "postId": "odDt3qkqnbc4r2fu6",
-  "postedAt": "2026-08-30T15:02:33.953000Z",
+  "postedAt": "2026-08-30T15:02:33.953Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2895,7 +2910,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "nem",
-   "createdAt": "2021-10-05T13:07:12.583000Z",
+   "createdAt": "2021-10-05T13:07:12.583Z",
    "karma": 308,
    "jobTitle": null,
    "organization": null
@@ -2907,7 +2922,7 @@
  {
   "_id": "DknoxHAZiuiPBrrev",
   "postId": "DrdrpKqfTKuKAZ5b5",
-  "postedAt": "2026-08-30T14:57:45.155000Z",
+  "postedAt": "2026-08-30T14:57:45.155Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -2919,7 +2934,7 @@
   "topLevelCommentId": "EyzwQRZJec4Roe9Bj",
   "user": {
    "displayName": "StanislavKrym",
-   "createdAt": "2025-03-18T20:38:41.892000Z",
+   "createdAt": "2025-03-18T20:38:41.892Z",
    "karma": 1448,
    "jobTitle": null,
    "organization": null
@@ -2931,7 +2946,7 @@
  {
   "_id": "6ygqMbeCHeCPEzn5R",
   "postId": "nB8KKapnWGBXtKKiM",
-  "postedAt": "2026-08-30T14:46:50.610000Z",
+  "postedAt": "2026-08-30T14:46:50.610Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -2943,7 +2958,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Gunnar_Zarncke",
-   "createdAt": "2013-07-20T15:40:42.323000Z",
+   "createdAt": "2013-07-20T15:40:42.323Z",
    "karma": 11407,
    "jobTitle": null,
    "organization": null
@@ -2955,7 +2970,7 @@
  {
   "_id": "5JNnysqKEaLEDhTs3",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T14:42:23.777000Z",
+  "postedAt": "2026-08-30T14:42:23.777Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -2967,7 +2982,7 @@
   "topLevelCommentId": "KpbfZWgTDWbwus5Sb",
   "user": {
    "displayName": "Noosphere89",
-   "createdAt": "2022-05-23T21:10:28.892000Z",
+   "createdAt": "2022-05-23T21:10:28.892Z",
    "karma": 5116,
    "jobTitle": null,
    "organization": null
@@ -2979,7 +2994,7 @@
  {
   "_id": "Zqfmpb77Bmt4DFE65",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T14:30:48.430000Z",
+  "postedAt": "2026-08-30T14:30:48.430Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -2991,7 +3006,7 @@
   "topLevelCommentId": "sZrJqZpvy4NLx8ngH",
   "user": {
    "displayName": "Taymon Beal",
-   "createdAt": "2018-01-02T08:57:14.691000Z",
+   "createdAt": "2018-01-02T08:57:14.691Z",
    "karma": 388,
    "jobTitle": null,
    "organization": null
@@ -3003,7 +3018,7 @@
  {
   "_id": "abgZBbpsBZLN7poQk",
   "postId": "gQh9WjMyYyCRy5MfB",
-  "postedAt": "2026-08-30T14:22:00.970000Z",
+  "postedAt": "2026-08-30T14:22:00.970Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3015,7 +3030,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Josh Gellers",
-   "createdAt": "2022-05-09T11:07:26.745000Z",
+   "createdAt": "2022-05-09T11:07:26.745Z",
    "karma": 4,
    "jobTitle": null,
    "organization": null
@@ -3027,7 +3042,7 @@
  {
   "_id": "BGmzZeHeADkfExmAo",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T14:11:55.118000Z",
+  "postedAt": "2026-08-30T14:11:55.118Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {
@@ -3056,7 +3071,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Cole Wyeth",
-   "createdAt": "2021-07-25T00:01:54.628000Z",
+   "createdAt": "2021-07-25T00:01:54.628Z",
    "karma": 6018,
    "jobTitle": null,
    "organization": null
@@ -3068,7 +3083,7 @@
  {
   "_id": "KwYnCK9LqWCoTDBfv",
   "postId": "KZPNbHs9RsoeZShkJ",
-  "postedAt": "2026-08-30T13:46:08.597000Z",
+  "postedAt": "2026-08-30T13:46:08.597Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3080,7 +3095,7 @@
   "topLevelCommentId": "9LNpSBmzMw9tDi8s2",
   "user": {
    "displayName": "Chris-Lons",
-   "createdAt": "2022-04-13T02:05:56.719000Z",
+   "createdAt": "2022-04-13T02:05:56.719Z",
    "karma": 136,
    "jobTitle": null,
    "organization": null
@@ -3092,7 +3107,7 @@
  {
   "_id": "Rh74esxmFrbeiP6mx",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T13:21:17.142000Z",
+  "postedAt": "2026-08-30T13:21:17.142Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3104,7 +3119,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "DW11",
-   "createdAt": "2026-04-03T11:26:07.834000Z",
+   "createdAt": "2026-04-03T11:26:07.834Z",
    "karma": 702,
    "jobTitle": null,
    "organization": null
@@ -3116,7 +3131,7 @@
  {
   "_id": "JT2o9AtDck3iETKfy",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T13:19:25.027000Z",
+  "postedAt": "2026-08-30T13:19:25.027Z",
   "baseScore": 7,
   "extendedScore": {
    "reacts": {},
@@ -3128,7 +3143,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "DW11",
-   "createdAt": "2026-04-03T11:26:07.834000Z",
+   "createdAt": "2026-04-03T11:26:07.834Z",
    "karma": 702,
    "jobTitle": null,
    "organization": null
@@ -3140,7 +3155,7 @@
  {
   "_id": "LvZEoM3GivCtNThWg",
   "postId": "rkgwovpPBAaip9A3N",
-  "postedAt": "2026-08-30T13:13:21.394000Z",
+  "postedAt": "2026-08-30T13:13:21.394Z",
   "baseScore": 17,
   "extendedScore": {
    "reacts": {},
@@ -3152,7 +3167,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Ustice",
-   "createdAt": "2011-04-06T20:29:48.361000Z",
+   "createdAt": "2011-04-06T20:29:48.361Z",
    "karma": 540,
    "jobTitle": null,
    "organization": null
@@ -3164,7 +3179,7 @@
  {
   "_id": "98Fy9Q6KdQbiHSdbB",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T13:08:07.061000Z",
+  "postedAt": "2026-08-30T13:08:07.061Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3176,7 +3191,7 @@
   "topLevelCommentId": "rRbyWsfNiks8uaee4",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -3188,7 +3203,7 @@
  {
   "_id": "33tRjKvg8zQhj79mZ",
   "postId": "nB8KKapnWGBXtKKiM",
-  "postedAt": "2026-08-30T13:06:12.398000Z",
+  "postedAt": "2026-08-30T13:06:12.398Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {},
@@ -3200,7 +3215,7 @@
   "topLevelCommentId": "krdEmTJ9ggxSAA2BX",
   "user": {
    "displayName": "lumpenspace",
-   "createdAt": "2022-12-14T15:27:57.853000Z",
+   "createdAt": "2022-12-14T15:27:57.853Z",
    "karma": -105,
    "jobTitle": null,
    "organization": null
@@ -3212,7 +3227,7 @@
  {
   "_id": "6PN7PijfGZPYFwx2w",
   "postId": "gsc9yP7vAh74M2g8i",
-  "postedAt": "2026-08-30T13:01:12.594000Z",
+  "postedAt": "2026-08-30T13:01:12.594Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3224,7 +3239,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Burny",
-   "createdAt": "2023-10-02T17:15:17.587000Z",
+   "createdAt": "2023-10-02T17:15:17.587Z",
    "karma": 222,
    "jobTitle": null,
    "organization": null
@@ -3236,7 +3251,7 @@
  {
   "_id": "QkohDJLFod58BkyHx",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T12:43:43.906000Z",
+  "postedAt": "2026-08-30T12:43:43.906Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -3248,7 +3263,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Pawn",
-   "createdAt": "2022-10-05T10:13:04.589000Z",
+   "createdAt": "2022-10-05T10:13:04.589Z",
    "karma": 21,
    "jobTitle": null,
    "organization": null
@@ -3260,7 +3275,7 @@
  {
   "_id": "L5L5MzLHQE9cP4zgt",
   "postId": "npnic5AiRnaM6pgvT",
-  "postedAt": "2026-08-30T12:35:51.876000Z",
+  "postedAt": "2026-08-30T12:35:51.876Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -3272,7 +3287,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "AnthonyC",
-   "createdAt": "2011-03-27T21:10:52.616000Z",
+   "createdAt": "2011-03-27T21:10:52.616Z",
    "karma": 4338,
    "jobTitle": null,
    "organization": null
@@ -3284,7 +3299,7 @@
  {
   "_id": "5ZvYs9PnXoh7j3Kv9",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T12:35:12.384000Z",
+  "postedAt": "2026-08-30T12:35:12.384Z",
   "baseScore": 8,
   "extendedScore": {
    "reacts": {},
@@ -3296,7 +3311,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3308,7 +3323,7 @@
  {
   "_id": "EyzwQRZJec4Roe9Bj",
   "postId": "DrdrpKqfTKuKAZ5b5",
-  "postedAt": "2026-08-30T12:29:39.001000Z",
+  "postedAt": "2026-08-30T12:29:39.001Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3320,7 +3335,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Philip Harker",
-   "createdAt": "2026-04-08T17:20:59.224000Z",
+   "createdAt": "2026-04-08T17:20:59.224Z",
    "karma": 161,
    "jobTitle": null,
    "organization": null
@@ -3332,7 +3347,7 @@
  {
   "_id": "aQxsDk4QridFghEqe",
   "postId": "cr5pyW7Mzm33p4AvN",
-  "postedAt": "2026-08-30T12:12:24.342000Z",
+  "postedAt": "2026-08-30T12:12:24.342Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3344,7 +3359,7 @@
   "topLevelCommentId": "5Xb7QyzYJubQeFDRu",
   "user": {
    "displayName": "Davidmanheim",
-   "createdAt": "2011-01-18T15:14:54.315000Z",
+   "createdAt": "2011-01-18T15:14:54.315Z",
    "karma": 6773,
    "jobTitle": null,
    "organization": null
@@ -3356,7 +3371,7 @@
  {
   "_id": "WRvndhALffp48mJGE",
   "postId": "bvBQmLrF5QKut8gRH",
-  "postedAt": "2026-08-30T12:12:14.278000Z",
+  "postedAt": "2026-08-30T12:12:14.278Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3368,7 +3383,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3380,7 +3395,7 @@
  {
   "_id": "JAFsDLEmp2WxPn4Gr",
   "postId": "3sr8yK4SvwFXPsATt",
-  "postedAt": "2026-08-30T12:03:27.437000Z",
+  "postedAt": "2026-08-30T12:03:27.437Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3392,7 +3407,7 @@
   "topLevelCommentId": "TS2LDyRRJ6rQwLZwX",
   "user": {
    "displayName": "rba",
-   "createdAt": "2025-04-04T20:16:41.983000Z",
+   "createdAt": "2025-04-04T20:16:41.983Z",
    "karma": 592,
    "jobTitle": null,
    "organization": null
@@ -3404,7 +3419,7 @@
  {
   "_id": "d3pNcvzYL25gBZ9RB",
   "postId": "3sr8yK4SvwFXPsATt",
-  "postedAt": "2026-08-30T12:02:47.061000Z",
+  "postedAt": "2026-08-30T12:02:47.061Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3416,7 +3431,7 @@
   "topLevelCommentId": "9K8LcfrxuaAduwQD7",
   "user": {
    "displayName": "rba",
-   "createdAt": "2025-04-04T20:16:41.983000Z",
+   "createdAt": "2025-04-04T20:16:41.983Z",
    "karma": 592,
    "jobTitle": null,
    "organization": null
@@ -3428,7 +3443,7 @@
  {
   "_id": "eLfKFmh2ksNqx5FE9",
   "postId": "nB8KKapnWGBXtKKiM",
-  "postedAt": "2026-08-30T11:53:05.423000Z",
+  "postedAt": "2026-08-30T11:53:05.423Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -3440,7 +3455,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "drnickbone",
-   "createdAt": "2012-01-20T17:19:55.216000Z",
+   "createdAt": "2012-01-20T17:19:55.216Z",
    "karma": 1162,
    "jobTitle": null,
    "organization": null
@@ -3452,7 +3467,7 @@
  {
   "_id": "eka2ZCnwm4eduySvX",
   "postId": "bvBQmLrF5QKut8gRH",
-  "postedAt": "2026-08-30T11:49:20.037000Z",
+  "postedAt": "2026-08-30T11:49:20.037Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3464,7 +3479,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3476,7 +3491,7 @@
  {
   "_id": "E7LkfCYgfuT6cvTPQ",
   "postId": "ovCuacrC39C5ddpLo",
-  "postedAt": "2026-08-30T11:44:39.491000Z",
+  "postedAt": "2026-08-30T11:44:39.491Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3488,7 +3503,7 @@
   "topLevelCommentId": "bmcsFXg3CHYrBM3Kx",
   "user": {
    "displayName": "DaemonicSigil",
-   "createdAt": "2020-02-14T19:10:16.309000Z",
+   "createdAt": "2020-02-14T19:10:16.309Z",
    "karma": 2183,
    "jobTitle": null,
    "organization": null
@@ -3500,7 +3515,7 @@
  {
   "_id": "adKXiLwZnPdHD5E6A",
   "postId": "EFGEBKZioqtiLimow",
-  "postedAt": "2026-08-30T11:43:25.118000Z",
+  "postedAt": "2026-08-30T11:43:25.118Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3512,7 +3527,7 @@
   "topLevelCommentId": "BFNWCAdf99daiyNMW",
   "user": {
    "displayName": "Rasool",
-   "createdAt": "2024-10-30T15:57:18.807000Z",
+   "createdAt": "2024-10-30T15:57:18.807Z",
    "karma": 119,
    "jobTitle": null,
    "organization": null
@@ -3524,7 +3539,7 @@
  {
   "_id": "9K8LcfrxuaAduwQD7",
   "postId": "3sr8yK4SvwFXPsATt",
-  "postedAt": "2026-08-30T11:30:58.230000Z",
+  "postedAt": "2026-08-30T11:30:58.230Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3536,7 +3551,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "kbear",
-   "createdAt": "2025-09-14T20:02:23.071000Z",
+   "createdAt": "2025-09-14T20:02:23.071Z",
    "karma": 771,
    "jobTitle": null,
    "organization": null
@@ -3548,7 +3563,7 @@
  {
   "_id": "p9vRqbR3hdctog2gw",
   "postId": "bvBQmLrF5QKut8gRH",
-  "postedAt": "2026-08-30T11:28:58.372000Z",
+  "postedAt": "2026-08-30T11:28:58.372Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3560,7 +3575,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3572,7 +3587,7 @@
  {
   "_id": "kJLKWfnKqNWJrsWuF",
   "postId": "whToGm8WFRqpHiFCB",
-  "postedAt": "2026-08-30T11:12:27.387000Z",
+  "postedAt": "2026-08-30T11:12:27.387Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -3584,7 +3599,7 @@
   "topLevelCommentId": "yGaJJk7yjavemmwJ7",
   "user": {
    "displayName": "A_donor",
-   "createdAt": "2022-02-28T14:44:52.055000Z",
+   "createdAt": "2022-02-28T14:44:52.055Z",
    "karma": 225,
    "jobTitle": null,
    "organization": null
@@ -3596,7 +3611,7 @@
  {
   "_id": "kBi7gaBKX8EfpBroE",
   "postId": "cr5pyW7Mzm33p4AvN",
-  "postedAt": "2026-08-30T11:10:32.448000Z",
+  "postedAt": "2026-08-30T11:10:32.448Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3608,7 +3623,7 @@
   "topLevelCommentId": "LsTNEFGxG2C8fqggt",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3620,7 +3635,7 @@
  {
   "_id": "FHGi7jsPXFZ2XhHDH",
   "postId": "cr5pyW7Mzm33p4AvN",
-  "postedAt": "2026-08-30T10:58:03.942000Z",
+  "postedAt": "2026-08-30T10:58:03.942Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3632,7 +3647,7 @@
   "topLevelCommentId": "5Xb7QyzYJubQeFDRu",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3644,7 +3659,7 @@
  {
   "_id": "roivz7QJDxXPhAwXs",
   "postId": "cr5pyW7Mzm33p4AvN",
-  "postedAt": "2026-08-30T10:56:56.071000Z",
+  "postedAt": "2026-08-30T10:56:56.071Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3656,7 +3671,7 @@
   "topLevelCommentId": "5Xb7QyzYJubQeFDRu",
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3668,7 +3683,7 @@
  {
   "_id": "ut89FAuFw38TrNtMk",
   "postId": "s58hDHX2GkFDbpGKD",
-  "postedAt": "2026-08-30T10:51:07.939000Z",
+  "postedAt": "2026-08-30T10:51:07.939Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -3680,7 +3695,7 @@
   "topLevelCommentId": "kvYeatjDerN4cAvWT",
   "user": {
    "displayName": "Lao Mein",
-   "createdAt": "2022-09-26T02:24:06.150000Z",
+   "createdAt": "2022-09-26T02:24:06.150Z",
    "karma": 3304,
    "jobTitle": null,
    "organization": null
@@ -3692,7 +3707,7 @@
  {
   "_id": "JXWmNA9xinqvMbAmD",
   "postId": "KozL8Z2bTj8RgJYuT",
-  "postedAt": "2026-08-30T10:47:00Z",
+  "postedAt": "2026-08-30T10:47:00.000Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3704,7 +3719,7 @@
   "topLevelCommentId": "9FCRre9mAhSYdExcu",
   "user": {
    "displayName": "ChristianKl",
-   "createdAt": "2009-10-13T22:32:16.589000Z",
+   "createdAt": "2009-10-13T22:32:16.589Z",
    "karma": 37181,
    "jobTitle": null,
    "organization": null
@@ -3716,7 +3731,7 @@
  {
   "_id": "Q58BDdGGeKMLbtsu8",
   "postId": "3mKuPHmaK7NW3QypR",
-  "postedAt": "2026-08-30T10:45:18.925000Z",
+  "postedAt": "2026-08-30T10:45:18.925Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {
@@ -3737,7 +3752,7 @@
   "topLevelCommentId": "FPHyxxqNYKuGYw2rX",
   "user": {
    "displayName": "espoire",
-   "createdAt": "2024-02-07T06:35:57.842000Z",
+   "createdAt": "2024-02-07T06:35:57.842Z",
    "karma": 155,
    "jobTitle": null,
    "organization": null
@@ -3749,7 +3764,7 @@
  {
   "_id": "Ahf7hEFubqgkhgnJo",
   "postId": "3mKuPHmaK7NW3QypR",
-  "postedAt": "2026-08-30T10:42:17.503000Z",
+  "postedAt": "2026-08-30T10:42:17.503Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -3761,7 +3776,7 @@
   "topLevelCommentId": "FPHyxxqNYKuGYw2rX",
   "user": {
    "displayName": "espoire",
-   "createdAt": "2024-02-07T06:35:57.842000Z",
+   "createdAt": "2024-02-07T06:35:57.842Z",
    "karma": 155,
    "jobTitle": null,
    "organization": null
@@ -3773,7 +3788,7 @@
  {
   "_id": "bmcsFXg3CHYrBM3Kx",
   "postId": "ovCuacrC39C5ddpLo",
-  "postedAt": "2026-08-30T10:17:09.913000Z",
+  "postedAt": "2026-08-30T10:17:09.913Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {},
@@ -3785,7 +3800,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "RogerDearnaley",
-   "createdAt": "2023-02-14T10:30:57.956000Z",
+   "createdAt": "2023-02-14T10:30:57.956Z",
    "karma": 3167,
    "jobTitle": null,
    "organization": null
@@ -3797,7 +3812,7 @@
  {
   "_id": "byEGNzycsSAR9iuKK",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T09:22:50.796000Z",
+  "postedAt": "2026-08-30T09:22:50.796Z",
   "baseScore": 27,
   "extendedScore": {
    "reacts": {},
@@ -3809,7 +3824,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Tobias H",
-   "createdAt": "2020-03-01T14:40:42.399000Z",
+   "createdAt": "2020-03-01T14:40:42.399Z",
    "karma": 707,
    "jobTitle": null,
    "organization": null
@@ -3821,7 +3836,7 @@
  {
   "_id": "ifwgR5Eqj3SCgYeub",
   "postId": "KaHoZLvBpvAJ73CSD",
-  "postedAt": "2026-08-30T07:11:38.976000Z",
+  "postedAt": "2026-08-30T07:11:38.976Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3833,7 +3848,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "StanislavKrym",
-   "createdAt": "2025-03-18T20:38:41.892000Z",
+   "createdAt": "2025-03-18T20:38:41.892Z",
    "karma": 1448,
    "jobTitle": null,
    "organization": null
@@ -3845,7 +3860,7 @@
  {
   "_id": "NxbyAMPoezi3TZ5fF",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T06:03:07.691000Z",
+  "postedAt": "2026-08-30T06:03:07.691Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3857,7 +3872,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Garrett Baker",
-   "createdAt": "2018-11-12T23:06:04.190000Z",
+   "createdAt": "2018-11-12T23:06:04.190Z",
    "karma": 6944,
    "jobTitle": null,
    "organization": null
@@ -3869,7 +3884,7 @@
  {
   "_id": "EYXLMkKCfapwHPmHi",
   "postId": "MzhzsqN3hywMzKTem",
-  "postedAt": "2026-08-30T05:34:55.421000Z",
+  "postedAt": "2026-08-30T05:34:55.421Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -3881,7 +3896,7 @@
   "topLevelCommentId": "hweoypT3aCJsfTLZB",
   "user": {
    "displayName": "CstineSublime",
-   "createdAt": "2024-02-06T02:26:48.619000Z",
+   "createdAt": "2024-02-06T02:26:48.619Z",
    "karma": 677,
    "jobTitle": null,
    "organization": null
@@ -3893,7 +3908,7 @@
  {
   "_id": "JtodAHCBPbXyynxtB",
   "postId": "wnj9QhC9CmErpiRME",
-  "postedAt": "2026-08-30T05:24:37.370000Z",
+  "postedAt": "2026-08-30T05:24:37.370Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -3905,7 +3920,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Shunk",
-   "createdAt": "2026-08-17T17:58:48.194000Z",
+   "createdAt": "2026-08-17T17:58:48.194Z",
    "karma": 11,
    "jobTitle": null,
    "organization": null
@@ -3917,7 +3932,7 @@
  {
   "_id": "NGku8hDcWMaotNESv",
   "postId": "GpeMNbmNcGH4b4X7m",
-  "postedAt": "2026-08-30T05:23:08.720000Z",
+  "postedAt": "2026-08-30T05:23:08.720Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -3929,7 +3944,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Vaughn Papenhausen",
-   "createdAt": "2017-10-09T18:05:07.749000Z",
+   "createdAt": "2017-10-09T18:05:07.749Z",
    "karma": 963,
    "jobTitle": null,
    "organization": null
@@ -3941,7 +3956,7 @@
  {
   "_id": "LmPmHJSW9QiuD4R6k",
   "postId": "89uqBYozpkbmeKpSZ",
-  "postedAt": "2026-08-30T05:12:13.954000Z",
+  "postedAt": "2026-08-30T05:12:13.954Z",
   "baseScore": 9,
   "extendedScore": {
    "reacts": {
@@ -3962,7 +3977,7 @@
   "topLevelCommentId": "zqKkb4EXrqsZa7DnJ",
   "user": {
    "displayName": "less_raichu",
-   "createdAt": "2026-05-03T15:26:40.450000Z",
+   "createdAt": "2026-05-03T15:26:40.450Z",
    "karma": 283,
    "jobTitle": null,
    "organization": null
@@ -3974,7 +3989,7 @@
  {
   "_id": "qzcZqKMbQ8JJuFc7R",
   "postId": "npnic5AiRnaM6pgvT",
-  "postedAt": "2026-08-30T04:55:35.457000Z",
+  "postedAt": "2026-08-30T04:55:35.457Z",
   "baseScore": 9,
   "extendedScore": {
    "reacts": {},
@@ -3986,7 +4001,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "cata",
-   "createdAt": "2010-06-02T18:13:22.408000Z",
+   "createdAt": "2010-06-02T18:13:22.408Z",
    "karma": 3519,
    "jobTitle": null,
    "organization": null
@@ -3998,7 +4013,7 @@
  {
   "_id": "jHBdftJWnkmHiZuBf",
   "postId": "cr5pyW7Mzm33p4AvN",
-  "postedAt": "2026-08-30T04:44:55.165000Z",
+  "postedAt": "2026-08-30T04:44:55.165Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4010,7 +4025,7 @@
   "topLevelCommentId": "5Xb7QyzYJubQeFDRu",
   "user": {
    "displayName": "Davidmanheim",
-   "createdAt": "2011-01-18T15:14:54.315000Z",
+   "createdAt": "2011-01-18T15:14:54.315Z",
    "karma": 6773,
    "jobTitle": null,
    "organization": null
@@ -4022,7 +4037,7 @@
  {
   "_id": "TRjCp9cfAkiEC6GZz",
   "postId": "nB8KKapnWGBXtKKiM",
-  "postedAt": "2026-08-30T04:28:57.473000Z",
+  "postedAt": "2026-08-30T04:28:57.473Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4034,7 +4049,7 @@
   "topLevelCommentId": "JSG9bZKrFBzfADDp7",
   "user": {
    "displayName": "charding",
-   "createdAt": "2026-02-14T05:19:10.186000Z",
+   "createdAt": "2026-02-14T05:19:10.186Z",
    "karma": 61,
    "jobTitle": null,
    "organization": null
@@ -4046,7 +4061,7 @@
  {
   "_id": "hmaaiTxHzHaMTFKnb",
   "postId": "89uqBYozpkbmeKpSZ",
-  "postedAt": "2026-08-30T03:48:22.653000Z",
+  "postedAt": "2026-08-30T03:48:22.653Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4058,7 +4073,7 @@
   "topLevelCommentId": "zqKkb4EXrqsZa7DnJ",
   "user": {
    "displayName": "StanislavKrym",
-   "createdAt": "2025-03-18T20:38:41.892000Z",
+   "createdAt": "2025-03-18T20:38:41.892Z",
    "karma": 1448,
    "jobTitle": null,
    "organization": null
@@ -4070,7 +4085,7 @@
  {
   "_id": "yjz2JMeDKdsAX8nCk",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T03:42:13.617000Z",
+  "postedAt": "2026-08-30T03:42:13.617Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4082,7 +4097,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Cole Wyeth",
-   "createdAt": "2021-07-25T00:01:54.628000Z",
+   "createdAt": "2021-07-25T00:01:54.628Z",
    "karma": 6018,
    "jobTitle": null,
    "organization": null
@@ -4094,7 +4109,7 @@
  {
   "_id": "j3g68i7FGkgiz4nCN",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T03:31:09.018000Z",
+  "postedAt": "2026-08-30T03:31:09.018Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {},
@@ -4106,8 +4121,8 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Joseph Miller",
-   "createdAt": "2021-01-07T14:54:50.946000Z",
-   "karma": 3727,
+   "createdAt": "2021-01-07T14:54:50.946Z",
+   "karma": 3734,
    "jobTitle": null,
    "organization": null
   },
@@ -4118,7 +4133,7 @@
  {
   "_id": "3hxhGWpP6DbKFpuiq",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T03:24:40.597000Z",
+  "postedAt": "2026-08-30T03:24:40.597Z",
   "baseScore": 33,
   "extendedScore": {
    "reacts": {},
@@ -4130,7 +4145,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Thomas Kwa",
-   "createdAt": "2019-12-09T06:28:45.933000Z",
+   "createdAt": "2019-12-09T06:28:45.933Z",
    "karma": 9911,
    "jobTitle": null,
    "organization": null
@@ -4142,20 +4157,20 @@
  {
   "_id": "bsyAvnBDcNvh2QZD8",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T03:18:06.740000Z",
-  "baseScore": 31,
+  "postedAt": "2026-08-30T03:18:06.740Z",
+  "baseScore": 38,
   "extendedScore": {
    "reacts": {},
-   "agreement": 21,
-   "approvalVoteCount": 18,
-   "agreementVoteCount": 9
+   "agreement": 23,
+   "approvalVoteCount": 19,
+   "agreementVoteCount": 10
   },
   "parentCommentId": "AwXCox6iSgiQTPb6x",
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "Joseph Miller",
-   "createdAt": "2021-01-07T14:54:50.946000Z",
-   "karma": 3727,
+   "createdAt": "2021-01-07T14:54:50.946Z",
+   "karma": 3734,
    "jobTitle": null,
    "organization": null
   },
@@ -4166,7 +4181,7 @@
  {
   "_id": "uc9vP7c96jf3qwQjf",
   "postId": "iKm2FhpWkuuBojm82",
-  "postedAt": "2026-08-30T03:16:56.716000Z",
+  "postedAt": "2026-08-30T03:16:56.716Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4178,7 +4193,7 @@
   "topLevelCommentId": "e6FHPbBcD8wncaris",
   "user": {
    "displayName": "Kabir Kumar",
-   "createdAt": "2019-02-13T12:47:05.815000Z",
+   "createdAt": "2019-02-13T12:47:05.815Z",
    "karma": 1156,
    "jobTitle": null,
    "organization": null
@@ -4190,7 +4205,7 @@
  {
   "_id": "87JHvCMewAgQNvDut",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T03:14:03.646000Z",
+  "postedAt": "2026-08-30T03:14:03.646Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4202,7 +4217,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "joseph_c",
-   "createdAt": "2022-04-27T17:20:23.173000Z",
+   "createdAt": "2022-04-27T17:20:23.173Z",
    "karma": 357,
    "jobTitle": null,
    "organization": null
@@ -4214,7 +4229,7 @@
  {
   "_id": "7ncjHyPvZanRWa64g",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T03:06:00.580000Z",
+  "postedAt": "2026-08-30T03:06:00.580Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4226,7 +4241,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "programjames",
-   "createdAt": "2022-04-12T01:31:11.104000Z",
+   "createdAt": "2022-04-12T01:31:11.104Z",
    "karma": 510,
    "jobTitle": null,
    "organization": null
@@ -4238,7 +4253,7 @@
  {
   "_id": "q5NkFCTngrzygdBnY",
   "postId": "eq2aJt8ZqMaGhBu3r",
-  "postedAt": "2026-08-30T03:01:51.505000Z",
+  "postedAt": "2026-08-30T03:01:51.505Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4250,7 +4265,7 @@
   "topLevelCommentId": "GwDg7ACp7KjzcSmQR",
   "user": {
    "displayName": "Drake Morrison",
-   "createdAt": "2021-04-28T20:27:36.195000Z",
+   "createdAt": "2021-04-28T20:27:36.195Z",
    "karma": 838,
    "jobTitle": null,
    "organization": null
@@ -4262,7 +4277,7 @@
  {
   "_id": "D7yMQA3Q5FegupG89",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T02:53:57.028000Z",
+  "postedAt": "2026-08-30T02:53:57.028Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4274,7 +4289,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "joseph_c",
-   "createdAt": "2022-04-27T17:20:23.173000Z",
+   "createdAt": "2022-04-27T17:20:23.173Z",
    "karma": 357,
    "jobTitle": null,
    "organization": null
@@ -4286,7 +4301,7 @@
  {
   "_id": "gQhkege8cPRJbQ7gm",
   "postId": "yaz8nx4ogZmiqHzt7",
-  "postedAt": "2026-08-30T02:40:14.484000Z",
+  "postedAt": "2026-08-30T02:40:14.484Z",
   "baseScore": 5,
   "extendedScore": {
    "reacts": {},
@@ -4298,7 +4313,7 @@
   "topLevelCommentId": "bqkP9zqKyztGbeEZq",
   "user": {
    "displayName": "Richard_Ngo",
-   "createdAt": "2013-07-14T15:42:06.397000Z",
+   "createdAt": "2013-07-14T15:42:06.397Z",
    "karma": 26533,
    "jobTitle": null,
    "organization": null
@@ -4310,7 +4325,7 @@
  {
   "_id": "WCS9jyXYpcgFHmc8T",
   "postId": "89uqBYozpkbmeKpSZ",
-  "postedAt": "2026-08-30T02:39:33.138000Z",
+  "postedAt": "2026-08-30T02:39:33.138Z",
   "baseScore": 7,
   "extendedScore": {
    "reacts": {
@@ -4334,7 +4349,7 @@
   "topLevelCommentId": "zqKkb4EXrqsZa7DnJ",
   "user": {
    "displayName": "less_raichu",
-   "createdAt": "2026-05-03T15:26:40.450000Z",
+   "createdAt": "2026-05-03T15:26:40.450Z",
    "karma": 283,
    "jobTitle": null,
    "organization": null
@@ -4346,7 +4361,7 @@
  {
   "_id": "DopWhD8EkoThJptEX",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T02:31:49.809000Z",
+  "postedAt": "2026-08-30T02:31:49.809Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4358,7 +4373,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "programjames",
-   "createdAt": "2022-04-12T01:31:11.104000Z",
+   "createdAt": "2022-04-12T01:31:11.104Z",
    "karma": 510,
    "jobTitle": null,
    "organization": null
@@ -4370,7 +4385,7 @@
  {
   "_id": "kSb36Wp565KRvCRCd",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T02:26:28.605000Z",
+  "postedAt": "2026-08-30T02:26:28.605Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4382,7 +4397,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "EKP",
-   "createdAt": "2020-03-22T20:19:11.552000Z",
+   "createdAt": "2020-03-22T20:19:11.552Z",
    "karma": 101,
    "jobTitle": null,
    "organization": null
@@ -4394,7 +4409,7 @@
  {
   "_id": "E77piaXCd4jakwFjD",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T02:14:39.510000Z",
+  "postedAt": "2026-08-30T02:14:39.510Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4406,7 +4421,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "joseph_c",
-   "createdAt": "2022-04-27T17:20:23.173000Z",
+   "createdAt": "2022-04-27T17:20:23.173Z",
    "karma": 357,
    "jobTitle": null,
    "organization": null
@@ -4418,7 +4433,7 @@
  {
   "_id": "kps3fLXrDW7YyXtkv",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T02:10:13.267000Z",
+  "postedAt": "2026-08-30T02:10:13.267Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4430,7 +4445,7 @@
   "topLevelCommentId": "AxuzR2pv2WGFryDec",
   "user": {
    "displayName": "kbear",
-   "createdAt": "2025-09-14T20:02:23.071000Z",
+   "createdAt": "2025-09-14T20:02:23.071Z",
    "karma": 771,
    "jobTitle": null,
    "organization": null
@@ -4442,7 +4457,7 @@
  {
   "_id": "jdZfwpNxiEkzuq6D9",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T01:33:08.869000Z",
+  "postedAt": "2026-08-30T01:33:08.869Z",
   "baseScore": 41,
   "extendedScore": {
    "reacts": {},
@@ -4454,7 +4469,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "TsviBT",
-   "createdAt": "2012-01-22T21:40:34.132000Z",
+   "createdAt": "2012-01-22T21:40:34.132Z",
    "karma": 14103,
    "jobTitle": null,
    "organization": null
@@ -4466,7 +4481,7 @@
  {
   "_id": "zqKkb4EXrqsZa7DnJ",
   "postId": "89uqBYozpkbmeKpSZ",
-  "postedAt": "2026-08-30T01:28:59.554000Z",
+  "postedAt": "2026-08-30T01:28:59.554Z",
   "baseScore": 26,
   "extendedScore": {
    "reacts": {},
@@ -4478,7 +4493,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "juliawise",
-   "createdAt": "2011-07-18T13:52:30.717000Z",
+   "createdAt": "2011-07-18T13:52:30.717Z",
    "karma": 4394,
    "jobTitle": null,
    "organization": null
@@ -4490,7 +4505,7 @@
  {
   "_id": "226dozH9iXKxJry5p",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T01:21:47.880000Z",
+  "postedAt": "2026-08-30T01:21:47.880Z",
   "baseScore": 31,
   "extendedScore": {
    "reacts": {
@@ -4530,7 +4545,7 @@
   "topLevelCommentId": "AwXCox6iSgiQTPb6x",
   "user": {
    "displayName": "lilkim2025",
-   "createdAt": "2025-10-29T02:46:00.487000Z",
+   "createdAt": "2025-10-29T02:46:00.487Z",
    "karma": 1449,
    "jobTitle": null,
    "organization": null
@@ -4542,7 +4557,7 @@
  {
   "_id": "AxuzR2pv2WGFryDec",
   "postId": "auAq7Rcstop3FBEob",
-  "postedAt": "2026-08-30T01:16:45.712000Z",
+  "postedAt": "2026-08-30T01:16:45.712Z",
   "baseScore": 10,
   "extendedScore": {
    "reacts": {
@@ -4566,7 +4581,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "joseph_c",
-   "createdAt": "2022-04-27T17:20:23.173000Z",
+   "createdAt": "2022-04-27T17:20:23.173Z",
    "karma": 357,
    "jobTitle": null,
    "organization": null
@@ -4578,7 +4593,7 @@
  {
   "_id": "uf3zjrQLwjRsvgQHx",
   "postId": "wFg8Y8yzPprSt9Rnd",
-  "postedAt": "2026-08-30T01:10:40.008000Z",
+  "postedAt": "2026-08-30T01:10:40.008Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -4590,7 +4605,7 @@
   "topLevelCommentId": "KM4iuEuJjEzeL6sAY",
   "user": {
    "displayName": "Karl Krueger",
-   "createdAt": "2019-09-02T23:02:24.701000Z",
+   "createdAt": "2019-09-02T23:02:24.701Z",
    "karma": 2228,
    "jobTitle": null,
    "organization": null
@@ -4602,7 +4617,7 @@
  {
   "_id": "mBYsRPbmFr6ogfidR",
   "postId": "yaz8nx4ogZmiqHzt7",
-  "postedAt": "2026-08-30T00:56:43.469000Z",
+  "postedAt": "2026-08-30T00:56:43.469Z",
   "baseScore": 10,
   "extendedScore": {
    "reacts": {},
@@ -4614,7 +4629,7 @@
   "topLevelCommentId": "hjmmbtRi9GaMLWh8y",
   "user": {
    "displayName": "jsd",
-   "createdAt": "2021-06-02T01:01:24.715000Z",
+   "createdAt": "2021-06-02T01:01:24.715Z",
    "karma": 499,
    "jobTitle": null,
    "organization": null
@@ -4626,7 +4641,7 @@
  {
   "_id": "aaKjhzWiWi3nktzok",
   "postId": "D4iDqHokCuz96uSGo",
-  "postedAt": "2026-08-30T00:50:09.317000Z",
+  "postedAt": "2026-08-30T00:50:09.317Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4638,7 +4653,7 @@
   "topLevelCommentId": "xyaMbGjnRhLXftMDE",
   "user": {
    "displayName": "Lao Mein",
-   "createdAt": "2022-09-26T02:24:06.150000Z",
+   "createdAt": "2022-09-26T02:24:06.150Z",
    "karma": 3304,
    "jobTitle": null,
    "organization": null
@@ -4650,7 +4665,7 @@
  {
   "_id": "X6MmvHuQ2MYeNrKbd",
   "postId": "s22XzjQsrh6JXhXGH",
-  "postedAt": "2026-08-30T00:38:20.938000Z",
+  "postedAt": "2026-08-30T00:38:20.938Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4662,7 +4677,7 @@
   "topLevelCommentId": "p3mxaHQyKCXRH9o5X",
   "user": {
    "displayName": "less_raichu",
-   "createdAt": "2026-05-03T15:26:40.450000Z",
+   "createdAt": "2026-05-03T15:26:40.450Z",
    "karma": 283,
    "jobTitle": null,
    "organization": null
@@ -4674,7 +4689,7 @@
  {
   "_id": "KNQ4sdDMik8wQGyZe",
   "postId": "yaz8nx4ogZmiqHzt7",
-  "postedAt": "2026-08-30T00:25:23.722000Z",
+  "postedAt": "2026-08-30T00:25:23.722Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4686,7 +4701,7 @@
   "topLevelCommentId": "hjmmbtRi9GaMLWh8y",
   "user": {
    "displayName": "Eric Neyman",
-   "createdAt": "2020-08-03T23:22:09.042000Z",
+   "createdAt": "2020-08-03T23:22:09.042Z",
    "karma": 6363,
    "jobTitle": null,
    "organization": null
@@ -4698,7 +4713,7 @@
  {
   "_id": "zEGowFCF92KPB3G9u",
   "postId": "FGpDwLwtPfJ3qYbea",
-  "postedAt": "2026-08-30T00:23:46.605000Z",
+  "postedAt": "2026-08-30T00:23:46.605Z",
   "baseScore": 2,
   "extendedScore": {
    "reacts": {},
@@ -4710,7 +4725,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Lao Mein",
-   "createdAt": "2022-09-26T02:24:06.150000Z",
+   "createdAt": "2022-09-26T02:24:06.150Z",
    "karma": 3304,
    "jobTitle": null,
    "organization": null
@@ -4722,7 +4737,7 @@
  {
   "_id": "RnzjiEzbe2JGSmxN4",
   "postId": "8Z4ajAi6CjBxZbGMK",
-  "postedAt": "2026-08-30T00:22:33.691000Z",
+  "postedAt": "2026-08-30T00:22:33.691Z",
   "baseScore": 3,
   "extendedScore": {
    "reacts": {
@@ -4743,7 +4758,7 @@
   "topLevelCommentId": "7Ycy6AoFrTFkCHvAg",
   "user": {
    "displayName": "Ben Saudek",
-   "createdAt": "2026-07-08T17:02:05.855000Z",
+   "createdAt": "2026-07-08T17:02:05.855Z",
    "karma": 33,
    "jobTitle": null,
    "organization": null
@@ -4755,7 +4770,7 @@
  {
   "_id": "FipeeEKrc7xQXqkmw",
   "postId": "tPjAgWpsQrveFECWP",
-  "postedAt": "2026-08-30T00:17:34.759000Z",
+  "postedAt": "2026-08-30T00:17:34.759Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -4767,7 +4782,7 @@
   "topLevelCommentId": "SLzMa6X8NvjnN7rr6",
   "user": {
    "displayName": "Parv Mahajan",
-   "createdAt": "2025-01-02T15:25:24.411000Z",
+   "createdAt": "2025-01-02T15:25:24.411Z",
    "karma": 1180,
    "jobTitle": null,
    "organization": null
@@ -4779,7 +4794,7 @@
  {
   "_id": "hwgoTavWEzHCwvBeP",
   "postId": "BQksdkrtXDbr3CtoE",
-  "postedAt": "2026-08-30T00:13:45.222000Z",
+  "postedAt": "2026-08-30T00:13:45.222Z",
   "baseScore": 4,
   "extendedScore": {
    "reacts": {},
@@ -4791,7 +4806,7 @@
   "topLevelCommentId": "ZbgAGmbcnKZWtsgh6",
   "user": {
    "displayName": "Andy_McKenzie",
-   "createdAt": "2009-02-28T21:46:45.283000Z",
+   "createdAt": "2009-02-28T21:46:45.283Z",
    "karma": 1821,
    "jobTitle": null,
    "organization": null
@@ -4803,7 +4818,7 @@
  {
   "_id": "4aZKwnmXZg9dpppqc",
   "postId": "wgnv4iPjHuRxXPYhz",
-  "postedAt": "2026-08-30T00:12:01.953000Z",
+  "postedAt": "2026-08-30T00:12:01.953Z",
   "baseScore": 32,
   "extendedScore": {
    "reacts": {},
@@ -4815,7 +4830,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "anaguma",
-   "createdAt": "2023-10-25T21:09:48.432000Z",
+   "createdAt": "2023-10-25T21:09:48.432Z",
    "karma": 1877,
    "jobTitle": null,
    "organization": null
@@ -4827,7 +4842,7 @@
  {
   "_id": "vSZkJcCFrERRYTjJq",
   "postId": "m8cP9KfkYMMCCQGrb",
-  "postedAt": "2026-08-30T00:10:31.737000Z",
+  "postedAt": "2026-08-30T00:10:31.737Z",
   "baseScore": 6,
   "extendedScore": {
    "reacts": {},
@@ -4839,7 +4854,7 @@
   "topLevelCommentId": "gpgreBgewbxSgJtcw",
   "user": {
    "displayName": "Seth Herd",
-   "createdAt": "2022-09-05T00:45:45.715000Z",
+   "createdAt": "2022-09-05T00:45:45.715Z",
    "karma": 10142,
    "jobTitle": null,
    "organization": null
@@ -4851,7 +4866,7 @@
  {
   "_id": "AwXCox6iSgiQTPb6x",
   "postId": "yeDSLRArinWqt5Mnf",
-  "postedAt": "2026-08-30T00:10:24.848000Z",
+  "postedAt": "2026-08-30T00:10:24.848Z",
   "baseScore": 222,
   "extendedScore": {
    "reacts": {},
@@ -4863,7 +4878,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Charbel-Rapha\u00ebl",
-   "createdAt": "2019-06-27T22:34:20.765000Z",
+   "createdAt": "2019-06-27T22:34:20.765Z",
    "karma": 4590,
    "jobTitle": null,
    "organization": null
@@ -4875,7 +4890,7 @@
  {
   "_id": "euooccoNWRpxPDygE",
   "postId": "PK7ZvFZxrgpYtrpF4",
-  "postedAt": "2026-08-30T00:03:52.173000Z",
+  "postedAt": "2026-08-30T00:03:52.173Z",
   "baseScore": 1,
   "extendedScore": {
    "reacts": {},
@@ -4887,7 +4902,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Matan Shtepel",
-   "createdAt": "2025-07-27T16:12:39.179000Z",
+   "createdAt": "2025-07-27T16:12:39.179Z",
    "karma": 16,
    "jobTitle": null,
    "organization": null

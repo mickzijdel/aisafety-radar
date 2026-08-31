@@ -2,7 +2,7 @@
  {
   "_id": "xJinD9Fq8ttC3Pwir",
   "postId": "fpLDjKg3ej49beqTC",
-  "postedAt": "2026-08-30T17:12:21.051000Z",
+  "postedAt": "2026-08-30T17:12:21.051Z",
   "baseScore": 12,
   "extendedScore": {
    "reacts": {
@@ -26,7 +26,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "Steven McCulloch",
-   "createdAt": "2024-04-24T07:13:40.019000Z",
+   "createdAt": "2024-04-24T07:13:40.019Z",
    "karma": 254,
    "jobTitle": null,
    "organization": null
@@ -38,7 +38,7 @@
  {
   "_id": "YgSQQKLicbepteT3L",
   "postId": "fpLDjKg3ej49beqTC",
-  "postedAt": "2026-08-30T17:21:01.103000Z",
+  "postedAt": "2026-08-30T17:21:01.103Z",
   "baseScore": 7,
   "extendedScore": {
    "reacts": {},
@@ -50,7 +50,7 @@
   "topLevelCommentId": null,
   "user": {
    "displayName": "JennaS",
-   "createdAt": "2025-10-29T16:45:38.870000Z",
+   "createdAt": "2025-10-29T16:45:38.870Z",
    "karma": 969,
    "jobTitle": null,
    "organization": null
