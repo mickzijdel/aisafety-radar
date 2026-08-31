@@ -145,8 +145,9 @@ def _window_posts(
 ) -> tuple[list[Item], dict[str, datetime | None]]:
     """The last `WINDOW_DAYS` of posts per site, and when each was last commented on.
 
-    Isolated per site: this fetch feeds the ledger and the movers, and one forum being unreachable
-    must cost that forum's movers rather than the whole run.
+    Isolated per site, and all or nothing within one: this fetch feeds the ledger and the movers,
+    so one forum being unreachable -- or sending a record that will not convert -- must cost that
+    forum's movers rather than the whole run, and must not leave the ledger holding half a site.
     """
     items: list[Item] = []
     last_commented: dict[str, datetime | None] = {}
@@ -159,13 +160,13 @@ def _window_posts(
                 # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
                 require_ai_tag=site != "af",
             )
+            converted = [(raw_post_to_item(site, p), p.lastCommentedAt) for p in posts]
         except Exception:  # noqa: BLE001 - isolation is the point
             log.exception("%s: 14-day window fetch failed; no movers from this site today", site)
             continue
-        for post in posts:
-            item = raw_post_to_item(site, post)
+        for item, commented_at in converted:
             items.append(item)
-            last_commented[item.id] = post.lastCommentedAt
+            last_commented[item.id] = commented_at
     return items, last_commented
 
 

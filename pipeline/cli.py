@@ -27,7 +27,9 @@ from pipeline.llm import LLM, CannedLLM
 from pipeline.run import RunInputs, run_daily
 from pipeline.versioning import next_letter, pack_version
 
-# Per-source 7-day minimums, the floor the probe and the daily status table read as "healthy".
+# Per-source 7-day minimums: the count below which a source is failing rather than quiet. Must
+# match `forums.forum_fetchers`, which builds the same three fetchers for callers that do not
+# need to hold on to the clients; this command does, because the comment refresh reuses them.
 MIN_ITEMS_7D = {"lw": 15, "af": 3, "eaf": 5}
 
 
