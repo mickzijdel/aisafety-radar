@@ -117,6 +117,23 @@ class Archive:
             json.dumps(payload, indent=1, default=_json_default),
         )
 
+    def recent_runs(self, before: date, n: int) -> list[dict[str, Any]]:
+        """The run reports of the `n` days *preceding* `before`, newest first, skipping the gaps.
+
+        Three callers read this history for three different windows -- the floor's 30-day source
+        medians, the cost gate's 14-day median and the 7-day minimums gate -- and each of them
+        wants "the reports that exist", not "the days that have passed". A day with no run.json is
+        therefore absent from the list rather than present as a zero: a pipeline that did not run
+        on Sunday produced no items on Sunday in the same sense that a broken fetcher did, and
+        counting the two the same way would let an outage look like a dead source.
+        """
+        reports = []
+        for offset in range(1, n + 1):
+            path = self.day_dir(before - timedelta(days=offset)) / "run.json"
+            if path.exists():
+                reports.append(json.loads(path.read_text()))
+        return reports
+
     def days_with_extractions(self, before: date, n: int) -> list[date]:
         """The days in the `n` days *preceding* `before` that have an extractions file."""
         days = []

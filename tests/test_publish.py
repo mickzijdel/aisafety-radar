@@ -207,6 +207,48 @@ def test_issue_body_survives_a_report_from_a_crashed_run():
     assert "$0.00" in body
 
 
+def _minimums(passed, details):
+    return {"name": "source-minimums", "passed": passed, "blocking": False, "details": details}
+
+
+def test_issue_body_gives_the_7_day_minimums_a_row_per_shortfall():
+    body = render_issue_body(
+        _report(
+            gates=[
+                _minimums(
+                    False,
+                    [
+                        "lesswrong: 7 items in 7 days, below the minimum 15",
+                        "category forums: 7 items in 7 days, below the minimum 23",
+                    ],
+                )
+            ]
+        )
+    )
+    assert "## 7-day minimums" in body
+    assert "| lesswrong | 7 items in 7 days, below the minimum 15 |" in body
+    assert "| category forums | 7 items in 7 days, below the minimum 23 |" in body
+
+
+def test_issue_body_says_so_when_every_source_cleared_its_7_day_minimum():
+    body = render_issue_body(_report(gates=[_minimums(True, [])]))
+    assert "## 7-day minimums" in body
+    assert "| every source and category | above its 7-day minimum |" in body
+
+
+def test_issue_body_passes_on_the_gates_own_words_when_there_is_no_week_yet():
+    detail = "3 of the last 7 runs recorded: too little history to judge a week"
+    body = render_issue_body(_report(gates=[_minimums(True, [detail])]))
+    assert f"| {detail} |" in body
+
+
+def test_issue_body_says_the_minimums_were_not_checked_when_the_gate_is_absent():
+    # A report from before this gate existed, or from a run that crashed before the gates ran.
+    body = render_issue_body(_report(gates=[]))
+    assert "## 7-day minimums" in body
+    assert "not checked" in body
+
+
 def test_refusal_reason_accepts_a_run_that_rendered_items():
     assert refusal_reason(_report(items_selected=3, dropped=["a"], failed=["a"])) is None
 

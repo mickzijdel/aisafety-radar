@@ -11,7 +11,7 @@ An agent loads an index, then only the one or two files a task needs. Design:
 **Phase 2 (forums vertical slice), not yet live.** Nothing has been published, and the
 bundled `references/00-index.md` is still a placeholder. What exists today: the LessWrong,
 Alignment Forum and EA Forum fetchers, triage, extraction with a substring verifier and a URL
-provenance check, an injection scan, six QA gates, the `31-today-forums.md` render, and the
+provenance check, an injection scan, the QA gates, the `31-today-forums.md` render, and the
 daily workflow with its two-step publish, health issue and dead-man's switch. Before the
 first run someone has to work through [`docs/go-live.md`](docs/go-live.md).
 

@@ -41,7 +41,6 @@ digest starts quoting threads directly.
 
 from __future__ import annotations
 
-import json
 import logging
 import random
 from collections.abc import Sequence
@@ -69,6 +68,7 @@ from pipeline.qa.gates import (
     gate_judge,
     gate_provenance,
     gate_scan,
+    gate_source_minimums,
 )
 from pipeline.render import PackMeta, build_render_items, render_all
 from pipeline.stages.comments import Mover, refresh_comments
@@ -145,22 +145,15 @@ def _source_medians(archive: Archive, day: date) -> dict[str, int]:
     history has no median: too little to call anything anomalous against.
     """
     counts: dict[str, list[int]] = {}
-    for offset in range(1, 31):
-        path = archive.day_dir(day - timedelta(days=offset)) / "run.json"
-        if not path.exists():
-            continue
-        for status in json.loads(path.read_text()).get("statuses", []):
+    for report in archive.recent_runs(day, 30):
+        for status in report.get("statuses", []):
             counts.setdefault(status["source"], []).append(int(status["items"]))
     return {source: int(median(v)) for source, v in counts.items() if len(v) >= 7}
 
 
 def _trailing_cost_median(archive: Archive, day: date) -> float | None:
     """The median cost of the last 14 recorded runs, or None with fewer than five to go on."""
-    costs = []
-    for offset in range(1, 15):
-        path = archive.day_dir(day - timedelta(days=offset)) / "run.json"
-        if path.exists():
-            costs.append(float(json.loads(path.read_text()).get("usage", {}).get("cost_usd", 0)))
+    costs = [float(r.get("usage", {}).get("cost_usd", 0)) for r in archive.recent_runs(day, 14)]
     return median(costs) if len(costs) >= 5 else None
 
 
@@ -301,6 +294,9 @@ def run_daily(inputs: RunInputs) -> RunReport:
             _trailing_cost_median(archive, day),
             settings.thresholds.cost_alert_multiplier,
         ),
+        # Reads the last seven run reports, not this run: a fetcher that quietly stopped matching
+        # anything is indistinguishable from a quiet Tuesday inside one day's counts.
+        gate_source_minimums(archive, day, inputs.fetchers),
     ]
     published = not blocking_failures(gates)
 

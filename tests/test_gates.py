@@ -1,8 +1,9 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
+from pipeline.archive import Archive
 from pipeline.config import load_settings
 from pipeline.models import Extraction, Usage
 from pipeline.qa.gates import (
@@ -14,6 +15,7 @@ from pipeline.qa.gates import (
     gate_judge,
     gate_provenance,
     gate_scan,
+    gate_source_minimums,
 )
 from pipeline.render import PAGES_BASE, PackMeta, build_render_items, render_all, render_forums
 from pipeline.stages.comments import Mover
@@ -486,6 +488,112 @@ def test_judge_gate_is_blocking_and_names_the_item():
     res = gate_judge(judges, {"lw:1": rec("lw:1", 4)})
     assert not res.passed and res.blocking
     assert "lw:1" in res.details[0] and "untraceable" in res.details[0]
+
+
+# --- the 7-day minimums -------------------------------------------------------------------
+
+
+class _Fetcher:
+    """Enough of the `Fetcher` protocol for the minimums gate: a name, a category, a floor."""
+
+    def __init__(self, name, category, min_items_7d):
+        self.name = name
+        self.category = category
+        self.min_items_7d = min_items_7d
+
+    def fetch(self, window):  # pragma: no cover - the gate never fetches
+        raise NotImplementedError
+
+
+FETCHERS = [
+    _Fetcher("lesswrong", "forums", 15),
+    _Fetcher("alignmentforum", "forums", 3),
+    _Fetcher("eaforum", "forums", 5),
+]
+
+
+def _history(archive, day, days, per_day):
+    """Write `days` run reports before `day`, each recording `per_day` items per source."""
+    for offset in range(1, days + 1):
+        archive.write_run(
+            day - timedelta(days=offset),
+            {
+                "statuses": [
+                    {"source": name, "category": "forums", "ok": True, "items": items}
+                    for name, items in per_day.items()
+                ]
+            },
+        )
+
+
+def test_source_minimums_passes_when_every_source_clears_its_floor(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    _history(archive, day, 7, {"lesswrong": 4, "alignmentforum": 1, "eaforum": 2})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    assert res.passed, res.details
+    # Never blocking: a quiet week is a thing to look at, not a reason to withhold a correct pack.
+    assert not res.blocking
+
+
+def test_source_minimums_names_a_source_below_its_floor(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    # 7 days x 1 post = 7 for LessWrong, under its minimum of 15; the other two clear theirs.
+    _history(archive, day, 7, {"lesswrong": 1, "alignmentforum": 1, "eaforum": 2})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    assert not res.passed and not res.blocking
+    assert any("lesswrong" in d and "7" in d and "15" in d for d in res.details), res.details
+    assert not any("alignmentforum" in d for d in res.details)
+
+
+def test_source_minimums_rolls_the_categorys_sources_up_into_one_row(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    # A whole layer of the pack going quiet: LessWrong is down to a post a day and the other two
+    # produced nothing all week. The per-source rows say which sources; the category row says how
+    # far the area as a whole fell short, which is the number spec 6.1 asks about.
+    _history(archive, day, 7, {"lesswrong": 1, "alignmentforum": 0, "eaforum": 0})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    assert not res.passed
+    category = [d for d in res.details if d.startswith("category forums")]
+    assert len(category) == 1, res.details
+    # 7 + 0 + 0 items against 15 + 3 + 5 minimums.
+    assert "7 items" in category[0] and "minimum 23" in category[0], category[0]
+
+
+def test_source_minimums_reports_no_category_row_while_the_area_holds_up(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    # One source short, the other two well over: the area as a whole is fine, so only the source
+    # that is actually short is named. The category row is a rollup of the same counts, so it can
+    # never fire on its own -- it fires when the shortfall is big enough to sink the total.
+    _history(archive, day, 7, {"lesswrong": 1, "alignmentforum": 3, "eaforum": 3})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    assert res.details == ["lesswrong: 7 items in 7 days, below the minimum 15"]
+
+
+def test_source_minimums_says_nothing_until_there_are_seven_runs_to_read(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    _history(archive, day, 6, {"lesswrong": 0, "alignmentforum": 0, "eaforum": 0})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    # Six days of nothing at all, and the gate still passes: a week's floor cannot be judged on
+    # less than a week, and a pipeline started on Wednesday must not alert every day until Sunday.
+    assert res.passed
+    assert res.details == ["6 of the last 7 runs recorded: too little history to judge a week"]
+    _history(archive, day, 7, {"lesswrong": 0, "alignmentforum": 0, "eaforum": 0})
+    assert not gate_source_minimums(archive, day, FETCHERS).passed
+
+
+def test_source_minimums_reads_a_source_missing_from_the_reports_as_zero(tmp_path):
+    archive = Archive(tmp_path)
+    day = date(2026, 8, 31)
+    # A source that raised every day writes an ok=False status with items 0; one that was not
+    # even wired in leaves no row at all. Both are zero items over the week.
+    _history(archive, day, 7, {"lesswrong": 4, "alignmentforum": 1})
+    res = gate_source_minimums(archive, day, FETCHERS)
+    assert any(d.startswith("eaforum: 0 items") for d in res.details), res.details
 
 
 # --- cost and aggregation -----------------------------------------------------------------

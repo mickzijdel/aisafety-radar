@@ -133,6 +133,7 @@ def test_run_daily_reports_the_gates_statuses_and_usage(tmp_path):
         "injection-scan",
         "faithfulness-judge",
         "cost",
+        "source-minimums",
     }
     assert {s.source for s in report.statuses} == {"lesswrong", "alignmentforum", "eaforum"}
     assert all(s.ok for s in report.statuses)
@@ -517,6 +518,31 @@ def test_source_medians_reads_the_raw_fetcher_counts_from_run_json(tmp_path):
     medians = _source_medians(archive, day)
     # Seven days of history for lesswrong, six for eaforum: too few days is no median at all.
     assert medians == {"lesswrong": 14}
+
+
+def test_a_week_under_the_source_minimums_is_reported_without_withholding_the_pack(tmp_path):
+    """The live check on the fetchers (spec 11): a source that stopped matching anything reads as
+    a quiet day inside one run and only shows up over a week. It must not block, though -- today's
+    pack is correct whatever last week's counts were, and spec 6.9 makes the alerting a human's
+    call on the pinned issue."""
+    archive = Archive(tmp_path / "data")
+    day = FixtureClient.day_of(FIX)
+    for offset in range(1, 8):
+        archive.write_run(
+            day - timedelta(days=offset),
+            {
+                "statuses": [
+                    {"source": name, "category": "forums", "ok": False, "items": 0, "error": "403"}
+                    for name in SOURCE_NAMES.values()
+                ]
+            },
+        )
+    report = run_daily(_inputs(tmp_path, _clients()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    gate = next(g for g in report.gates if g.name == "source-minimums")
+    assert not gate.passed and not gate.blocking
+    assert any(d.startswith("lesswrong: 0 items") for d in gate.details), gate.details
+    assert any(d.startswith("category forums:") for d in gate.details), gate.details
 
 
 def test_trailing_cost_median_needs_five_days(tmp_path):

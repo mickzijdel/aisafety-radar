@@ -1,11 +1,14 @@
-"""The six QA gates a run has to clear before its pack is published (spec 6.8).
+"""The QA gates a run has to clear before its pack is published (spec 6.8).
 
-Each gate is a pure function over material the run already produced, and each returns a
+Each gate is a function over material the run already produced, and each returns a
 `GateResult` rather than raising: the point of a gate is to say precisely what is wrong, and a
-traceback names one problem where a run may have several. `blocking_failures` is what the caller
-turns that list into a decision with -- five of the six gates block publication, and the cost gate
-alerts without blocking, because an expensive run is a thing to look at, not a reason to withhold
-a correct digest.
+traceback names one problem where a run may have several. All but one are pure; the exception is
+`gate_source_minimums`, which reads the last week of `run.json` reports out of the archive,
+because the thing it checks -- a fetcher that has quietly stopped matching anything -- is
+invisible inside a single day's counts. `blocking_failures` is what the caller
+turns that list into a decision with. Spec 6.8's five gates block publication; the cost gate and
+the 7-day source minimums alert without blocking, because an expensive run and a quiet week are
+both things to look at, not reasons to withhold a correct digest.
 
 Two of the gates deserve their reasoning stated, because the obvious reading of each is too weak:
 
@@ -40,16 +43,22 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Sequence
-from datetime import datetime
+from datetime import date, datetime
 from typing import get_args
 
+from pipeline.archive import Archive
 from pipeline.config import Settings
+from pipeline.fetchers.base import Fetcher
 from pipeline.models import GateResult, Item, Site, Usage
 from pipeline.render import PAGES_BASE
 from pipeline.stages.scan import JudgeResult, ScanResult
 from pipeline.stages.verify import ExtractionRecord
 
 OWN_BASE = f"{PAGES_BASE}/"
+
+# Named rather than spelled twice: `pipeline.publish.health` renders this gate's details as their
+# own section of the pinned issue, and has to find the gate in the report by name.
+SOURCE_MINIMUMS_GATE = "source-minimums"
 
 # What ends a link in running text: whitespace, the closing half of a markdown or HTML wrapper,
 # a quote, or a code-span backtick. Everything up to one of those is part of the link.
@@ -292,6 +301,68 @@ def gate_judge(judges: dict[str, JudgeResult], records: dict[str, ExtractionReco
         if rec.extraction.importance >= 4:
             details.append(f"{iid}: importance {rec.extraction.importance} failed judge: {j.notes}")
     return GateResult(name="faithfulness-judge", passed=not details, blocking=True, details=details)
+
+
+def gate_source_minimums(archive: Archive, day: date, fetchers: Sequence[Fetcher]) -> GateResult:
+    """Every source and every category above its rolling 7-day minimum item count (spec 6.1).
+
+    This is the live check on the fetchers: spec 11 says so explicitly, because a fetcher that has
+    quietly stopped matching anything looks exactly like a quiet week from inside one run. Only a
+    week of them tells the two apart, so the counts come out of the last seven recorded `run.json`
+    reports rather than out of today.
+
+    Three decisions in it:
+
+    * **Raw counts, the same ones the medians read.** `statuses[].items` is what the fetcher
+      returned before the floor, which is the number a broken selector or a moved API actually
+      moves. Post-floor survivors would fold a karma-threshold change into the same number.
+    * **A category's minimum is the sum of its sources'.** Spec 6.1 gives every category its own
+      minimum but no configuration carries one, and the sum of the member fetchers' floors is the
+      only figure the code actually knows. Being a sum of the same counts, the category row cannot
+      fire while every one of its sources clears its own floor -- it is a rollup, not a second
+      independent check, and it is here because "the forums layer produced 7 of an expected 23
+      this week" is the sentence spec 6.1 asks for and three per-source rows do not say.
+    * **Never blocking.** A week under the floor is a thing for a human to look at, not a reason
+      to withhold a correct digest; spec 6.9 makes three consecutive runs the health failure, and
+      that judgement belongs to whoever reads the pinned issue.
+
+    With fewer than seven reports to read there is no week to judge, so the gate passes and says
+    why. A pipeline started on Wednesday would otherwise alert every morning until Sunday.
+    """
+    reports = archive.recent_runs(day, 7)
+    if len(reports) < 7:
+        return GateResult(
+            name=SOURCE_MINIMUMS_GATE,
+            passed=True,
+            blocking=False,
+            details=[
+                f"{len(reports)} of the last 7 runs recorded: too little history to judge a week"
+            ],
+        )
+    totals: dict[str, int] = {}
+    for report in reports:
+        for status in report.get("statuses", []):
+            totals[status["source"]] = totals.get(status["source"], 0) + int(status["items"])
+    details: list[str] = []
+    for f in fetchers:
+        # A fetcher with no row at all in the reports counts as zero, not as unknown: a source
+        # that was never reached wrote nothing, and that is the failure the gate is looking for.
+        got = totals.get(f.name, 0)
+        if got < f.min_items_7d:
+            details.append(f"{f.name}: {got} items in 7 days, below the minimum {f.min_items_7d}")
+    by_category: dict[str, list[Fetcher]] = {}
+    for f in fetchers:
+        by_category.setdefault(f.category, []).append(f)
+    for category, members in by_category.items():
+        got = sum(totals.get(f.name, 0) for f in members)
+        minimum = sum(f.min_items_7d for f in members)
+        if got < minimum:
+            details.append(
+                f"category {category}: {got} items in 7 days, below the minimum {minimum}"
+            )
+    return GateResult(
+        name=SOURCE_MINIMUMS_GATE, passed=not details, blocking=False, details=details
+    )
 
 
 def gate_cost(usage: Usage, trailing_median: float | None, multiplier: float) -> GateResult:
