@@ -58,7 +58,7 @@ def test_cli_picks_the_next_letter_from_the_changelog(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["version"] == f"{day:%Y.%m.%d}b"
 
 
-def test_cli_exits_2_when_a_blocking_gate_failed(tmp_path, monkeypatch):
+def test_cli_exits_3_when_a_blocking_gate_failed(tmp_path, monkeypatch):
     report = RunReport(
         version="2026.08.31a",
         statuses=[],
@@ -72,7 +72,7 @@ def test_cli_exits_2_when_a_blocking_gate_failed(tmp_path, monkeypatch):
         published=False,
     )
     monkeypatch.setattr("pipeline.cli.run_daily", lambda inputs: report)
-    assert _run(tmp_path) == 2
+    assert _run(tmp_path) == 3
 
 
 def test_cli_probe_prints_a_status_table_and_always_exits_0(monkeypatch, capsys):

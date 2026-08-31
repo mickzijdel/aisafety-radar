@@ -12,10 +12,12 @@ stating, because each is easy to get subtly wrong and cheap to get right here:
 * **The anomaly medians are raw fetcher counts.** `run.json` records `statuses[].items`, which is
   what each source returned *before* the floor, and that is the unit `apply_floor` compares
   against. Feeding it post-floor survivors would hide a flood the per-author cap already absorbed.
-* **Failure isolation is per source.** `run_all` already isolates a daily fetch; the 14-day window
-  fetch and the comment refresh are isolated here on the same principle. One forum being down
-  costs its own contribution and nothing else. The refresh has no per-post isolation inside it, so
-  a failure there costs the day's movers, not the day's run.
+* **Failure isolation is per source and per item.** `run_all` already isolates a daily fetch; the
+  14-day window fetch, the comment refresh and every item's own extract/scan/judge are isolated
+  here on the same principle, so one forum being down or one API call failing costs its own
+  contribution and nothing else. The extract/scan/judge loop is where a run's money is spent, and
+  a failure on the last item of it must not throw away everything already paid for. The refresh
+  has no per-post isolation inside it, so a failure there costs the day's movers, not the run.
 * **Files and seen ids are written last, and only if no blocking gate failed.** The archive, the
   ledger and the run report are written either way -- a run that could not publish is still a run
   that happened, and the next day's medians and cost comparison read those files -- but an item is
@@ -93,9 +95,10 @@ class RunInputs:
 class RunReport(BaseModel):
     """What the day did, as written to `run.json` and printed by the CLI.
 
-    `dropped` and `scan_flagged` exist so a shrunken pack is never silent: an item can leave the
-    render set without failing a gate, and a count that only ever appears in a log line is a count
-    nobody reads.
+    `dropped`, `scan_flagged` and `failed` exist so a shrunken pack is never silent: an item can
+    leave the render set without failing a gate, and a count that only ever appears in a log line
+    is a count nobody reads. `dropped` is the union -- every selected item that never reached the
+    render set -- and the other two say why.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -111,6 +114,7 @@ class RunReport(BaseModel):
     published: bool
     dropped: list[str] = Field(default_factory=list)
     scan_flagged: list[str] = Field(default_factory=list)
+    failed: list[str] = Field(default_factory=list)
 
 
 def _source_medians(archive: Archive, day: date) -> dict[str, int]:
@@ -190,23 +194,44 @@ def run_daily(inputs: RunInputs) -> RunReport:
     records: dict[str, ExtractionRecord] = {}
     scans: dict[str, ScanResult] = {}
     judges: dict[str, JudgeResult] = {}
+    quarantined: list[ExtractionRecord] = []
+    failed: list[str] = []
     for item in selected:
-        record = extract_verified(item, llm, settings)
-        scan = scan_record(record, llm, settings)
-        scans[item.id] = scan
-        if scan.flagged:
-            log.warning("injection scan flagged %s: %s", item.id, scan.reason)
-            continue
-        if needs_judge(record, rng, settings):
-            verdict = judge_record(record, item, llm, settings)
-            judges[item.id] = verdict
-            if not verdict.passed and record.extraction.importance >= 4:
-                record = record.model_copy(
-                    update={"degraded": True, "notes": record.notes + [f"judge: {verdict.notes}"]}
+        # Isolated per item, because this loop is where the run's money goes: one transient API
+        # error on the fortieth of fifty items must cost that item, not the thirty-nine already
+        # paid for and not the day's pack.
+        try:
+            record = extract_verified(item, llm, settings)
+            scan = scan_record(record, llm, settings)
+            scans[item.id] = scan
+            if scan.flagged:
+                log.warning("injection scan flagged %s: %s", item.id, scan.reason)
+                # Out of `records`, so out of the pack, but archived with the reason: spec 6.8
+                # gate 4 wants the flagged text kept for review, and a flag whose text nobody can
+                # go back and read teaches nothing.
+                quarantined.append(
+                    record.model_copy(
+                        update={"notes": record.notes + [f"scan flagged: {scan.reason}"]}
+                    )
                 )
-        records[item.id] = record
-    # An item selected but never recorded is one `build_render_items` would drop in silence.
-    # Today that is exactly the scan-flagged set; both are reported so a new cause would show.
+                continue
+            if needs_judge(record, rng, settings):
+                verdict = judge_record(record, item, llm, settings)
+                judges[item.id] = verdict
+                if not verdict.passed and record.extraction.importance >= 4:
+                    record = record.model_copy(
+                        update={
+                            "degraded": True,
+                            "notes": record.notes + [f"judge: {verdict.notes}"],
+                        }
+                    )
+            records[item.id] = record
+        except Exception:  # noqa: BLE001 - one item is not the run
+            log.exception("item %s failed during extraction, scan or judging; skipping it", item.id)
+            failed.append(item.id)
+    # An item selected but never recorded is one `build_render_items` would drop in silence. That
+    # is the scan-flagged set plus the failed one; all three are reported, so a pack that shrank
+    # says why and a new cause would show up rather than passing as one of these two.
     dropped = [i.id for i in selected if i.id not in records]
     rendered_items = [i for i in selected if i.id in records]
     assert judges.keys() <= records.keys(), "judged an item that never reached the render set"
@@ -255,7 +280,9 @@ def run_daily(inputs: RunInputs) -> RunReport:
     published = not blocking_failures(gates)
 
     archive.write_items(day, fetched.items)
-    archive.write_extractions(day, list(records.values()))
+    # The quarantined records go to the same file: it is the day's record of what the model wrote,
+    # not of what was published, and each one says in its notes why it went no further.
+    archive.write_extractions(day, list(records.values()) + quarantined)
     ledger.save()
     report = RunReport(
         version=inputs.version,
@@ -270,6 +297,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
         published=published,
         dropped=dropped,
         scan_flagged=[iid for iid, scan in scans.items() if scan.flagged],
+        failed=failed,
     )
     archive.write_run(day, report.model_dump(mode="json"))
     if published:

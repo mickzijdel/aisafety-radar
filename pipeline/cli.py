@@ -6,6 +6,9 @@ an API key, and `anthropic` is imported only on that branch so a dry run works w
 
 Rendering is not its own subcommand: a pack is rendered from what the run's own stages produced,
 so there is nothing to render without a run.
+
+`run` exits 0 when the pack published and `BLOCKED_EXIT` when a gate withheld it; `probe` exits 0
+whatever the sources did, because its output *is* the report.
 """
 
 from __future__ import annotations
@@ -22,15 +25,15 @@ from pipeline.config import load_settings, user_agent
 from pipeline.fetchers.base import Window, run_all
 from pipeline.fetchers.fixtures import FixtureClient
 from pipeline.fetchers.forummagnum import ForumClient
-from pipeline.fetchers.forums import SOURCE_NAMES, ForumFetcher
+from pipeline.fetchers.forums import MIN_ITEMS_7D, SOURCE_NAMES, ForumFetcher
 from pipeline.llm import LLM, CannedLLM
 from pipeline.run import RunInputs, run_daily
 from pipeline.versioning import next_letter, pack_version
 
-# Per-source 7-day minimums: the count below which a source is failing rather than quiet. Must
-# match `forums.forum_fetchers`, which builds the same three fetchers for callers that do not
-# need to hold on to the clients; this command does, because the comment refresh reuses them.
-MIN_ITEMS_7D = {"lw": 15, "af": 3, "eaf": 5}
+# A blocked run is not a crashed one, and argparse already owns 2 for a usage error, so the two
+# must not share an exit code: the workflow has to tell "the pack was withheld by a gate" from
+# "the command line was wrong".
+BLOCKED_EXIT = 3
 
 
 def _clients(fixtures: Path | None, ua: str):
@@ -90,9 +93,7 @@ def cmd_run(args) -> int:
         )
     )
     print(report.model_dump_json(indent=1))
-    # 2, not 1: a blocking gate failure is a run that worked and withheld its pack, which the
-    # workflow treats differently from the pipeline itself falling over.
-    return 0 if report.published else 2
+    return 0 if report.published else BLOCKED_EXIT
 
 
 def cmd_probe(args) -> int:
@@ -102,7 +103,7 @@ def cmd_probe(args) -> int:
     rather than as a traceback; `run_all` already turns each failure into a not-ok status.
     """
     clients = _clients(None, user_agent(pipeline.__version__))
-    window = Window.for_day(datetime.now(UTC).date(), hours=int(args.hours))
+    window = Window.for_day(datetime.now(UTC).date(), hours=args.hours)
     result = run_all(_fetchers(clients), window)
     print("| source | ok | items | error |\n|---|---|---|---|")
     for status in result.statuses:
@@ -129,7 +130,7 @@ def main(argv=None) -> int:
     run.set_defaults(fn=cmd_run)
 
     probe = sub.add_parser("probe", help="fetch from every live source and print a status table")
-    probe.add_argument("--hours", default="168", help="window size, in hours")
+    probe.add_argument("--hours", type=int, default=168, help="window size, in hours")
     probe.set_defaults(fn=cmd_probe)
 
     args = parser.parse_args(argv)

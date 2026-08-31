@@ -11,6 +11,12 @@ from pipeline.textnorm import html_to_markdown, html_to_text
 
 SOURCE_NAMES: dict[Site, str] = {"lw": "lesswrong", "af": "alignmentforum", "eaf": "eaforum"}
 
+# Per-source 7-day minimums: the count below which a source is broken rather than quiet. Defined
+# once, because two callers build these fetchers -- `forum_fetchers`, for a caller that wants
+# nothing but the fetchers, and the CLI, which has to keep the clients it built them from for the
+# comment refresh. Two copies would let a threshold change reach one path and not the other.
+MIN_ITEMS_7D: dict[Site, int] = {"lw": 15, "af": 3, "eaf": 5}
+
 
 def raw_post_to_item(site: Site, post: RawPost) -> Item:
     html = (post.contents or {}).get("html") or ""
@@ -64,7 +70,6 @@ class ForumFetcher:
 
 def forum_fetchers(user_agent: str) -> list[Fetcher]:
     return [
-        ForumFetcher("lw", ForumClient("lw", user_agent), "lesswrong", 15),
-        ForumFetcher("af", ForumClient("af", user_agent), "alignmentforum", 3),
-        ForumFetcher("eaf", ForumClient("eaf", user_agent), "eaforum", 5),
+        ForumFetcher(site, ForumClient(site, user_agent), name, MIN_ITEMS_7D[site])
+        for site, name in SOURCE_NAMES.items()
     ]

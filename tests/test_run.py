@@ -22,7 +22,12 @@ from pipeline.config import load_settings
 from pipeline.fetchers.base import Window
 from pipeline.fetchers.fixtures import FixtureClient
 from pipeline.fetchers.forummagnum import RawComment, RawPost
-from pipeline.fetchers.forums import ForumFetcher, raw_post_to_item
+from pipeline.fetchers.forums import (
+    MIN_ITEMS_7D,
+    SOURCE_NAMES,
+    ForumFetcher,
+    raw_post_to_item,
+)
 from pipeline.llm import CannedLLM
 from pipeline.models import Extraction, Item
 from pipeline.run import RunInputs, _source_medians, _trailing_cost_median, run_daily
@@ -39,20 +44,19 @@ SITES = ("lw", "af", "eaf")
 
 def _fetchers(clients):
     return [
-        ForumFetcher("lw", clients["lw"], "lesswrong", 15),
-        ForumFetcher("af", clients["af"], "alignmentforum", 3),
-        ForumFetcher("eaf", clients["eaf"], "eaforum", 5),
+        ForumFetcher(site, clients[site], name, MIN_ITEMS_7D[site])
+        for site, name in SOURCE_NAMES.items()
     ]
 
 
-def _inputs(tmp_path, clients, llm=None, fetchers=None, **kw):
+def _inputs(tmp_path, clients, llm=None, fetchers=None, day=None, **kw):
     return RunInputs(
         settings=load_settings(),
         llm=llm or CannedLLM(),
         archive=Archive(tmp_path / "data"),
         clients=clients,
         fetchers=fetchers if fetchers is not None else _fetchers(clients),
-        day=FixtureClient.day_of(FIX),
+        day=day or FixtureClient.day_of(FIX),
         version="2026.08.30a",
         out_dir=tmp_path / "out",
         **kw,
@@ -135,7 +139,7 @@ def test_run_daily_reports_the_gates_statuses_and_usage(tmp_path):
     assert report.usage.cost_usd == 0.0
     assert report.items_after_floor <= report.items_fetched
     assert report.items_selected <= report.items_after_floor
-    assert report.dropped == [] and report.scan_flagged == []
+    assert report.dropped == [] and report.scan_flagged == [] and report.failed == []
 
 
 class _FlagsFirstScan(CannedLLM):
@@ -162,6 +166,45 @@ def test_scan_flagged_items_are_dropped_named_in_the_report_and_not_rendered(tmp
     assert flagged in report.dropped
     rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
     assert flagged.split(":", 1)[1] not in rendered
+
+
+def test_the_scan_archives_what_it_flagged_with_the_reason(tmp_path):
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_FlagsFirstScan()))
+    flagged = report.scan_flagged[0]
+    archived = Archive(tmp_path / "data").read_extractions(FixtureClient.day_of(FIX))
+    by_id = {r.extraction.item_id: r for r in archived}
+    # Out of the pack but on disk: the flagged text is the review trail (spec 6.8 gate 4).
+    assert flagged in by_id
+    assert "scan flagged: test injection" in by_id[flagged].notes
+    assert by_id[flagged].extraction.summary
+    assert len(archived) == report.items_selected
+
+
+class _FailsOneItem(CannedLLM):
+    """Canned answers, except the second extraction dies the way a transient API error does."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.extractions = 0
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        if {"summary", "key_quotes"} <= set(schema.get("properties", {})):
+            self.extractions += 1
+            if self.extractions == 2:
+                raise RuntimeError("upstream 529")
+        return super().structured(model, system, user, schema, max_tokens)
+
+
+def test_one_item_failing_costs_that_item_and_nothing_else(tmp_path, caplog):
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_FailsOneItem()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    assert len(report.failed) == 1
+    assert report.failed == report.dropped
+    assert "upstream 529" in caplog.text
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    # Every other item is still there, and the one that failed is not.
+    assert rendered.count("\n- **") == report.items_selected - 1
+    assert report.failed[0].split(":", 1)[1] not in rendered
 
 
 class _WritesAUrlInTheSummary(CannedLLM):
@@ -287,6 +330,78 @@ def test_a_movers_url_without_the_window_posts_would_not_pass_provenance(tmp_pat
     assert not report.published
     provenance = next(g for g in report.gates if g.name == "provenance")
     assert any(mover.url.removeprefix("https://") in d for d in provenance.details)
+
+
+# --- two consecutive days, driving the real comment refresh --------------------------------
+
+# The one LW post `lw_top_comments.json` holds comments for, and one of the eleven the first day
+# renders -- so the refresh has both an archived extraction to update and a thread to read.
+MOVER_POST = "fpLDjKg3ej49beqTC"
+
+
+class _GrowingThread(FixtureClient):
+    """A fixture client whose one chosen post has gained comments, the way a live thread does.
+
+    The recorded payloads are a single instant, so nothing in them can move on its own. This is
+    the smallest possible lie that lets the real `refresh_comments` see a real movement: one
+    post's `commentCount`, which is exactly what the forum would report the next morning.
+    """
+
+    def __init__(self, site, root, post_id: str, extra_comments: int) -> None:
+        super().__init__(site, root)
+        self.post_id = post_id
+        self.extra_comments = extra_comments
+
+    def posts_since(self, after, view="top", limit=200, require_ai_tag=True):
+        posts = super().posts_since(after, view=view, limit=limit, require_ai_tag=require_ai_tag)
+        for post in posts:
+            if post.id == self.post_id:
+                post.commentCount += self.extra_comments
+        return posts
+
+
+class _WritesADiscussionSignal(CannedLLM):
+    """Canned, but writes a real discussion signal so the archive write-back is observable."""
+
+    SIGNAL = "Contested, with the strongest pushback on the evolution framing."
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        out = super().structured(model, system, user, schema, max_tokens)
+        # The refresh's schema asks for that field alone; extraction's has it among many others.
+        if list(out) == ["discussion_signal"]:
+            return {"discussion_signal": self.SIGNAL}
+        return out
+
+
+def test_two_consecutive_days_produce_a_mover_and_write_its_signal_back(tmp_path):
+    day_one = FixtureClient.day_of(FIX)
+    day_two = day_one + timedelta(days=1)
+    archive = Archive(tmp_path / "data")
+    item_id = f"lw:{MOVER_POST}"
+
+    first = run_daily(_inputs(tmp_path, _clients(), llm=_WritesADiscussionSignal()))
+    assert first.published and first.movers == 0
+    day_one_records = {r.extraction.item_id: r for r in archive.read_extractions(day_one)}
+    assert item_id in day_one_records
+    assert day_one_records[item_id].extraction.discussion_signal is None
+
+    # Overnight: no new posts in the window, but that thread gained twelve comments.
+    grown = {**_clients(), "lw": _GrowingThread("lw", FIX, MOVER_POST, 12)}
+    second = run_daily(_inputs(tmp_path, grown, llm=_WritesADiscussionSignal(), day=day_two))
+
+    assert second.published, [g.details for g in second.gates if not g.passed]
+    assert second.items_selected == 0, "the fixtures hold nothing new on the second day"
+    assert second.movers == 1
+    # The refresh wrote the new signal back onto the day the post was originally archived.
+    refreshed = {r.extraction.item_id: r for r in archive.read_extractions(day_one)}[item_id]
+    assert refreshed.extraction.discussion_signal == _WritesADiscussionSignal.SIGNAL
+    assert refreshed.extraction.summary == day_one_records[item_id].extraction.summary
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert "## Discussion movers" in rendered
+    assert "+12 comments" in rendered
+    assert f"Discussion: {_WritesADiscussionSignal.SIGNAL}" in rendered
+    assert MOVER_POST in rendered, "the mover's own link comes from the ledger entry"
+    assert rendered.count("\n- **") == 1
 
 
 def test_a_run_without_clients_still_renders(tmp_path):
