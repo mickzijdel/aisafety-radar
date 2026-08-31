@@ -1,0 +1,290 @@
+"""One day's run, from the fetchers to the rendered pack.
+
+Every module below this one is a stage that knows nothing about the others; this is the file that
+knows the order, and the order carries most of the correctness. Four decisions in it are worth
+stating, because each is easy to get subtly wrong and cheap to get right here:
+
+* **The gates take different item lists.** `gate_provenance` gets today's rendered posts *plus*
+  the 14-day window posts, because a discussion mover is rendered from a ledger entry built out of
+  that window and its link would otherwise read as model-invented. `gate_freshness` gets only
+  today's rendered posts: a mover is an older post by definition, so handing it the same list would
+  fail the window check on the very thing that made the post a mover.
+* **The anomaly medians are raw fetcher counts.** `run.json` records `statuses[].items`, which is
+  what each source returned *before* the floor, and that is the unit `apply_floor` compares
+  against. Feeding it post-floor survivors would hide a flood the per-author cap already absorbed.
+* **Failure isolation is per source.** `run_all` already isolates a daily fetch; the 14-day window
+  fetch and the comment refresh are isolated here on the same principle. One forum being down
+  costs its own contribution and nothing else. The refresh has no per-post isolation inside it, so
+  a failure there costs the day's movers, not the day's run.
+* **Files and seen ids are written last, and only if no blocking gate failed.** The archive, the
+  ledger and the run report are written either way -- a run that could not publish is still a run
+  that happened, and the next day's medians and cost comparison read those files -- but an item is
+  only "seen" once it has actually been published, or a blocked run would spend the day's items
+  without showing them to anyone and leave the rerun nothing to publish.
+
+Note that `archive.write_comments` is not called: phase 2 fetches comments only inside the refresh,
+which writes back extractions rather than comment rows. The comment archive is phase 3's, when the
+digest starts quoting threads directly.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import random
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+from statistics import median
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from pipeline.archive import Archive
+from pipeline.config import Settings
+from pipeline.fetchers.base import Fetcher, Window, run_all
+from pipeline.fetchers.forummagnum import ForumClient, Site
+from pipeline.fetchers.forums import raw_post_to_item
+from pipeline.floor import apply_floor
+from pipeline.ledger import PostsLedger, SeenIds
+from pipeline.llm import LLM
+from pipeline.models import GateResult, Item, SourceStatus, Usage
+from pipeline.qa.gates import (
+    blocking_failures,
+    gate_budgets,
+    gate_cost,
+    gate_freshness,
+    gate_judge,
+    gate_provenance,
+    gate_scan,
+)
+from pipeline.render import PackMeta, build_render_items, render_all
+from pipeline.stages.comments import Mover, refresh_comments
+from pipeline.stages.extract import extract_verified
+from pipeline.stages.scan import JudgeResult, ScanResult, judge_record, needs_judge, scan_record
+from pipeline.stages.triage import select, triage
+from pipeline.stages.verify import ExtractionRecord
+
+log = logging.getLogger(__name__)
+
+FORUMS_FILE = "31-today-forums.md"
+
+# How far back the ledger's live-post window reaches, and the page size the window fetch asks for.
+# The window is what makes a mover possible: a post outside it can no longer move the digest.
+WINDOW_DAYS = 14
+WINDOW_LIMIT = 500
+
+
+@dataclass
+class RunInputs:
+    settings: Settings
+    llm: LLM
+    archive: Archive
+    # `FixtureClient` satisfies the same three methods without inheriting from `ForumClient`; the
+    # annotation names the real thing because that is what production passes.
+    clients: dict[Site, ForumClient] | None
+    fetchers: Sequence[Fetcher]
+    day: date
+    version: str
+    out_dir: Path
+    rng_seed: int = 0
+
+
+class RunReport(BaseModel):
+    """What the day did, as written to `run.json` and printed by the CLI.
+
+    `dropped` and `scan_flagged` exist so a shrunken pack is never silent: an item can leave the
+    render set without failing a gate, and a count that only ever appears in a log line is a count
+    nobody reads.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    version: str
+    statuses: list[SourceStatus]
+    items_fetched: int
+    items_after_floor: int
+    items_selected: int
+    rendered_files: list[str]
+    gates: list[GateResult]
+    usage: Usage
+    movers: int
+    published: bool
+    dropped: list[str] = Field(default_factory=list)
+    scan_flagged: list[str] = Field(default_factory=list)
+
+
+def _source_medians(archive: Archive, day: date) -> dict[str, int]:
+    """Each source's median RAW fetched items per day over the last 30 recorded runs.
+
+    Raw, because `statuses[].items` is what the fetcher returned before any floor ran, which is
+    the unit `apply_floor`'s anomaly check is defined in. A source with fewer than seven days of
+    history has no median: too little to call anything anomalous against.
+    """
+    counts: dict[str, list[int]] = {}
+    for offset in range(1, 31):
+        path = archive.day_dir(day - timedelta(days=offset)) / "run.json"
+        if not path.exists():
+            continue
+        for status in json.loads(path.read_text()).get("statuses", []):
+            counts.setdefault(status["source"], []).append(int(status["items"]))
+    return {source: int(median(v)) for source, v in counts.items() if len(v) >= 7}
+
+
+def _trailing_cost_median(archive: Archive, day: date) -> float | None:
+    """The median cost of the last 14 recorded runs, or None with fewer than five to go on."""
+    costs = []
+    for offset in range(1, 15):
+        path = archive.day_dir(day - timedelta(days=offset)) / "run.json"
+        if path.exists():
+            costs.append(float(json.loads(path.read_text()).get("usage", {}).get("cost_usd", 0)))
+    return median(costs) if len(costs) >= 5 else None
+
+
+def _window_posts(
+    clients: dict[Site, ForumClient], day: date
+) -> tuple[list[Item], dict[str, datetime | None]]:
+    """The last `WINDOW_DAYS` of posts per site, and when each was last commented on.
+
+    Isolated per site: this fetch feeds the ledger and the movers, and one forum being unreachable
+    must cost that forum's movers rather than the whole run.
+    """
+    items: list[Item] = []
+    last_commented: dict[str, datetime | None] = {}
+    for site, client in clients.items():
+        try:
+            posts = client.posts_since(
+                day - timedelta(days=WINDOW_DAYS),
+                view="new",
+                limit=WINDOW_LIMIT,
+                # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
+                require_ai_tag=site != "af",
+            )
+        except Exception:  # noqa: BLE001 - isolation is the point
+            log.exception("%s: 14-day window fetch failed; no movers from this site today", site)
+            continue
+        for post in posts:
+            item = raw_post_to_item(site, post)
+            items.append(item)
+            last_commented[item.id] = post.lastCommentedAt
+    return items, last_commented
+
+
+def run_daily(inputs: RunInputs) -> RunReport:
+    settings, llm, archive, day = inputs.settings, inputs.llm, inputs.archive, inputs.day
+    window = Window.for_day(day)
+    rng = random.Random(inputs.rng_seed)
+    clients = inputs.clients or {}
+
+    fetched = run_all(inputs.fetchers, window)
+    seen = SeenIds(archive.seen_path).load()
+    fresh = [i for i in fetched.items if i.id not in seen]
+    # Medians in raw fetched items per day, which is the unit `apply_floor` compares against.
+    floor = apply_floor(fresh, settings.floor, day, _source_medians(archive, day))
+    for note in floor.anomalies:
+        log.warning("anomaly: %s", note)
+
+    results = triage(floor.kept, llm, settings)
+    selected = select(floor.kept, results, settings.caps.forums_per_day)
+
+    records: dict[str, ExtractionRecord] = {}
+    scans: dict[str, ScanResult] = {}
+    judges: dict[str, JudgeResult] = {}
+    for item in selected:
+        record = extract_verified(item, llm, settings)
+        scan = scan_record(record, llm, settings)
+        scans[item.id] = scan
+        if scan.flagged:
+            log.warning("injection scan flagged %s: %s", item.id, scan.reason)
+            continue
+        if needs_judge(record, rng, settings):
+            verdict = judge_record(record, item, llm, settings)
+            judges[item.id] = verdict
+            if not verdict.passed and record.extraction.importance >= 4:
+                record = record.model_copy(
+                    update={"degraded": True, "notes": record.notes + [f"judge: {verdict.notes}"]}
+                )
+        records[item.id] = record
+    # An item selected but never recorded is one `build_render_items` would drop in silence.
+    # Today that is exactly the scan-flagged set; both are reported so a new cause would show.
+    dropped = [i.id for i in selected if i.id not in records]
+    rendered_items = [i for i in selected if i.id in records]
+    assert judges.keys() <= records.keys(), "judged an item that never reached the render set"
+
+    ledger = PostsLedger(archive.ledger_path).load()
+    window_items, last_commented = _window_posts(clients, day)
+    ledger.snapshot(day, rendered_items + window_items, last_commented)
+    movers: list[Mover] = []
+    if clients:
+        try:
+            movers = refresh_comments(clients, ledger, archive, llm, settings, day)
+        except Exception:  # noqa: BLE001 - a lost refresh is not a lost run
+            log.exception("comment refresh failed; publishing without discussion movers")
+
+    meta = PackMeta(version=inputs.version, generated_at=datetime.now(UTC), data_through=window.end)
+    rendered = render_all(
+        meta,
+        build_render_items(rendered_items, list(records.values())),
+        movers,
+        fetched.statuses,
+        llm.count_tokens,
+    )
+    assert FORUMS_FILE in rendered, f"{FORUMS_FILE} was not rendered; the gates would pass on air"
+
+    gates = [
+        # Movers are rendered from ledger entries built out of the window posts, so provenance
+        # needs those items too or a mover's own link reads as unsourced.
+        gate_provenance(rendered, rendered_items + window_items),
+        # Both posts and movers render as `- **` lines; the index's are recipes and are not counted.
+        gate_budgets(
+            rendered,
+            settings,
+            llm.count_tokens,
+            {FORUMS_FILE: len(rendered_items) + len(movers)},
+        ),
+        # Today's posts only: a mover is older than the window by definition.
+        gate_freshness(rendered, rendered_items, window.start, window.end, inputs.version),
+        gate_scan(scans, {i.id for i in rendered_items}),
+        gate_judge(judges, records),
+        gate_cost(
+            llm.usage,
+            _trailing_cost_median(archive, day),
+            settings.thresholds.cost_alert_multiplier,
+        ),
+    ]
+    published = not blocking_failures(gates)
+
+    archive.write_items(day, fetched.items)
+    archive.write_extractions(day, list(records.values()))
+    ledger.save()
+    report = RunReport(
+        version=inputs.version,
+        statuses=fetched.statuses,
+        items_fetched=len(fetched.items),
+        items_after_floor=len(floor.kept),
+        items_selected=len(selected),
+        rendered_files=list(rendered),
+        gates=gates,
+        usage=llm.usage,
+        movers=len(movers),
+        published=published,
+        dropped=dropped,
+        scan_flagged=[iid for iid, scan in scans.items() if scan.flagged],
+    )
+    archive.write_run(day, report.model_dump(mode="json"))
+    if published:
+        # "Seen" means published, not fetched. A run a gate blocked has shown nobody anything,
+        # and marking its items seen would make that failure permanent: the rerun that fixed the
+        # problem would find every item already spent and publish an empty pack. The archive and
+        # the ledger above are written either way, because the day happened either way.
+        for item in fetched.items:
+            seen.add(item.id)
+        seen.save()
+        inputs.out_dir.mkdir(parents=True, exist_ok=True)
+        for name, text in rendered.items():
+            (inputs.out_dir / name).write_text(text)
+    else:
+        log.error(
+            "not published; blocking gates failed: %s",
+            [f"{g.name}: {g.details}" for g in blocking_failures(gates)],
+        )
+    return report
