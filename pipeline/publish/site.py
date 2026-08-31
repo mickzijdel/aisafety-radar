@@ -7,10 +7,10 @@ Three contracts leave this module and are relied on elsewhere:
   and refuses to print a file it cannot find a checksum for, so a path in column 2 or a single
   space turns every freshness fetch into a hard failure. The digests are taken from the copies in
   `latest/` rather than from the pack, so what is hashed is what is served.
-* **A bundle is a recipe in one fetch.** The file lists come from `pipeline.render.RECIPES`, the
-  same lists the index advertises, so the two cannot drift; `map.md` is the one bundle without a
-  recipe, because "a close look at one area" pairs two files a reader picks per area while the
-  map layer as a whole is worth one fetch (SKILL.md names all four).
+* **A bundle is a recipe in one fetch.** `pipeline.render.BUNDLES` holds the file lists, built
+  from the same `RECIPES` the index advertises, so the two cannot drift; `map.md` is the one
+  bundle without a recipe, because "a close look at one area" pairs two files a reader picks per
+  area while the map layer as a whole is worth one fetch.
 * **`latest/` is rebuilt, not updated.** An appendix that stops being generated has to disappear
   from the site rather than sit there with a stale date under a fresh `checksums.txt`.
 * **`versions/` keeps the newest `KEEP_VERSIONS`**, the same number the changelog keeps. The two
@@ -27,32 +27,10 @@ import hashlib
 import shutil
 from pathlib import Path
 
-from pipeline.render import APPENDIX_PURPOSE, RECIPES
-
-# Bundle file name per recipe name in `RECIPES`. The recipes are the source of truth for the
-# file lists; this only names the download.
-_RECIPE_BUNDLES = {
-    "what happened today": "today.md",
-    "this week": "week.md",
-    "career change": "careers.md",
-}
-
-# The slow layer in one fetch. No recipe matches it: "a close look at one area" is two files
-# chosen per area, not the whole map.
-_MAP_BUNDLE = [
-    "10-map-field-overview.md",
-    "11-map-orgs.md",
-    "12-map-programmes.md",
-    "13-map-glossary.md",
-    "14-map-readings.md",
-]
-
-_recipe_files = dict(RECIPES)
-assert _RECIPE_BUNDLES.keys() <= _recipe_files.keys(), "a bundle names a recipe that is gone"
-
-BUNDLES: dict[str, list[str]] = {
-    bundle: _recipe_files[recipe] for recipe, bundle in _RECIPE_BUNDLES.items()
-} | {"map.md": _MAP_BUNDLE}
+# `BUNDLES` is defined in `pipeline.render`, not here, and imported: the index's footer has to
+# advertise exactly the bundles this module writes, and it is rendered a job earlier. Two copies
+# would let the footer promise a `week.md` the site never published.
+from pipeline.render import APPENDIX_PURPOSE, BUNDLES
 
 CHECKSUMS = "checksums.txt"
 

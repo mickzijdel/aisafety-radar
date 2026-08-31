@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from pipeline.render import PAGES_BASE, PackMeta
+from pipeline.render import BUNDLES, PAGES_BASE, PackMeta
 
 ROOT = Path(__file__).parents[1]
 SKILL = ROOT / "skills" / "aisafety-radar" / "SKILL.md"
@@ -159,6 +159,31 @@ def test_the_skill_routes_the_two_exit_codes_differently():
     integrity, transport = text.index("exit 2"), text.index("exit 1")
     assert "bundled copy" in text[integrity : integrity + 200]
     assert "URL-fetch" in text[transport : transport + 200]
+
+
+def _names(bundle: str, text: str) -> bool:
+    """Does `text` name `bundle` as itself, rather than as the tail of an appendix name?
+
+    `21-this-week.md` ends in `week.md` and `15-careers.md` ends in `careers.md`, so a plain
+    substring search reads the recipe list as an advertisement for two bundles it never mentions.
+    """
+    return re.search(rf"(?<![-\w.]){re.escape(bundle)}", text) is not None
+
+
+def test_skill_md_advertises_no_bundle_this_phase_does_not_publish():
+    """SKILL.md used to list all four bundles as things an agent could fetch. Three of them are
+    made of appendices phase 2 does not render, so `site._write_bundles` never writes them and
+    the fetch 404s -- and the agent has been told by its own skill that the file exists."""
+    have = {p.name for p in (INDEX.parent).glob("*.md")} | {"00-index.md", "31-today-forums.md"}
+    available = {b for b, parts in BUNDLES.items() if any(p in have for p in parts)}
+    assert available == {"today.md"}, "the phase's published bundles moved; check SKILL.md"
+    _, text = frontmatter()
+    for bundle in set(BUNDLES) - available:
+        assert not _names(bundle, text), f"SKILL.md advertises {bundle}, which is not published"
+    # The one that does exist stays as the worked example, and the index is named as the
+    # authority on the rest, so the skill needs no edit when a later phase adds one.
+    assert _names("today.md", text)
+    assert "index footer" in text
 
 
 def test_manifests_agree():

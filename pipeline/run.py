@@ -277,6 +277,10 @@ def run_daily(inputs: RunInputs) -> RunReport:
         movers,
         fetched.statuses,
         llm.count_tokens,
+        # The pack is written into the skill's references directory, which also holds the
+        # appendices nobody generates. The index reads them from there so it reports a file the
+        # reader already has as published rather than as still to come.
+        static_dir=inputs.out_dir,
     )
     assert FORUMS_FILE in rendered, f"{FORUMS_FILE} was not rendered; the gates would pass on air"
 

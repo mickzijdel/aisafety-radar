@@ -454,7 +454,8 @@ def test_bundles_match_the_render_recipes():
     assert BUNDLES["today.md"] == recipes["what happened today"]
     assert BUNDLES["week.md"] == recipes["this week"]
     assert BUNDLES["careers.md"] == recipes["career change"]
-    # The names SKILL.md and fetch-latest.sh advertise.
+    # The four names `fetch-latest.sh` accepts as arguments. SKILL.md advertises only
+    # the ones a phase actually publishes; see tests/test_skill.py.
     assert set(BUNDLES) == {"today.md", "week.md", "careers.md", "map.md"}
     for parts in BUNDLES.values():
         for name in parts:

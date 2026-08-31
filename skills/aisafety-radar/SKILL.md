@@ -41,8 +41,8 @@ Every generated file starts with a header giving its `version`, `generated` time
 - Under 48 hours old: use the bundled copy.
 - 48 hours or older: get the latest copy. If you have a shell, run
   `scripts/fetch-latest.sh <file-or-bundle>` from this skill's directory (for example
-  `today.md`, `week.md`, `careers.md`, `map.md`, or a single file such as
-  `31-today-forums.md`); it prints exact bytes and verifies a checksum. If the script reports
+  `today.md`, or a single file such as `31-today-forums.md`); it prints exact bytes and
+  verifies a checksum. If the script reports
   an integrity failure (exit 2: checksum mismatch or missing), do not fetch the URL; use the
   bundled copy and tell the user. If it could not reach the site (exit 1), try the URL-fetch
   tool path. If you only have a URL-fetch tool (WebFetch, web_fetch, webfetch, fetch_web,
@@ -53,8 +53,10 @@ Every generated file starts with a header giving its `version`, `generated` time
   caveat; treat deadlines, jobs, events and today items as unreliable and verify them via
   `references/90-live-sources.md`.
 
-Bundles for one fetch: `today.md`, `week.md`, `careers.md`, `map.md`. Past days are archived
-at `https://github.com/mickzijdel/aisafety-radar-data` under `YYYY/MM/DD/`.
+Some appendices can be fetched together as one bundle, `today.md` for instance. The bundles
+that exist for the current phase are listed in the index footer; do not assume one that is not
+listed there. Past days are archived at `https://github.com/mickzijdel/aisafety-radar-data`
+under `YYYY/MM/DD/`.
 
 ## Trust boundary
 

@@ -6,6 +6,7 @@ from pathlib import Path
 from pipeline.models import Extraction, SourceStatus
 from pipeline.render import (
     APPENDIX_PURPOSE,
+    BUNDLES,
     PackMeta,
     build_render_items,
     oneline,
@@ -430,7 +431,13 @@ def test_appendix_purpose_covers_every_file_in_spec_4_1():
 def test_index_golden_and_recipes():
     items, records, movers, statuses = fixture()
     forums = render_forums(META, build_render_items(items, records), movers, statuses)
-    text = render_index(META, {"31-today-forums.md": forums}, lambda s: len(s) // 4)
+    # What a real run passes: the file it rendered, and the reference the skill ships unbuilt.
+    text = render_index(
+        META,
+        {"31-today-forums.md": forums},
+        lambda s: len(s) // 4,
+        {"90-live-sources.md": "the live source list\n"},
+    )
     assert "| `31-today-forums.md` |" in text and "not yet published" in text
     check_golden("00-index.md", text)
 
@@ -464,6 +471,92 @@ def test_render_all_returns_both_files():
         META, build_render_items(items, records), movers, statuses, lambda s: len(s) // 4
     )
     assert set(out) == {"31-today-forums.md", "00-index.md"}
+
+
+# --- the index says only what the pack actually has ----------------------------------------
+
+LIVE_SOURCES = "90-live-sources.md"
+
+
+def published_rows(text):
+    """The index rows claiming a file exists: `name -> tokens`, skipping the unpublished ones."""
+    rows = {}
+    for line in text.splitlines():
+        m = re.fullmatch(r"\| `([^`]+)` \| [^|]* \| ([^|]*) \| ([^|]*) \|", line)
+        if m and m.group(3).strip() != "not yet published":
+            rows[m.group(1)] = m.group(2).strip()
+    return rows
+
+
+def footer_bundles(text):
+    return set(re.findall(r"/latest/([a-z]+\.md)", text.split("Bundles for one fetch:")[-1]))
+
+
+def test_index_shows_a_static_reference_the_pack_ships_as_published():
+    # `90-live-sources.md` is hand-maintained and shipped in the skill's references directory, so
+    # it sits next to the index the moment a reader opens it. Saying "not yet published" of a file
+    # the reader already has is the index misreporting its own directory.
+    text = render_index(
+        META, {"31-today-forums.md": "x" * 400}, lambda s: len(s) // 4, {LIVE_SOURCES: "y" * 200}
+    )
+    rows = published_rows(text)
+    assert set(rows) == {"31-today-forums.md", LIVE_SOURCES}
+    assert rows[LIVE_SOURCES] == "50", "a shipped file gets a real token count, not a dash"
+    assert "not yet published" in text, "and the files that really are missing still say so"
+
+
+def test_no_index_row_claims_a_file_the_pack_does_not_have():
+    forums = "31-today-forums.md"
+    text = render_index(META, {forums: "x"}, lambda s: len(s) // 4, {LIVE_SOURCES: "y"})
+    assert set(published_rows(text)) == {forums, LIVE_SOURCES}
+    # With nothing rendered and nothing shipped, the index claims nothing at all.
+    assert published_rows(render_index(META, {}, lambda s: len(s) // 4)) == {}
+
+
+def test_the_index_footer_names_only_the_bundles_the_site_will_write():
+    # `site._write_bundles` writes a bundle when at least one of its parts is in the pack, so the
+    # footer is computed from that same rule over the same files. `31-today-forums.md` is a part
+    # of `today.md` and of nothing else; `90-live-sources.md` is a part of no bundle at all.
+    text = render_index(
+        META, {"31-today-forums.md": "x"}, lambda s: len(s) // 4, {LIVE_SOURCES: "y"}
+    )
+    assert footer_bundles(text) == {"today.md"}
+    # And nowhere else in the footer either -- the check above reads the links, this reads the
+    # prose around them, so a bundle named without a link cannot slip through.
+    footer = text.split("Bundles for one fetch:")[-1]
+    for absent in ("week.md", "careers.md", "map.md"):
+        assert absent not in footer, absent
+
+
+def test_the_index_footer_disappears_when_no_bundle_has_a_part():
+    assert "Bundles for one fetch" not in render_index(META, {}, lambda s: len(s) // 4)
+
+
+def test_the_index_footer_names_every_bundle_once_the_whole_pack_exists():
+    whole = dict.fromkeys(APPENDIX_PURPOSE, "x")
+    assert footer_bundles(render_index(META, whole, lambda s: len(s) // 4)) == set(BUNDLES)
+
+
+def test_render_all_reads_the_static_references_out_of_the_pack_directory(tmp_path):
+    # The run writes the pack into the skill's references directory, which already holds the
+    # hand-maintained files. Handing `render_all` that directory is what lets the index tell a
+    # shipped file from an unwritten one.
+    (tmp_path / LIVE_SOURCES).write_text("live sources\n")
+    (tmp_path / "31-today-forums.md").write_text("yesterday's forums file\n")
+    (tmp_path / "notes.txt").write_text("not an appendix\n")
+    out = render_all(META, [], [], [], lambda s: len(s) // 4, static_dir=tmp_path)
+    assert set(out) == {"31-today-forums.md", "00-index.md"}
+    # The static file counts. Yesterday's copy of a file this run re-rendered does not, or the
+    # index would report the stale one; a file that is not an appendix is ignored outright.
+    assert set(published_rows(out["00-index.md"])) == {"31-today-forums.md", LIVE_SOURCES}
+
+
+def test_render_all_without_a_pack_directory_claims_only_what_it_rendered(tmp_path):
+    out = render_all(META, [], [], [], lambda s: len(s) // 4)
+    assert set(published_rows(out["00-index.md"])) == {"31-today-forums.md"}
+    # A directory that does not exist yet is the first run, not an error.
+    out = render_all(META, [], [], [], lambda s: len(s) // 4, static_dir=tmp_path / "nope")
+    assert set(published_rows(out["00-index.md"])) == {"31-today-forums.md"}
 
 
 def test_output_has_no_em_dashes_and_ends_in_one_newline():

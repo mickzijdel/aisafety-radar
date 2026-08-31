@@ -11,4 +11,5 @@ Load only what the task needs. Token counts are approximate.
 
 {% for r in recipes %}- **{{ r.name }}**: {% if r.files %}{{ r.files|code_list }} (about {{ r.tokens }} tokens){% if r.missing %}; {% endif %}{% endif %}{% if r.missing %}not yet published: {{ r.missing|code_list }}{% endif %}
 {% endfor %}
-Bundles for one fetch: `{{ meta.latest_base }}/today.md`, `{{ meta.latest_base }}/week.md`, `{{ meta.latest_base }}/careers.md`, `{{ meta.latest_base }}/map.md`.
+{% if bundles %}Bundles for one fetch: {% for b in bundles %}`{{ meta.latest_base }}/{{ b }}`{% if not loop.last %}, {% endif %}{% endfor %}.
+{% endif %}

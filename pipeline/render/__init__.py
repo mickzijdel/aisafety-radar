@@ -161,6 +161,36 @@ RECIPES: list[tuple[str, list[str]]] = [
 ]
 
 
+# Bundle file name per recipe name in `RECIPES`. The recipes are the source of truth for the file
+# lists; this only names the download.
+_RECIPE_BUNDLES = {
+    "what happened today": "today.md",
+    "this week": "week.md",
+    "career change": "careers.md",
+}
+
+# The slow layer in one fetch. No recipe matches it: "a close look at one area" is two files
+# chosen per area, not the whole map.
+_MAP_BUNDLE = [
+    "10-map-field-overview.md",
+    "11-map-orgs.md",
+    "12-map-programmes.md",
+    "13-map-glossary.md",
+    "14-map-readings.md",
+]
+
+_recipe_files = dict(RECIPES)
+assert _RECIPE_BUNDLES.keys() <= _recipe_files.keys(), "a bundle names a recipe that is gone"
+
+# What each downloadable bundle is made of. This lives here rather than in `pipeline.publish.site`,
+# which is what writes the files, because the *index* has to name the same bundles the site
+# actually publishes and the index is rendered a job earlier: a footer advertising `week.md`
+# against a site that never wrote one sends readers to a 404. `site.py` imports it from here.
+BUNDLES: dict[str, list[str]] = {
+    bundle: _recipe_files[recipe] for recipe, bundle in _RECIPE_BUNDLES.items()
+} | {"map.md": _MAP_BUNDLE}
+
+
 @dataclass
 class PackMeta:
     version: str
@@ -272,20 +302,39 @@ def render_forums(
     )
 
 
-def render_index(meta: PackMeta, appendices: dict[str, str], counter: Callable[[str], int]) -> str:
+def render_index(
+    meta: PackMeta,
+    appendices: dict[str, str],
+    counter: Callable[[str], int],
+    static: dict[str, str] | None = None,
+) -> str:
     """The index: one row per appendix in spec 4.1, then the recipes with live token totals.
 
-    Every appendix is listed whether or not this run produced it, so a reader can tell the
-    difference between "this pack has no jobs appendix yet" and "there were no jobs today".
+    Every appendix is listed whether or not this pack has it, so a reader can tell the difference
+    between "this pack has no jobs appendix yet" and "there were no jobs today". What the index
+    must never do is get that distinction backwards, and there are two ways it can:
+
+    * `static` is the appendices the pack ships without this run rendering them -- today that is
+      the hand-maintained `90-live-sources.md`, which sits in the skill's references directory
+      next to the index itself. Marking a file the reader already has as "not yet published" sends
+      them looking for something in their own folder. They are dated `static` rather than with this
+      run's date, because nothing regenerated them today.
+    * The bundle footer names only the bundles the site will actually write, computed from the
+      files this pack has by the same rule `site._write_bundles` applies (a bundle exists when at
+      least one of its parts does). A footer advertising `week.md` against a site that never wrote
+      one hands the reader a 404, and the recipes above it already say what is missing.
     """
     counts = {name: counter(text) for name, text in appendices.items()}
+    shipped = {name: counter(text) for name, text in (static or {}).items()}
     rows = [
         {
             "name": name,
             "purpose": purpose,
-            "tokens": counts[name] if name in counts else "-",
+            "tokens": counts.get(name, shipped.get(name, "-")),
             "generated": (
-                meta.generated_at.date().isoformat() if name in counts else "not yet published"
+                meta.generated_at.date().isoformat()
+                if name in counts
+                else ("static" if name in shipped else "not yet published")
             ),
         }
         for name, purpose in APPENDIX_PURPOSE.items()
@@ -300,11 +349,39 @@ def render_index(meta: PackMeta, appendices: dict[str, str], counter: Callable[[
         }
         for name, files in RECIPES
     ]
+    have = set(counts) | set(shipped)
+    bundles = [b for b, parts in BUNDLES.items() if any(p in have for p in parts)]
     return _tidy(
         _ENV.get_template("00-index.md.j2").render(
-            meta=meta, layer="index", filename="00-index.md", rows=rows, recipes=recipes
+            meta=meta,
+            layer="index",
+            filename="00-index.md",
+            rows=rows,
+            recipes=recipes,
+            bundles=bundles,
         )
     )
+
+
+def _static_references(directory: Path | None, generated: set[str]) -> dict[str, str]:
+    """The appendices already sitting in `directory` that this run does not render itself.
+
+    The pack is written into the skill's references directory, which also holds the files nobody
+    generates -- `90-live-sources.md` today. Reading them here is what lets the index tell "shipped
+    with the skill" from "not written yet".
+
+    Two exclusions, both load-bearing. Files this run *does* render are skipped even when an older
+    copy is on disk, or a rerun would count yesterday's bytes for today's file. Names that are not
+    appendices are skipped because the index has one row per name in `APPENDIX_PURPOSE` and
+    nothing else has a row to appear in.
+    """
+    if directory is None or not directory.is_dir():
+        return {}
+    return {
+        path.name: path.read_text()
+        for path in sorted(directory.glob("*.md"))
+        if path.name in APPENDIX_PURPOSE and path.name not in generated
+    }
 
 
 def render_all(
@@ -313,8 +390,17 @@ def render_all(
     movers: list[Mover],
     statuses: list[SourceStatus],
     counter: Callable[[str], int],
+    static_dir: Path | None = None,
 ) -> dict[str, str]:
-    """Every file this phase renders, keyed by the name it is published under."""
+    """Every file this phase renders, keyed by the name it is published under.
+
+    `static_dir` is where the pack will be written, if the caller knows: the index reads it for
+    the appendices that ship without being generated, so it can report them as published rather
+    than as missing. Only the rendered files come back in the return value; the static ones are
+    already on disk and rewriting them is not this module's job.
+    """
     forums = render_forums(meta, forums_items, movers, statuses)
-    index = render_index(meta, {"31-today-forums.md": forums}, counter)
+    generated = {"31-today-forums.md", "00-index.md"}
+    static = _static_references(static_dir, generated)
+    index = render_index(meta, {"31-today-forums.md": forums}, counter, static)
     return {"31-today-forums.md": forums, "00-index.md": index}

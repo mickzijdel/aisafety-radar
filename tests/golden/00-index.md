@@ -25,7 +25,7 @@ Load only what the task needs. Token counts are approximate.
 | `41-jobs-funding.md` | daily: new roles, funding rounds and deadlines | - | not yet published |
 | `50-forecasts-metrics.md` | daily: forecast movements, Epoch data, benchmarks | - | not yet published |
 | `60-imports-xrisk-daily.md` | verbatim: the latest X-Risk Daily briefing | - | not yet published |
-| `90-live-sources.md` | stable URLs and APIs for every source | - | not yet published |
+| `90-live-sources.md` | stable URLs and APIs for every source | 5 | static |
 
 ## Recipes
 
@@ -34,4 +34,4 @@ Load only what the task needs. Token counts are approximate.
 - **close look at an area**: not yet published: `10-map-field-overview.md`, `20-current-state.md`
 - **career change**: not yet published: `15-careers.md`, `16-map-field-context.md`, `12-map-programmes.md`, `40-events-training.md`, `41-jobs-funding.md`
 
-Bundles for one fetch: `https://mickzijdel.github.io/aisafety-radar/latest/today.md`, `https://mickzijdel.github.io/aisafety-radar/latest/week.md`, `https://mickzijdel.github.io/aisafety-radar/latest/careers.md`, `https://mickzijdel.github.io/aisafety-radar/latest/map.md`.
+Bundles for one fetch: `https://mickzijdel.github.io/aisafety-radar/latest/today.md`.
