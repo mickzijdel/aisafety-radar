@@ -1,0 +1,20 @@
+{% include 'header.j2' %}
+# Today on the forums · {{ meta.data_through.strftime('%Y-%m-%d') }}
+
+{{ items|length|plural('post') }} from LessWrong, the Alignment Forum and the EA Forum in the 24 hours to {{ meta.data_through.strftime('%Y-%m-%d %H:%M') }} UTC, ordered by importance.{% for s in statuses if not s.ok %} Source unavailable today: {{ s.source }}.{% endfor %}
+
+## Posts
+
+{% if not items %}No posts from these forums cleared the bar today.
+{% endif %}{% for it in items %}{% include 'item.j2' %}
+{% endfor %}
+{% if movers %}
+## Discussion movers
+
+Older posts whose discussion moved since the previous version.
+
+{% for m in movers %}- **{{ m.title }}**{% if m.new_comments > 0 %} · +{{ m.new_comments|plural('comment') }}{% endif %}{% if m.score_before is not none and m.score_after is not none %} · karma {{ m.score_before }} -> {{ m.score_after }}{% endif %} · {{ m.url }}
+{% if m.record.extraction.discussion_signal %}  Discussion: {{ m.record.extraction.discussion_signal }}
+{% endif %}{% if m.top_new_comment %}  New top comment by {{ m.top_new_comment.author }} ({{ m.top_new_comment.score }} karma).
+{% endif %}
+{% endfor %}{% endif %}
