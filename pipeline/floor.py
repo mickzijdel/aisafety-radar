@@ -7,7 +7,7 @@ need to compare items against each other.
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 
@@ -63,10 +63,16 @@ def apply_floor(
 ) -> FloorResult:
     """Drop low-signal items and cap floods, returning what survives and why the rest did not.
 
-    `source_medians` maps a source name to its recent per-day item count; a source that exceeds
-    `anomaly_multiplier` times its median is capped to the median and reported in `anomalies`.
+    `items` is a single day's fetch: both caps are per-day allowances, so handing this a multi-day
+    batch would spend one day's budget on the lot.
+
+    `source_medians` maps a source name to its recent median of RAW fetched items per day, which is
+    what the daily run records before any floor. Anomaly detection therefore compares the raw input
+    count, not the post-floor survivors: a flood the per-author cap already absorbed is still a
+    flood worth reporting.
     """
     result = FloorResult(kept=[])
+    raw_counts = Counter(item.source for item in items)
 
     # Per-item floors. Curated and frontpage posts are promoted by the forum's own moderation,
     # which is a stronger signal than either karma or account age, so they bypass both.
@@ -75,7 +81,8 @@ def apply_floor(
         bypass = item.curated or item.frontpage
         floor = cfg.post_karma_min.get(item.site or "", 0)
         if not bypass and (item.score or 0) < floor:
-            result.rejected.append(Rejection(item.id, f"karma {item.score} below {floor}"))
+            seen = "unknown" if item.score is None else item.score
+            result.rejected.append(Rejection(item.id, f"karma {seen} below {floor}"))
             continue
         if not bypass and not _account_old_enough(
             item.author_created_at, today, cfg.account_age_days
@@ -96,24 +103,32 @@ def apply_floor(
         for extra in group[cfg.per_author_per_day :]:
             result.rejected.append(Rejection(extra.id, "per-author cap"))
 
-    # Per-source cap, tightened to the median when the day's volume looks anomalous.
+    # Anomaly detection, on the raw counts rather than the survivors. Reported for every flooding
+    # source, including one whose items the floors already dropped entirely — the anomaly says
+    # something about the fetch, and staying quiet because the defence worked would hide it.
+    anomaly_caps: dict[str, int] = {}
+    for source, raw in raw_counts.items():
+        # A median of 0 (or a source with no history) gives nothing to compare against, and
+        # capping to 0 would discard the source entirely — leave the flat cap in charge.
+        median = (source_medians or {}).get(source)
+        if median and raw > cfg.anomaly_multiplier * median:
+            anomaly_caps[source] = cap = min(cfg.per_source_per_day, median)
+            result.anomalies.append(
+                f"{source}: {raw} items vs 30-day median {median}; capped to {cap}"
+            )
+
+    # Per-source cap, tightened to the median for a source flagged above.
     by_source: dict[str, list[Item]] = defaultdict(list)
     for item in after_author:
         by_source[item.source].append(item)
     for source, group in by_source.items():
         group.sort(key=_by_score_then_id)
-        cap = cfg.per_source_per_day
-        # A median of 0 (or a source with no history) gives nothing to compare against, and
-        # capping to 0 would discard the source entirely — leave the flat cap in charge.
-        median = (source_medians or {}).get(source)
-        if median and len(group) > cfg.anomaly_multiplier * median:
-            result.anomalies.append(
-                f"{source}: {len(group)} items vs 30-day median {median}; capped to {median}"
-            )
-            cap = min(cap, median)
+        anomalous = source in anomaly_caps
+        cap = anomaly_caps[source] if anomalous else cfg.per_source_per_day
+        reason = "per-source anomaly cap" if anomalous else "per-source cap"
         result.kept.extend(group[:cap])
         for extra in group[cap:]:
-            result.rejected.append(Rejection(extra.id, "per-source cap"))
+            result.rejected.append(Rejection(extra.id, reason))
     return result
 
 

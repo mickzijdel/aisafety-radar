@@ -52,6 +52,59 @@ def test_anomaly_caps_to_median():
     ]
     res = apply_floor(items, FloorConfig(), TODAY, source_medians={"lesswrong": 10})
     assert len(res.kept) == 10 and res.anomalies and "lesswrong" in res.anomalies[0]
+    assert "40 items" in res.anomalies[0] and "capped to 10" in res.anomalies[0]
+
+
+def test_anomaly_measured_on_raw_counts_not_survivors():
+    # 100 posts from one author: the per-author cap cuts the group to 3 before the source cap ever
+    # sees it, so a flood is only visible if the anomaly check reads the raw fetched count.
+    items = [
+        make_item(id=f"lw:{n}", score=100, author="Flooder", author_created_at=OLD_ACCOUNT)
+        for n in range(100)
+    ]
+    res = apply_floor(items, FloorConfig(), TODAY, source_medians={"lesswrong": 10})
+    assert len(res.kept) == 3
+    assert res.anomalies and "100 items" in res.anomalies[0]
+
+
+def test_anomaly_recorded_even_when_floors_reject_every_item():
+    items = [
+        make_item(id=f"lw:{n}", score=100, frontpage=False, author_created_at=None)
+        for n in range(50)
+    ]
+    res = apply_floor(items, FloorConfig(), TODAY, source_medians={"lesswrong": 10})
+    assert res.kept == []
+    assert res.anomalies and "50 items" in res.anomalies[0]
+
+
+def test_anomaly_message_states_effective_cap_when_flat_cap_is_tighter():
+    items = [
+        make_item(id=f"lw:{n}", score=100 - n, author=f"a{n}", author_created_at=OLD_ACCOUNT)
+        for n in range(40)
+    ]
+    res = apply_floor(
+        items, FloorConfig(per_source_per_day=5), TODAY, source_medians={"lesswrong": 10}
+    )
+    assert len(res.kept) == 5
+    assert "capped to 5" in res.anomalies[0]
+
+
+def test_anomaly_capped_items_get_a_distinct_rejection_reason():
+    items = [
+        make_item(id=f"lw:{n}", score=100 - n, author=f"a{n}", author_created_at=OLD_ACCOUNT)
+        for n in range(40)
+    ]
+    res = apply_floor(items, FloorConfig(), TODAY, source_medians={"lesswrong": 10})
+    assert {r.reason for r in res.rejected} == {"per-source anomaly cap"}
+
+
+def test_scoreless_item_reason_reads_unknown():
+    res = apply_floor(
+        [make_item(id="lw:x", score=None, frontpage=False, author_created_at=OLD_ACCOUNT)],
+        FloorConfig(),
+        TODAY,
+    )
+    assert res.rejected[0].reason == "karma unknown below 20"
 
 
 def test_per_source_cap_keeps_highest_and_records_reason():
