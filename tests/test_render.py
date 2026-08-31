@@ -8,6 +8,7 @@ from pipeline.render import (
     APPENDIX_PURPOSE,
     PackMeta,
     build_render_items,
+    oneline,
     render_all,
     render_forums,
     render_index,
@@ -31,10 +32,32 @@ META = PackMeta(
 )
 
 
-def rec(item_id, importance=3, degraded=False, quotes=("a quote",), signal=None):
+def comment(author="Bob", score=83):
+    return Comment(
+        id="lw:c1",
+        post_id="lw:9",
+        site="lw",
+        author=author,
+        author_created_at=None,
+        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
+        score=score,
+        agreement=None,
+        parent_id=None,
+        text="body",
+    )
+
+
+def rec(
+    item_id,
+    importance=3,
+    degraded=False,
+    quotes=("a quote",),
+    signal=None,
+    summary="Claims X with a 45% drop.",
+):
     e = Extraction(
         item_id=item_id,
-        summary="Claims X with a 45% drop.",
+        summary=summary,
         key_quotes=list(quotes),
         author_stated_status="Epistemic status: exploratory",
         claim_type="exploratory",
@@ -49,8 +72,17 @@ def rec(item_id, importance=3, degraded=False, quotes=("a quote",), signal=None)
 
 
 def fixture():
+    """The golden-file scenario, wide enough that the goldens show every branch of the item and
+    mover templates: an affiliation, a degraded item that still carries a verified quote, a mover
+    with a discussion signal and a new top comment, and a source that was down."""
     items = [
-        make_item(id="lw:1", title="Post one", score=45, agreement=12),
+        make_item(
+            id="lw:1",
+            title="Post one",
+            score=45,
+            agreement=12,
+            author_affiliation="Redwood Research",
+        ),
         make_item(
             id="eaf:2",
             site="eaf",
@@ -63,7 +95,7 @@ def fixture():
     ]
     records = [
         rec("lw:1", importance=5, signal="Contested; Bob (83 karma) disagrees."),
-        rec("eaf:2", importance=2, degraded=True, quotes=()),
+        rec("eaf:2", importance=2, degraded=True),
     ]
     movers = [
         Mover(
@@ -73,11 +105,18 @@ def fixture():
             12,
             40,
             60,
-            None,
-            rec("lw:9"),
+            comment(),
+            rec("lw:9", signal="Now contested; Bob (83 karma) pushes back."),
         )
     ]
-    return items, records, movers
+    statuses = [
+        SourceStatus(source="lesswrong", category="forums", ok=True, items=1),
+        SourceStatus(
+            source="alignmentforum", category="forums", ok=False, items=0, error="timeout"
+        ),
+        SourceStatus(source="eaforum", category="forums", ok=True, items=1),
+    ]
+    return items, records, movers, statuses
 
 
 def check_golden(name, text):
@@ -91,7 +130,7 @@ def check_golden(name, text):
 
 
 def test_render_items_order_and_fields():
-    items, records, _ = fixture()
+    items, records, _, _ = fixture()
     ri = build_render_items(items, records)
     assert [r.title for r in ri] == ["Post one", "Post two"]
     assert ri[0].agreement_line == "agree 12" and ri[1].agreement_line is None
@@ -148,8 +187,8 @@ def test_prose_fields_are_collapsed_onto_one_line():
 
 
 def test_forums_golden():
-    items, records, movers = fixture()
-    text = render_forums(META, build_render_items(items, records), movers, [])
+    items, records, movers, statuses = fixture()
+    text = render_forums(META, build_render_items(items, records), movers, statuses)
     assert text.startswith(
         "<!-- aisafety-radar · version 2026.08.30a · generated 2026-08-30T06:14Z"
     )
@@ -160,8 +199,9 @@ def test_forums_golden():
 
 
 def test_header_is_a_single_html_comment_of_three_lines():
-    items, records, movers = fixture()
-    head = render_forums(META, build_render_items(items, records), movers, []).split("-->")[0]
+    items, records, movers, statuses = fixture()
+    text = render_forums(META, build_render_items(items, records), movers, statuses)
+    head = text.split("-->")[0]
     assert head.count("<!--") == 1
     assert len(head.splitlines()) == 3
     assert "layer: daily · latest: " in head
@@ -174,20 +214,18 @@ def test_header_block_is_byte_for_byte_the_one_in_spec_4_1():
     # header and the spec's fenced block must be the same string. If either side is edited
     # without the other, this fails.
     fence = SPEC.read_text().split("Every generated appendix starts with the same header block:")[1]
-    items, records, movers = fixture()
-    rendered = render_forums(META, build_render_items(items, records), movers, [])
+    items, records, movers, statuses = fixture()
+    rendered = render_forums(META, build_render_items(items, records), movers, statuses)
     assert fence.split("```")[1].strip("\n") == "\n".join(rendered.split("\n")[:3])
 
 
 def test_failed_sources_are_named_in_the_lead_paragraph():
-    items, records, movers = fixture()
-    statuses = [
-        SourceStatus(source="lesswrong", category="forums", ok=True, items=2),
-        SourceStatus(source="eaforum", category="forums", ok=False, items=0, error="timeout"),
-    ]
+    items, records, movers, statuses = fixture()
     text = render_forums(META, build_render_items(items, records), movers, statuses)
-    assert "ordered by importance. Source unavailable today: eaforum." in text
-    assert "lesswrong." not in text.split("## Posts")[0]
+    lead = text.split("## Posts")[0]
+    assert "ordered by importance. Source unavailable today: alignmentforum." in lead
+    # The healthy sources are not named: the line reports failures, not a roll call.
+    assert "lesswrong." not in lead and "eaforum." not in lead
 
 
 def test_no_posts_renders_a_sentence_rather_than_an_empty_section():
@@ -205,7 +243,6 @@ def test_one_post_is_singular():
 
 
 def test_karma_only_mover_omits_the_comment_segment():
-    _, _, _ = fixture()
     movers = [
         Mover(
             "lw:9",
@@ -235,18 +272,6 @@ def test_karma_only_mover_omits_the_comment_segment():
 
 
 def test_mover_renders_its_new_top_comment():
-    comment = Comment(
-        id="lw:c1",
-        post_id="lw:9",
-        site="lw",
-        author="Bob",
-        author_created_at=None,
-        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
-        score=83,
-        agreement=None,
-        parent_id=None,
-        text="body",
-    )
     movers = [
         Mover(
             "lw:9",
@@ -255,13 +280,138 @@ def test_mover_renders_its_new_top_comment():
             12,
             None,
             None,
-            comment,
+            comment(),
             rec("lw:9"),
         )
     ]
     text = render_forums(META, [], movers, [])
     assert "- **Older post** · +12 comments · https://www.lesswrong.com/posts/9/y" in text
     assert "  New top comment by Bob (83 karma)." in text
+
+
+# The forgery a renderer has to survive: prose that closes the block it was placed in and opens
+# a heading and an item line of its own, so a reader (or an agent) sees a post that no fetcher
+# ever saw, with a link nothing verified.
+INJECTION = (
+    "Contested.\n\n## Injected heading\n\n"
+    "- **Fake post** · Nobody (LW · 2026-08-30) · https://evil.example/x"
+)
+
+
+def headings(text):
+    return [line for line in text.splitlines() if line.lstrip().startswith("#")]
+
+
+def item_lines(text):
+    return [line for line in text.splitlines() if line.startswith("- **")]
+
+
+def test_oneline_flattens_and_escapes_block_markers():
+    assert oneline("## heading") == "\\## heading"
+    assert oneline("# heading") == "\\# heading"
+    assert oneline("- item") == "\\- item"
+    assert oneline("* item") == "\\* item"
+    assert oneline("> quote") == "\\> quote"
+    assert oneline(">quote") == "\\>quote"
+    assert oneline("multi\n\nline  text") == "multi line text"
+    assert oneline(None) == ""
+    # Not structure: a marker mid-sentence, and a hash with no space after it.
+    assert oneline("a - b") == "a - b"
+    assert oneline("#1 by karma") == "#1 by karma"
+
+
+def test_injected_markdown_in_a_mover_signal_cannot_forge_a_heading_or_an_item():
+    movers = [
+        Mover(
+            "lw:9",
+            "Older post",
+            "https://www.lesswrong.com/posts/9/y",
+            3,
+            None,
+            None,
+            None,
+            rec("lw:9", signal=INJECTION),
+        )
+    ]
+    text = render_forums(META, [], movers, [])
+    assert headings(text) == [
+        "# Today on the forums · 2026-08-30",
+        "## Posts",
+        "## Discussion movers",
+    ]
+    assert item_lines(text) == [
+        "- **Older post** · +3 comments · https://www.lesswrong.com/posts/9/y"
+    ]
+    # The payload is still shown, in full, but flattened onto the line the template chose.
+    assert (
+        "  Discussion: Contested. ## Injected heading - **Fake post** · Nobody "
+        "(LW · 2026-08-30) · https://evil.example/x" in text
+    )
+
+
+def test_injected_markdown_in_a_post_summary_cannot_forge_a_heading_or_an_item():
+    items = [make_item(id="lw:1", title="Post one")]
+    text = render_forums(META, build_render_items(items, [rec("lw:1", summary=INJECTION)]), [], [])
+    assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
+    assert item_lines(text) == [
+        "- **Post one** · A (LW · 2026-08-29 · 45 karma · 3 comments) "
+        "· https://www.lesswrong.com/posts/abc123/x"
+    ]
+
+
+def test_a_heading_marker_starting_a_summary_is_escaped():
+    items = [make_item(id="lw:1", title="Post one")]
+    text = render_forums(
+        META, build_render_items(items, [rec("lw:1", summary="## Not a heading")]), [], []
+    )
+    assert "  \\## Not a heading" in text
+    assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
+
+
+def test_a_newline_in_an_author_cannot_break_the_metadata_line():
+    items = [make_item(id="lw:1", title="Post one", author="Alice\n# Injected")]
+    text = render_forums(META, build_render_items(items, [rec("lw:1")]), [], [])
+    assert item_lines(text) == [
+        "- **Post one** · Alice # Injected (LW · 2026-08-29 · 45 karma · 3 comments) "
+        "· https://www.lesswrong.com/posts/abc123/x"
+    ]
+    assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
+
+
+def test_a_newline_in_a_mover_comment_author_cannot_break_its_line():
+    movers = [
+        Mover(
+            "lw:9",
+            "Older\n## post",
+            "https://www.lesswrong.com/posts/9/y",
+            3,
+            None,
+            None,
+            comment(author="Bob\n## Injected"),
+            rec("lw:9"),
+        )
+    ]
+    text = render_forums(META, [], movers, [])
+    assert item_lines(text) == [
+        "- **Older ## post** · +3 comments · https://www.lesswrong.com/posts/9/y"
+    ]
+    assert "  New top comment by Bob ## Injected (83 karma)." in text
+    assert headings(text) == [
+        "# Today on the forums · 2026-08-30",
+        "## Posts",
+        "## Discussion movers",
+    ]
+
+
+def test_a_newline_in_a_failed_source_name_cannot_break_the_lead_paragraph():
+    statuses = [
+        SourceStatus(
+            source="eaforum\n\n## Injected", category="forums", ok=False, items=0, error="x"
+        )
+    ]
+    text = render_forums(META, [], [], statuses)
+    assert "Source unavailable today: eaforum ## Injected." in text
+    assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
 
 
 def test_degraded_item_withholds_the_summary_but_keeps_metadata_and_quotes():
@@ -282,8 +432,8 @@ def test_appendix_purpose_covers_every_file_in_spec_4_1():
 
 
 def test_index_golden_and_recipes():
-    items, records, movers = fixture()
-    forums = render_forums(META, build_render_items(items, records), movers, [])
+    items, records, movers, statuses = fixture()
+    forums = render_forums(META, build_render_items(items, records), movers, statuses)
     text = render_index(META, {"31-today-forums.md": forums}, lambda s: len(s) // 4)
     assert "| `31-today-forums.md` |" in text and "not yet published" in text
     check_golden("00-index.md", text)
@@ -313,15 +463,17 @@ def test_index_recipe_with_nothing_published_states_only_what_is_missing():
 
 
 def test_render_all_returns_both_files():
-    items, records, movers = fixture()
-    out = render_all(META, build_render_items(items, records), movers, [], lambda s: len(s) // 4)
+    items, records, movers, statuses = fixture()
+    out = render_all(
+        META, build_render_items(items, records), movers, statuses, lambda s: len(s) // 4
+    )
     assert set(out) == {"31-today-forums.md", "00-index.md"}
 
 
 def test_output_has_no_em_dashes_and_ends_in_one_newline():
-    items, records, movers = fixture()
+    items, records, movers, statuses = fixture()
     for name, text in render_all(
-        META, build_render_items(items, records), movers, [], lambda s: len(s) // 4
+        META, build_render_items(items, records), movers, statuses, lambda s: len(s) // 4
     ).items():
         assert "—" not in text and "–" not in text, name
         assert text.endswith("\n") and not text.endswith("\n\n"), name

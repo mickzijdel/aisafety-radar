@@ -21,10 +21,22 @@ Whitespace is normalised on the way out (`_tidy`) rather than micro-managed with
 whitespace control. The templates then only have to get the *content* right and may be written
 to read like the markdown they produce; the guarantee that the file has no trailing spaces, no
 double blank lines and exactly one final newline lives in one place and is tested once.
+
+**The structure invariant: all prose and display strings pass through `oneline`; quotes are the
+only verbatim slot, and they render inside `> "..."`.** Everything a template interpolates apart
+from a quote is third-party text (a post title, an author name, a model-written summary or
+discussion signal), and markdown gives a string no way to say "I am content, not structure". A
+summary arriving as `Contested.\\n\\n## Heading\\n\\n- **Fake post** ...` would otherwise close
+the item block and render a real heading and a counterfeit item line: precisely the forgery the
+template-owns-the-metadata-line rule (spec 6.3) exists to prevent, reintroduced one layer down.
+`oneline` flattens the value to a single line and escapes a leading block marker, so third-party
+text can only ever land *inside* the line the template put it on. Any interpolation added to a
+template needs `|oneline` unless it is a number or one of this module's own constants.
 """
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import datetime
@@ -35,6 +47,27 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pipeline.models import Item, SourceStatus
 from pipeline.stages.comments import Mover
 from pipeline.stages.verify import ExtractionRecord
+
+# A line that markdown would read as opening a block rather than as text: an ATX heading, a
+# bullet, or a blockquote. `#` and the bullet markers need the trailing space (`#foo` is not a
+# heading); `>` does not (`>foo` is a blockquote). Anchored, so only a marker at the *start* of
+# the flattened line can do structural damage; `a - b` mid-sentence is left alone.
+_OPENS_A_BLOCK = re.compile(r"^(?:#{1,6}(?:\s|$)|[-*+](?:\s|$)|>)")
+
+
+def oneline(text: str | None) -> str:
+    """`text` flattened to one line, with a leading markdown block marker escaped.
+
+    Every prose and display value a template interpolates goes through this. Flattening is what
+    stops third-party text escaping the line the template put it on; the backslash is what stops
+    a *single*-line `## Heading` doing the same thing without needing a newline (an indented
+    heading is still a heading: CommonMark allows up to three leading spaces, so the two-space
+    indent under a metadata line is no protection).
+    """
+    if text is None:
+        return ""
+    line = " ".join(text.split())
+    return "\\" + line if _OPENS_A_BLOCK.match(line) else line
 
 
 def _plural(count: int, word: str) -> str:
@@ -55,6 +88,7 @@ _ENV = Environment(
     trim_blocks=False,
     lstrip_blocks=False,
 )
+_ENV.filters["oneline"] = oneline
 _ENV.filters["plural"] = _plural
 _ENV.filters["code_list"] = _code_list
 
@@ -131,12 +165,14 @@ class RenderItem:
     importance: int
 
 
-def _one_line(text: str | None) -> str | None:
-    """`text` with every run of whitespace collapsed to one space, or None.
+def _collapse(text: str | None) -> str | None:
+    """`text` with every run of whitespace collapsed to one space, preserving None.
 
-    Every field the item template renders occupies exactly one line, indented under the metadata
-    line. A summary or quote that arrived with a newline in it would break out of that block and
-    read as a new top-level paragraph, so the newline is spent here rather than in the template.
+    `RenderItem` is the templates' input, and every field of it occupies exactly one line, so it
+    is built with single-line values. This is *not* the structure guarantee: escaping belongs to
+    render time, where `oneline` applies it to movers and statuses too, which never pass through
+    here. Keeping the two separate leaves `RenderItem` holding readable data rather than
+    backslash-escaped markdown.
     """
     return " ".join(text.split()) if text is not None else None
 
@@ -169,9 +205,9 @@ def build_render_items(items: list[Item], records: list[ExtractionRecord]) -> li
         e = record.extraction
         out.append(
             RenderItem(
-                title=_one_line(item.title) or item.id,
+                title=_collapse(item.title) or item.id,
                 author=item.author,
-                affiliation=_one_line(item.author_affiliation),
+                affiliation=_collapse(item.author_affiliation),
                 site_label=SITE_LABELS.get(item.site or "", item.source),
                 date=item.published_at.date().isoformat(),
                 score=item.score,
@@ -179,12 +215,12 @@ def build_render_items(items: list[Item], records: list[ExtractionRecord]) -> li
                 agreement_line=f"agree {item.agreement}" if item.agreement else None,
                 comment_count=item.comment_count,
                 url=item.url,
-                summary=_one_line(e.summary) or "",
-                author_stated_status=_one_line(e.author_stated_status),
+                summary=_collapse(e.summary) or "",
+                author_stated_status=_collapse(e.author_stated_status),
                 claim_type=e.claim_type,
-                discussion_signal=_one_line(e.discussion_signal),
-                novelty=_one_line(e.novelty),
-                quotes=[q for q in (_one_line(q) for q in e.key_quotes) if q],
+                discussion_signal=_collapse(e.discussion_signal),
+                novelty=_collapse(e.novelty),
+                quotes=[q for q in (_collapse(q) for q in e.key_quotes) if q],
                 degraded=record.degraded,
                 importance=e.importance,
             )
