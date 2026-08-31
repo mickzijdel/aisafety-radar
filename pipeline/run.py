@@ -12,6 +12,10 @@ stating, because each is easy to get subtly wrong and cheap to get right here:
 * **The anomaly medians are raw fetcher counts.** `run.json` records `statuses[].items`, which is
   what each source returned *before* the floor, and that is the unit `apply_floor` compares
   against. Feeding it post-floor survivors would hide a flood the per-author cap already absorbed.
+* **The scan gate does not cover movers.** `gate_scan` is given this run's rendered item ids, and
+  a mover is an archived record from an earlier day republished through `refresh_comments`. That
+  stage therefore scans its own refreshed signal and refuses to touch a record an earlier scan
+  flagged; nothing here would catch either case.
 * **Failure isolation is per source and per item.** `run_all` already isolates a daily fetch; the
   14-day window fetch, the comment refresh and every item's own extract/scan/judge are isolated
   here on the same principle, so one forum being down or one API call failing costs its own
@@ -63,7 +67,14 @@ from pipeline.qa.gates import (
 from pipeline.render import PackMeta, build_render_items, render_all
 from pipeline.stages.comments import Mover, refresh_comments
 from pipeline.stages.extract import extract_verified
-from pipeline.stages.scan import JudgeResult, ScanResult, judge_record, needs_judge, scan_record
+from pipeline.stages.scan import (
+    QUARANTINE_NOTE,
+    JudgeResult,
+    ScanResult,
+    judge_record,
+    needs_judge,
+    scan_record,
+)
 from pipeline.stages.triage import select, triage
 from pipeline.stages.verify import ExtractionRecord
 
@@ -211,7 +222,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
                 # go back and read teaches nothing.
                 quarantined.append(
                     record.model_copy(
-                        update={"notes": record.notes + [f"scan flagged: {scan.reason}"]}
+                        update={"notes": record.notes + [f"{QUARANTINE_NOTE} {scan.reason}"]}
                     )
                 )
                 continue

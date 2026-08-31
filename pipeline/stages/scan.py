@@ -69,6 +69,13 @@ _JUDGE_SCHEMA = {
 _DOC_TOKENS = 12000
 
 
+# The prefix every note about a flagged record starts with. It is a value rather than a literal
+# because two stages write it and two read it: `run_daily` quarantines a flagged extraction with
+# it, the comment refresh quarantines a flagged refreshed signal with it, and the refresh then
+# skips any record already carrying one. A typo in one copy would silently unquarantine a record.
+QUARANTINE_NOTE = "scan flagged:"
+
+
 @dataclass
 class ScanResult:
     flagged: bool

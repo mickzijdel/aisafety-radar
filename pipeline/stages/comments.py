@@ -10,12 +10,18 @@ The signal is checked the same way `verify` checks an extraction: every number i
 in the comment text the model was shown, or the field is nulled. The prompt's blocks are built
 through `data_block`, so a commenter cannot close a block and continue as if they were the system.
 
+A refreshed signal is also scanned for injection before it is written back, and a record an
+earlier scan flagged is never refreshed at all. Both are this stage's own responsibility: the
+mover path publishes an archived record without going through `run_daily`'s scan-and-drop loop,
+and `gate_scan` is given today's item ids, so nothing downstream would notice either case.
+
 `run.py` fetches the 14-day post window and snapshots the ledger before calling in here; this
 stage only reads the ledger.
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time
 
@@ -26,8 +32,11 @@ from pipeline.floor import filter_comments
 from pipeline.ledger import Movement, PostsLedger
 from pipeline.llm import LLM
 from pipeline.models import Comment, Site
+from pipeline.stages.scan import QUARANTINE_NOTE, scan_record
 from pipeline.stages.verify import ExtractionRecord
 from pipeline.textnorm import contains, data_block, find_numbers_and_dates, truncate_tokens_approx
+
+log = logging.getLogger(__name__)
 
 SIGNAL_SYSTEM = """You update the discussion_signal field of a digest entry. You receive the
 entry's existing summary and the top comments on the post, in data blocks. Write one sentence:
@@ -172,6 +181,39 @@ def refresh_discussion_signal(
     )
 
 
+def _quarantine_if_flagged(
+    record: ExtractionRecord, llm: LLM, settings: Settings
+) -> ExtractionRecord | None:
+    """The record with its refreshed signal removed and a quarantine note added, or None if clean.
+
+    A refreshed signal is model prose written out of comment text that no scan has ever read, and
+    it reaches the rendered pack down the mover path, which `gate_scan` does not cover: that gate
+    is given the day's own item ids. So the refresh scans its own output on the same terms
+    `run_daily` scans an extraction, and a flagged one loses the signal on the spot.
+
+    A signal that came back null costs no call: nothing new entered the record, and everything
+    else in it was scanned on the day it was written.
+    """
+    if record.extraction.discussion_signal is None:
+        return None
+    scan = scan_record(record, llm, settings)
+    if not scan.flagged:
+        return None
+    log.warning(
+        "injection scan flagged the refreshed signal on %s: %s",
+        record.extraction.item_id,
+        scan.reason,
+    )
+    # The note is written back rather than just dropped, so tomorrow's refresh skips this record
+    # instead of paying to have the same poisoned thread summarised again.
+    return record.model_copy(
+        update={
+            "extraction": record.extraction.model_copy(update={"discussion_signal": None}),
+            "notes": [*record.notes, f"{QUARANTINE_NOTE} {scan.reason}"],
+        }
+    )
+
+
 def refresh_comments(
     clients: dict[Site, ForumClient],
     ledger: PostsLedger,
@@ -210,6 +252,14 @@ def refresh_comments(
         if found is None:
             continue
         orig_day, record = found
+        # A record the injection scan flagged is out of the pack for good. This path reads the
+        # archive rather than the day's render set, so without the check a day-0 quarantine walks
+        # straight back in the next morning as a discussion mover, carrying the flagged text with
+        # it -- and no gate would object, because `gate_scan` only sees today's own items. The
+        # note is checked before anything is fetched, called for or written.
+        if any(n.startswith(QUARANTINE_NOTE) for n in record.notes):
+            log.warning("%s: quarantined by an earlier injection scan; not refreshed", m.post_id)
+            continue
         site, raw_id = m.post_id.split(":", 1)
         client = clients.get(site)
         if client is None:
@@ -225,7 +275,10 @@ def refresh_comments(
         # says, so the archived record is left exactly as it is.
         if comments:
             refreshed = refresh_discussion_signal(record, comments, llm, settings)
-            archive.update_extraction(orig_day, refreshed)
+            quarantined = _quarantine_if_flagged(refreshed, llm, settings)
+            archive.update_extraction(orig_day, quarantined or refreshed)
+            if quarantined is not None:
+                continue
         if not is_notable(m, settings):
             continue
         new = [c for c in comments if _as_utc(c.posted_at) >= since]
