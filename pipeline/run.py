@@ -54,7 +54,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from pipeline.archive import Archive
 from pipeline.config import Settings
 from pipeline.fetchers.base import Fetcher, Window, run_all
-from pipeline.fetchers.forummagnum import ForumClient, Site
+from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient, Site
 from pipeline.fetchers.forums import raw_post_to_item
 from pipeline.floor import apply_floor
 from pipeline.ledger import PostsLedger, SeenIds
@@ -165,6 +165,16 @@ def _window_posts(
     Isolated per site, and all or nothing within one: this fetch feeds the ledger and the movers,
     so one forum being unreachable -- or sending a record that will not convert -- must cost that
     forum's movers rather than the whole run, and must not leave the ledger holding half a site.
+
+    Metadata only (`POST_FIELDS_LEAN`). Nothing downstream reads a window post's body: a ledger
+    entry is a title, a url, a score and a comment count, and a mover that carries an extraction
+    was extracted on the day it was published, out of its own full record. Asking three sites for
+    500 bodies every morning to store none of them is the largest avoidable transfer in the run.
+
+    It is also a narrowing, not only a saving. Every link in every one of those bodies used to
+    join the provenance gate's allowed set, which meant a fortnight of unrelated posts quietly
+    vouching for hosts nothing in today's pack ever cited. A window post now vouches for its own
+    url, title and author, which is exactly what the mover path renders.
     """
     items: list[Item] = []
     last_commented: dict[str, datetime | None] = {}
@@ -176,6 +186,7 @@ def _window_posts(
                 limit=WINDOW_LIMIT,
                 # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
                 require_ai_tag=site != "af",
+                fields=POST_FIELDS_LEAN,
             )
             converted = [(raw_post_to_item(site, p), p.lastCommentedAt) for p in posts]
         except Exception:  # noqa: BLE001 - isolation is the point

@@ -8,12 +8,15 @@ import pytest
 import respx
 
 from pipeline.fetchers.forummagnum import (
+    POST_FIELDS,
+    POST_FIELDS_LEAN,
     SITES,
     ForumClient,
     RawComment,
     RawPost,
     gql_literal,
 )
+from pipeline.fetchers.forums import raw_post_to_item
 
 UA = "aisafety-radar-test/0"
 
@@ -194,6 +197,50 @@ def test_posts_since_can_skip_the_tag_filter_on_request():
     route = mock_site("lw", "posts", [])
     ForumClient("lw", UA, pause_seconds=0).posts_since(date(2026, 8, 29), require_ai_tag=False)
     assert "filterSettings" not in sent_query(route)
+
+
+@respx.mock
+def test_posts_since_asks_for_the_full_field_set_by_default():
+    route = mock_site("lw", "posts", [])
+    ForumClient("lw", UA, pause_seconds=0).posts_since(date(2026, 8, 29))
+    assert "contents { html }" in sent_query(route)
+
+
+@respx.mock
+def test_the_lean_field_set_leaves_the_post_bodies_on_the_server():
+    # The 14-day window fetch asks for five hundred posts and never reads a body: it feeds the
+    # ledger and the movers, both of which are metadata. Bodies are the overwhelming majority of
+    # that payload, so they are not asked for.
+    route = mock_site("lw", "posts", [])
+    ForumClient("lw", UA, pause_seconds=0).posts_since(
+        date(2026, 8, 29), view="new", fields=POST_FIELDS_LEAN
+    )
+    query = sent_query(route)
+    assert "contents" not in query
+    # Everything the window and the ledger actually read is still there.
+    for field in ("title", "pageUrl", "postedAt", "baseScore", "commentCount", "lastCommentedAt"):
+        assert field in query, field
+
+
+def test_the_lean_field_set_is_the_full_one_minus_the_body():
+    assert "contents { html }" in POST_FIELDS
+    assert POST_FIELDS_LEAN == POST_FIELDS.replace(" contents { html }", "")
+
+
+@respx.mock
+def test_a_post_that_arrives_without_contents_still_parses_and_converts():
+    # The lean fetch's own records carry no `contents` key at all, so `raw_post_to_item` has to
+    # give the item empty text and markdown rather than raising halfway through a 500-post window.
+    lean = {k: v for k, v in POST.items() if k != "contents"}
+    respx.post(SITES["lw"].graphql_url).mock(
+        return_value=httpx.Response(200, json={"data": {"posts": {"results": [lean]}}})
+    )
+    posts = ForumClient("lw", UA, pause_seconds=0).posts_since(
+        date(2026, 8, 29), fields=POST_FIELDS_LEAN
+    )
+    item = raw_post_to_item("lw", posts[0])
+    assert item.text == "" and item.markdown == ""
+    assert item.title == "A post" and item.url.endswith("/a-post")
 
 
 # --- tolerance for records the schema rejects --------------------------------------------------

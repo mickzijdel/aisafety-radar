@@ -21,7 +21,7 @@ from pipeline.archive import Archive
 from pipeline.config import load_settings
 from pipeline.fetchers.base import Window
 from pipeline.fetchers.fixtures import FixtureClient
-from pipeline.fetchers.forummagnum import RawComment, RawPost
+from pipeline.fetchers.forummagnum import POST_FIELDS, RawComment, RawPost
 from pipeline.fetchers.forums import (
     MIN_ITEMS_7D,
     SOURCE_NAMES,
@@ -30,7 +30,13 @@ from pipeline.fetchers.forums import (
 )
 from pipeline.llm import CannedLLM
 from pipeline.models import Extraction, Item
-from pipeline.run import RunInputs, _source_medians, _trailing_cost_median, run_daily
+from pipeline.run import (
+    RunInputs,
+    _source_medians,
+    _trailing_cost_median,
+    _window_posts,
+    run_daily,
+)
 from pipeline.stages.comments import Mover
 from pipeline.stages.extract import extract_verified
 from pipeline.stages.scan import judge_record, scan_record
@@ -268,10 +274,12 @@ def test_a_blocked_run_leaves_its_items_unseen_so_the_rerun_can_publish_them(tmp
 class _BrokenWindowFetch(FixtureClient):
     """A client that serves the daily fetch but fails the 14-day window fetch."""
 
-    def posts_since(self, after, view="top", limit=200, require_ai_tag=True):
+    def posts_since(self, after, view="top", limit=200, require_ai_tag=True, **kw):
         if view == "new":
             raise RuntimeError("window fetch is down")
-        return super().posts_since(after, view=view, limit=limit, require_ai_tag=require_ai_tag)
+        return super().posts_since(
+            after, view=view, limit=limit, require_ai_tag=require_ai_tag, **kw
+        )
 
 
 def test_one_sites_window_fetch_failing_does_not_kill_the_run(tmp_path, caplog):
@@ -359,6 +367,49 @@ def test_a_movers_top_comment_author_may_be_a_url_without_blocking_the_pack(tmp_
     assert "www.example.org/me" in rendered, "precondition: the name reaches the pack"
 
 
+# A link that appears only in the *body* of a post in the 14-day window: a real one, out of the
+# recorded AF fixtures. Its post is a fortnight-old record the pack never renders a word of.
+WINDOW_BODY_URL = "https://aligned.substack.com/p/crisp-and-fuzzy-tasks"
+
+
+def test_the_window_fetch_asks_for_no_post_bodies(tmp_path):
+    items, last_commented = _window_posts(_clients(), FixtureClient.day_of(FIX))
+    assert items, "precondition: the fixtures hold posts inside the 14-day window"
+    # Metadata is what the ledger and the movers read, and it is all still there.
+    assert all(i.title and i.url for i in items)
+    assert last_commented
+    # The bodies are not, so the run neither transfers nor stores them.
+    assert all(i.markdown == "" and i.text == "" for i in items)
+
+
+class _WritesAWindowBodyUrl(CannedLLM):
+    """Canned answers, except every summary cites a link out of an old window post's body."""
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        out = super().structured(model, system, user, schema, max_tokens)
+        if "summary" in out:
+            out["summary"] = f"Contested. Background at {WINDOW_BODY_URL}."
+        return out
+
+
+def test_a_link_from_a_window_posts_body_no_longer_vouches_for_a_model_written_one(tmp_path):
+    """What the lean window fetch narrows. Those 500 records per site used to arrive with their
+    full bodies, and every link in every one of them joined the provenance gate's allowed set --
+    so a fortnight of unrelated posts quietly vouched for hosts nothing in today's pack cited, and
+    a model that lifted one of them published it. A window post now vouches for its own url, title
+    and author, which is exactly what the mover path renders."""
+    full = FixtureClient("af", FIX).posts_since(
+        FixtureClient.day_of(FIX) - timedelta(days=14), view="new", fields=POST_FIELDS
+    )
+    assert any(WINDOW_BODY_URL in (p.contents or {}).get("html", "") for p in full), (
+        "precondition: the fixture body really does carry this link"
+    )
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_WritesAWindowBodyUrl()))
+    assert not report.published
+    provenance = next(g for g in report.gates if g.name == "provenance")
+    assert any("aligned.substack.com" in d for d in provenance.details), provenance.details
+
+
 def test_a_movers_url_without_the_window_posts_would_not_pass_provenance(tmp_path, monkeypatch):
     """The other half of that contract: the window items are load-bearing, not incidental."""
     mover = _mover_from_an_older_window_post()
@@ -390,8 +441,10 @@ class _GrowingThread(FixtureClient):
         self.post_id = post_id
         self.extra_comments = extra_comments
 
-    def posts_since(self, after, view="top", limit=200, require_ai_tag=True):
-        posts = super().posts_since(after, view=view, limit=limit, require_ai_tag=require_ai_tag)
+    def posts_since(self, after, view="top", limit=200, require_ai_tag=True, **kw):
+        posts = super().posts_since(
+            after, view=view, limit=limit, require_ai_tag=require_ai_tag, **kw
+        )
         for post in posts:
             if post.id == self.post_id:
                 post.commentCount += self.extra_comments

@@ -9,7 +9,9 @@ reads nothing but `self.cfg`, which is why binding it to this class works.
 The recorded payloads were fetched with the same terms the real client sends (`view: top`, the AI
 tag required where the site has one), so `view` and `require_ai_tag` are accepted and ignored here:
 what they would select is already baked into the file. `after` and `limit` are applied, because the
-run asks for two different windows out of the same recording.
+run asks for two different windows out of the same recording. So is `fields`: it is the one term
+that changes the *shape* of what comes back rather than which records do, and replaying bodies to
+a caller that asked for none would make the offline run a more generous test than the live one.
 """
 
 from __future__ import annotations
@@ -20,7 +22,13 @@ from pathlib import Path
 from typing import Any
 
 from pipeline.fetchers.base import Window
-from pipeline.fetchers.forummagnum import SITES, ForumClient, RawComment, RawPost
+from pipeline.fetchers.forummagnum import (
+    POST_FIELDS,
+    SITES,
+    ForumClient,
+    RawComment,
+    RawPost,
+)
 from pipeline.models import Site
 
 
@@ -47,11 +55,19 @@ class FixtureClient:
         view: str = "top",
         limit: int = 200,
         require_ai_tag: bool = True,
+        fields: str = POST_FIELDS,
     ) -> list[RawPost]:
         posts: list[RawPost] = self._load("posts", RawPost)
         kept = [p for p in posts if p.postedAt.date() >= after][:limit]
         for p in kept:
             p.pageUrl = self._public_url(p.pageUrl)
+            # `fields` is the one argument that changes what comes *back*, so unlike `view` and
+            # `require_ai_tag` it cannot be accepted and ignored: a caller asking for the lean set
+            # gets records with no body, the way the server would send them. Replaying full
+            # records to the window fetch would hide exactly what the lean set changes -- how much
+            # source text reaches the provenance gate's allowed set.
+            if "contents" not in fields:
+                p.contents = None
         return kept
 
     def comments_since(self, after: datetime, limit: int = 5000) -> list[RawComment]:

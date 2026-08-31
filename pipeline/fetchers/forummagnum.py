@@ -56,6 +56,15 @@ POST_FIELDS = (
     "_id title pageUrl postedAt baseScore voteCount extendedScore commentCount "
     "lastCommentedAt curatedDate frontpageDate " + USER_FIELDS + " tags { name } contents { html }"
 )
+# The same records without their bodies, for a caller that only wants metadata. The 14-day window
+# fetch asks each site for up to 500 posts to feed the ledger and find the discussion movers, and
+# reads nothing but their titles, urls, scores and comment counts -- while the bodies it would
+# otherwise be sent are the overwhelming majority of that payload, on every site, every morning.
+#
+# Not asking for them also narrows what the provenance gate will allow: a window post contributes
+# its url, title and author to the allowed set and no longer contributes a body full of links to
+# hosts nothing in today's pack ever cited. `raw_post_to_item` already tolerates the missing key.
+POST_FIELDS_LEAN = POST_FIELDS.replace(" contents { html }", "")
 COMMENT_FIELDS = (
     "_id postId postedAt baseScore extendedScore parentCommentId topLevelCommentId "
     + USER_FIELDS
@@ -197,8 +206,13 @@ class ForumClient:
         view: str = "top",
         limit: int = 200,
         require_ai_tag: bool = True,
+        fields: str = POST_FIELDS,
     ) -> list[dict[str, Any]]:
-        """The server's own post records, untouched — what the fixture recorder stores."""
+        """The server's own post records, untouched — what the fixture recorder stores.
+
+        `fields` defaults to the full set, so a caller that says nothing gets everything; pass
+        `POST_FIELDS_LEAN` to leave the bodies on the server.
+        """
         terms: dict[str, Any] = {"view": view, "after": after.isoformat(), "limit": limit}
         if require_ai_tag and self.cfg.ai_tag_id:
             terms["filterSettings"] = {
@@ -206,8 +220,7 @@ class ForumClient:
             }
         return self._results(
             "posts",
-            f"{{ posts(input: {{terms: {gql_literal(terms)}}}) "
-            f"{{ results {{ {POST_FIELDS} }} }} }}",
+            f"{{ posts(input: {{terms: {gql_literal(terms)}}}) {{ results {{ {fields} }} }} }}",
         )
 
     def posts_since(
@@ -216,8 +229,11 @@ class ForumClient:
         view: str = "top",
         limit: int = 200,
         require_ai_tag: bool = True,
+        fields: str = POST_FIELDS,
     ) -> list[RawPost]:
-        raw = self.posts_since_raw(after, view=view, limit=limit, require_ai_tag=require_ai_tag)
+        raw = self.posts_since_raw(
+            after, view=view, limit=limit, require_ai_tag=require_ai_tag, fields=fields
+        )
         posts: list[RawPost] = self._parse_many(RawPost, raw)
         for p in posts:
             p.pageUrl = self._public_url(p.pageUrl)
