@@ -104,6 +104,29 @@ def test_changelog_round_trips_through_the_version_parser(tmp_path):
     assert next_letter(_existing_versions(path), date(2026, 8, 31)) == "a"
 
 
+def test_prepending_the_same_version_twice_rewrites_one_entry(tmp_path):
+    """The promote job is re-runnable, so a second pass must not double the heading."""
+    path = tmp_path / "CHANGELOG.md"
+    day = date(2026, 8, 30)
+    prepend(path, "2026.08.30a", day, ["first attempt"])
+    prepend(path, "2026.08.30a", day, ["second attempt"])
+    assert versions(path) == ["2026.08.30a"]
+    text = path.read_text()
+    assert text.count("## 2026.08.30a") == 1
+    assert "- second attempt\n" in text and "first attempt" not in text
+    # And the letter for the next pack is still `b`, not `c`.
+    assert next_letter(_existing_versions(path), day) == "b"
+
+
+def test_prepending_a_repeat_version_keeps_the_other_entries(tmp_path):
+    path = tmp_path / "CHANGELOG.md"
+    prepend(path, "2026.08.30a", date(2026, 8, 30), ["older"])
+    prepend(path, "2026.08.31a", date(2026, 8, 31), ["newer"])
+    prepend(path, "2026.08.31a", date(2026, 8, 31), ["newer, retried"])
+    assert versions(path) == ["2026.08.31a", "2026.08.30a"]
+    assert "- older\n" in path.read_text()
+
+
 def test_versions_of_a_missing_changelog_is_empty(tmp_path):
     assert versions(tmp_path / "nope.md") == []
 
@@ -185,7 +208,7 @@ def test_issue_body_survives_a_report_from_a_crashed_run():
 
 
 def test_refusal_reason_accepts_a_run_that_rendered_items():
-    assert refusal_reason(_report(items_selected=3, failed=["a"])) is None
+    assert refusal_reason(_report(items_selected=3, dropped=["a"], failed=["a"])) is None
 
 
 @pytest.mark.parametrize(
@@ -193,13 +216,34 @@ def test_refusal_reason_accepts_a_run_that_rendered_items():
     [
         ({}, "no report"),
         (_report(published=False), "did not publish"),
-        (_report(items_selected=0, failed=[]), "0 rendered items"),
-        (_report(items_selected=2, failed=["a", "b"]), "0 rendered items"),
+        # A same-day rerun: everything is already seen, so nothing was even selected.
+        (_report(items_selected=0, dropped=[]), "0 rendered items"),
+        # Every selected item raised during extract/scan/judge.
+        (
+            _report(items_selected=2, dropped=["a", "b"], failed=["a", "b"]),
+            "0 rendered items",
+        ),
     ],
 )
 def test_refusal_reason_refuses_an_empty_or_blocked_run(report, expected):
     reason = refusal_reason(report)
     assert reason is not None and expected in reason
+
+
+def test_refusal_reason_counts_dropped_not_failed_so_a_scan_wave_cannot_publish_empty():
+    """An injection-scan wave empties the render set without putting one id in `failed`.
+
+    `RunReport.dropped` is the union of every selected item that never reached the render set;
+    `failed` is only its exception branch. Subtracting `failed` would read this run as five
+    healthy items and push an empty pack to the `generated` branch.
+    """
+    ids = ["a", "b", "c", "d", "e"]
+    reason = refusal_reason(
+        _report(published=True, items_selected=5, failed=[], scan_flagged=ids, dropped=ids)
+    )
+    assert reason is not None
+    assert "0 rendered items" in reason
+    assert "5 dropped" in reason and "5 scan-flagged" in reason
 
 
 def test_update_pinned_issue_edits_the_existing_issue(monkeypatch):

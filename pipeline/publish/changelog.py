@@ -37,9 +37,22 @@ def _entries(text: str) -> list[str]:
     return [text[start:end].strip("\n") + "\n" for start, end in bounds]
 
 
+def _version_of(entry: str) -> str | None:
+    """The pack version an entry's heading names."""
+    match = _HEAD.match(entry)
+    return match.group(1) if match else None
+
+
 def prepend(path: Path, version: str, day: date, lines: list[str], keep: int = 30) -> None:
-    """Put `version`'s entry at the top and keep the newest `keep` entries."""
-    entries = _entries(path.read_text() if path.exists() else "")
+    """Put `version`'s entry at the top and keep the newest `keep` entries.
+
+    Rewriting `version`'s existing entry rather than adding a second one makes this idempotent,
+    which the promote job needs: a re-run of a job that already got as far as the changelog --
+    after a failed `git push`, say -- would otherwise leave one version heading two entries, and
+    `next_letter` counts headings.
+    """
+    existing = _entries(path.read_text() if path.exists() else "")
+    entries = [e for e in existing if _version_of(e) != version]
     entry = f"## {version} ({day.isoformat()})\n" + "".join(f"- {line}\n" for line in lines)
     kept = [entry, *entries][:keep]
     path.write_text(_HEADER.format(keep=keep) + "\n" + "\n".join(kept))

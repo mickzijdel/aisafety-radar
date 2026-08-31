@@ -106,8 +106,14 @@ jobs:
       # The CLI's exit code is the signal (0 published, 3 a blocking gate withheld the pack,
       # anything else a crash), so it is captured rather than allowed to fail the step: the
       # health issue below has to be written for every one of those outcomes, and `report.json`
-      # has to be read even when the run was blocked. `jq` defaults keep this step green when
-      # the pipeline died before printing anything at all.
+      # has to be read even when the run was blocked.
+      #
+      # Neither jq call may use `-e`. `jq -e` exits 1 when the value it printed is `false` or
+      # `null`, so `jq -e … || echo false` on a *valid* blocked report prints "false" twice, and
+      # the stray second line makes GitHub reject the whole $GITHUB_OUTPUT file — failing the
+      # step on exactly the path it exists to handle. The `if/else` always prints one line and
+      # always exits 0 on parseable JSON, so the `|| echo` fallback is reached only when jq
+      # cannot parse the file at all (a crash before anything was printed).
       - name: Run the pipeline
         id: run
         env:
@@ -117,8 +123,14 @@ jobs:
           status=0
           uv run radar run --data data --out skills/aisafety-radar/references \
             | tee report.json || status=$?
-          version=$(jq -er '.version' report.json 2>/dev/null || echo "")
-          published=$(jq -er '.published' report.json 2>/dev/null || echo "false")
+          # `// empty` so a JSON null becomes the empty string rather than the word "null",
+          # which would otherwise reach a commit message as `Archive null`.
+          version=$(jq -r '.version // empty' report.json 2>/dev/null || echo "")
+          published=$(jq -r 'if .published == true then "true" else "false" end' report.json \
+            2>/dev/null || echo "false")
+          # jq prints nothing and still exits 0 on an *empty* file, so the `|| echo` above never
+          # fires there; this is what makes the output "false" rather than blank in that case.
+          published=${published:-false}
           {
             echo "status=$status"
             echo "version=$version"
@@ -219,7 +231,7 @@ jobs:
           git config user.email "claude@mickzijdel.com"
           git checkout -B generated
           git add skills/aisafety-radar/references
-          git commit -m "Pack $RADAR_VERSION" || echo "nothing to commit"
+          git commit -m "Pack ${RADAR_VERSION:-unknown}" || echo "nothing to commit"
           git push --force origin generated
 
   # `environment: production` is the canary: its wait timer holds this job for long enough that a

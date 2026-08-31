@@ -96,21 +96,28 @@ def render_issue_body(report: dict, outcome: str | None = None, run_url: str | N
 def refusal_reason(report: dict) -> str | None:
     """Why this run's pack must not be published, or None when it may be.
 
-    Two failures publish an *empty* pack rather than no pack, and neither trips a gate: a same-day
-    rerun whose items are all already seen, and a systematic per-item failure that leaves every
-    selected item in `failed`. Both look like a successful run from the outside -- the gates pass
-    on an empty file -- so the arithmetic is checked here before anything reaches the `generated`
-    branch.
+    Three failures publish an *empty* pack rather than no pack, and none of them trips a gate: a
+    same-day rerun whose items are all already seen, a systematic per-item failure that leaves
+    every selected item in `failed`, and an injection-scan wave that quarantines every one of
+    them. All three look like a successful run from the outside -- the gates pass on an empty
+    file -- so the arithmetic is checked here before anything reaches the `generated` branch.
+
+    The subtrahend is `dropped`, not `failed`. `RunReport.dropped` is the union of every selected
+    item that never reached the render set; `failed` is only the exception branch of that union
+    and misses the scan-flagged items, so subtracting it would let a full scan wave through as a
+    healthy run.
     """
     if not report:
         return "no report.json: the run crashed before it could write one"
     if not report.get("published"):
         return "the run did not publish: a blocking gate withheld the pack"
-    rendered = int(report.get("items_selected", 0)) - len(report.get("failed") or [])
+    selected = int(report.get("items_selected", 0))
+    dropped = report.get("dropped") or []
+    rendered = selected - len(dropped)
     if rendered <= 0:
         return (
-            f"the run published {rendered} rendered items "
-            f"({report.get('items_selected', 0)} selected, "
+            f"the run published {rendered} rendered items ({selected} selected, "
+            f"{len(dropped)} dropped: {len(report.get('scan_flagged') or [])} scan-flagged, "
             f"{len(report.get('failed') or [])} failed): refusing to promote an empty pack"
         )
     return None
