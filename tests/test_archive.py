@@ -5,7 +5,7 @@ import pytest
 
 from pipeline import ledger as ledger_module
 from pipeline.archive import Archive
-from pipeline.models import Comment, Extraction
+from pipeline.models import Comment, Extraction, GateResult, SourceStatus, Usage
 from pipeline.stages.verify import ExtractionRecord
 from tests.test_models import make_item
 
@@ -128,6 +128,34 @@ def test_run_json_replaces_the_previous_run_and_serialises_dates(tmp_path):
     assert payload["version"] == "b"
     assert "statuses" not in payload
     assert payload["generated_at"].startswith("2026-08-30 06:00")
+
+
+def test_run_json_writes_models_as_objects_not_reprs(tmp_path):
+    a = Archive(tmp_path)
+    d = date(2026, 8, 30)
+    a.write_run(
+        d,
+        {
+            "statuses": [
+                SourceStatus(source="lesswrong", category="forums", ok=True, items=12),
+                SourceStatus(
+                    source="eaforum", category="forums", ok=False, items=0, error="timeout"
+                ),
+            ],
+            "usage": Usage(input_tokens=5, output_tokens=7, cost_usd=0.25),
+            "gates": [GateResult(name="injection", passed=True, blocking=True)],
+        },
+    )
+    payload = json.loads((a.day_dir(d) / "run.json").read_text())
+    assert [s["source"] for s in payload["statuses"]] == ["lesswrong", "eaforum"]
+    assert payload["statuses"][1]["error"] == "timeout"
+    assert payload["usage"]["cost_usd"] == 0.25
+    assert payload["gates"][0] == {
+        "name": "injection",
+        "passed": True,
+        "blocking": True,
+        "details": [],
+    }
 
 
 def test_find_extraction_prefers_the_most_recent_day(tmp_path):

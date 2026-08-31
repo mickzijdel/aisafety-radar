@@ -28,6 +28,19 @@ from pipeline.stages.verify import ExtractionRecord
 T = TypeVar("T", bound=BaseModel)
 
 
+def _json_default(value: Any) -> Any:
+    """Serialise what `json` cannot: pydantic models as objects, anything else as its string.
+
+    The run report is assembled from `SourceStatus`, `Usage` and `GateResult` models, and dumping
+    one with `str` would bury a whole day's statuses in an unparseable repr. Anything else -- a
+    stray date, a Path -- still falls back to `str` rather than raising: the report is written at
+    the very end of a run, and a TypeError there would lose the record of the run itself.
+    """
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    return str(value)
+
+
 class Archive:
     def __init__(self, root: Path) -> None:
         self.root = root
@@ -96,10 +109,13 @@ class Archive:
         """Write the day's run report: statuses, usage, gate results, version.
 
         Unlike the JSONL writes this replaces the file outright -- the report describes one run,
-        and merging two runs' reports would describe neither. `default=str` keeps a stray date or
-        Path from sinking the report at the last step of a run.
+        and merging two runs' reports would describe neither. The payload may hold the models
+        themselves; see `_json_default`.
         """
-        _atomic_write(self.day_dir(day) / "run.json", json.dumps(payload, indent=1, default=str))
+        _atomic_write(
+            self.day_dir(day) / "run.json",
+            json.dumps(payload, indent=1, default=_json_default),
+        )
 
     def days_with_extractions(self, before: date, n: int) -> list[date]:
         """The days in the `n` days *preceding* `before` that have an extractions file."""
