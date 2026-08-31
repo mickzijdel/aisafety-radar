@@ -136,3 +136,6 @@ def test_forum_fetchers_covers_the_three_sites():
         ("eaforum", "eaf", 5, "forums"),
     ]
     assert all(f.client.user_agent == "aisafety-radar/0.1 (+mick@example.com)" for f in fetchers)
+    # A fetcher's name has to be the source its items carry, or a SourceStatus cannot be
+    # joined back to the items it accounts for.
+    assert all(raw_post_to_item(f.site, RAW).source == f.name for f in fetchers)
