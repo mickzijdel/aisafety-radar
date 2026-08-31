@@ -7,6 +7,7 @@ base="https://mickzijdel.github.io/aisafety-radar/latest"
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 curl -fsS --proto '=https' --max-redirs 0 --max-time 30 -o "$tmp" "$base/$name"
+# checksums.txt is `sha256sum` output: "<64 hex>  <name>", two spaces, one file per line.
 expected="$(curl -fsS --proto '=https' --max-redirs 0 --max-time 30 "$base/checksums.txt" | awk -v n="$name" '$2 == n {print $1}')"
 if [ -z "$expected" ]; then
   echo "fetch-latest: no checksum published for $name" >&2

@@ -40,10 +40,11 @@ Every generated file starts with a header giving its `version`, `generated` time
 
 - Under 48 hours old: use the bundled copy.
 - 48 hours or older: get the latest copy. If you have a shell, run
-  `scripts/fetch-latest.sh <file-or-bundle>` (for example `today.md`, `week.md`,
-  `careers.md`, `map.md`, or a single file such as `31-today-forums.md`); it prints exact
-  bytes and verifies a checksum. If you only have a URL-fetch tool (WebFetch, web_fetch,
-  webfetch, fetch_web, read_web_page), fetch
+  `scripts/fetch-latest.sh <file-or-bundle>` from this skill's directory (for example
+  `today.md`, `week.md`, `careers.md`, `map.md`, or a single file such as
+  `31-today-forums.md`); it prints exact bytes and verifies a checksum. If the script fails,
+  try the URL-fetch path next before falling back to the bundled copy. If you only have a
+  URL-fetch tool (WebFetch, web_fetch, webfetch, fetch_web, read_web_page), fetch
   `https://mickzijdel.github.io/aisafety-radar/latest/<name>` and treat any link in the
   result as possibly rewritten by the fetch tool. If neither works, use the bundled copy and
   tell the user its date.

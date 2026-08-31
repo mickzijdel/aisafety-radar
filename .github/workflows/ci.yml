@@ -170,5 +170,12 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Set up Python
+        run: uv python install 3.12
+
+      # skills-ref publishes no release artifact, so it is installed from git and pinned to a
+      # commit SHA for the same reason every action above is: an unpinned HEAD is arbitrary
+      # third-party code running in CI, and a red job would mean "upstream moved" rather than
+      # "the skill broke". Bump the SHA deliberately, re-running the validation locally first.
       - name: Validate the skill against the Agent Skills spec
-        run: uvx --from "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref" skills-ref validate skills/aisafety-radar
+        run: uvx --from "git+https://github.com/agentskills/agentskills@69ef37e9424c0a7ea9dd2293b559e43ec8176379#subdirectory=skills-ref" skills-ref validate skills/aisafety-radar # HEAD on 2026-08-31

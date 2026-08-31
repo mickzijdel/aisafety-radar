@@ -11,11 +11,12 @@ from pathlib import Path
 
 import yaml
 
-from pipeline.render import PAGES_BASE
+from pipeline.render import PAGES_BASE, PackMeta
 
 ROOT = Path(__file__).parents[1]
 SKILL = ROOT / "skills" / "aisafety-radar" / "SKILL.md"
 SCRIPT = ROOT / "skills" / "aisafety-radar" / "scripts" / "fetch-latest.sh"
+INDEX = ROOT / "skills" / "aisafety-radar" / "references" / "00-index.md"
 ALLOWED = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
 
 
@@ -44,12 +45,17 @@ def test_skill_body_limits_and_style():
 
 def test_published_urls_agree_with_the_pipeline_base():
     # The header the pipeline writes into every appendix, the URL the skill tells an agent to
-    # fetch, and the URL the script actually fetches all name the same host and path. Three
-    # copies of one string, so the test reads the Python constant rather than repeating it.
+    # fetch, the URL the script actually fetches, and the placeholder index's own header all
+    # name the same host AND the same `latest` directory. Four copies of one string, so the
+    # test reads PackMeta's default rather than repeating it: a base that resolves to the
+    # right host but the wrong directory 404s exactly as loudly as a wrong host.
+    latest = PackMeta.__dataclass_fields__["latest_base"].default
+    assert latest == f"{PAGES_BASE}/latest"
     fm, _ = frontmatter()
-    assert fm["metadata"]["latest"].startswith(PAGES_BASE)
+    assert fm["metadata"]["latest"].startswith(latest)
     base_line = next(line for line in SCRIPT.read_text().splitlines() if line.startswith("base="))
-    assert base_line.split("=", 1)[1].strip('"').startswith(PAGES_BASE)
+    assert base_line.split("=", 1)[1].strip('"') == latest
+    assert f"{latest}/00-index.md" in INDEX.read_text()
 
 
 def test_fetch_script_verifies_a_checksum_before_printing():
