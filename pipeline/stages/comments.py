@@ -135,6 +135,10 @@ def refresh_discussion_signal(
     into the prompt: a number the model could only have got from our own escaping is not a number
     the comments contain. `model_copy` does not validate, so a signal that is not a non-empty
     string is nulled here rather than landing in the record as whatever the model sent.
+
+    A signal that ends up null when there was something to lose is noted rather than silently
+    blanked, the way `extract_verified` notes a dropped quote or deadline: a field that is empty
+    on disk should say why it is empty.
     """
     corpus = _comments_corpus(comments)
     user = "\n\n".join(
@@ -144,13 +148,27 @@ def refresh_discussion_signal(
         ]
     )
     out = llm.structured(settings.models.haiku, SIGNAL_SYSTEM, user, _SIGNAL_SCHEMA, max_tokens=200)
-    signal = out.get("discussion_signal")
-    if not isinstance(signal, str) or not signal.strip():
+    attempted = out.get("discussion_signal")
+    signal = attempted if isinstance(attempted, str) and attempted.strip() else None
+    if signal and any(not contains(corpus, tok) for tok in find_numbers_and_dates(signal)):
         signal = None
-    elif any(not contains(corpus, tok) for tok in find_numbers_and_dates(signal)):
-        signal = None
+    notes = list(record.notes)
+    if signal is None:
+        # Name what the model tried to put there, or failing that what the field used to hold. The
+        # failed attempt is the more useful of the two, since it is the sentence that could not be
+        # verified. A note already on the record says nothing new the second time, and this record
+        # is rewritten every day the post keeps moving.
+        lost = (attempted if isinstance(attempted, str) and attempted.strip() else None) or (
+            record.extraction.discussion_signal
+        )
+        note = f"dropped discussion_signal: {lost}"
+        if lost and note not in notes:
+            notes.append(note)
     return record.model_copy(
-        update={"extraction": record.extraction.model_copy(update={"discussion_signal": signal})}
+        update={
+            "extraction": record.extraction.model_copy(update={"discussion_signal": signal}),
+            "notes": notes,
+        }
     )
 
 
@@ -162,10 +180,15 @@ def refresh_comments(
     settings: Settings,
     day: date,
 ) -> list[Mover]:
-    """Refresh the signal of every notable mover on `day`, and report what moved.
+    """Refresh every changed post's discussion signal, and report the ones that moved notably.
+
+    Two different questions, deliberately not the same threshold (spec 6.2). Any archived post
+    whose thread or score changed at all gets its signal re-read, because a stale signal in the
+    digest is wrong whether or not the change was dramatic; `is_notable` then decides the much
+    smaller set that is worth showing the reader as a mover. The extra Haiku calls are a few a day.
 
     Only a post that is already in the archive can be refreshed: this stage never extracts, so a
-    mover with no record is a post the digest never carried and has nothing to update. The write
+    movement with no record is a post the digest never carried and has nothing to update. The write
     goes back to the day the record was found on, not to `day`, or the item would exist twice.
     """
     prev_day = ledger.latest_before(day)
@@ -174,10 +197,14 @@ def refresh_comments(
     # same comments selecting the same movers wherever the run happens. `movements` is empty
     # without a previous day, so the fallback is only ever a guard.
     since = datetime.combine(prev_day or day, time.min, tzinfo=UTC)
+    previous = ledger.entries(prev_day) if prev_day is not None else {}
     entries = ledger.entries(day)
     movers: list[Mover] = []
     for m in ledger.movements(day):
-        if not is_notable(m, settings):
+        # A post the ledger is seeing for the first time has not moved; it has arrived. `movements`
+        # reports its whole comment count as new, which would make a week-old post with a long
+        # thread look like an overnight sensation and spend a model call saying so.
+        if m.post_id not in previous:
             continue
         found = archive.find_extraction(m.post_id, day)
         if found is None:
@@ -192,8 +219,15 @@ def refresh_comments(
         entry = entries[m.post_id]
         fetched = [raw_comment_to_comment(site, c) for c in client.top_comments(raw_id)]
         comments = filter_comments(fetched, settings.floor, day)
-        refreshed = refresh_discussion_signal(record, comments, llm, settings)
-        archive.update_extraction(orig_day, refreshed)
+        refreshed = record
+        # Nothing survived the floor, so there is no discussion to re-read. Asking the model to
+        # describe an empty block would only buy a null that overwrites whatever the entry already
+        # says, so the archived record is left exactly as it is.
+        if comments:
+            refreshed = refresh_discussion_signal(record, comments, llm, settings)
+            archive.update_extraction(orig_day, refreshed)
+        if not is_notable(m, settings):
+            continue
         new = [c for c in comments if _as_utc(c.posted_at) >= since]
         movers.append(
             Mover(

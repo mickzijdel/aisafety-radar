@@ -40,8 +40,9 @@ def raw(
     return RawComment.model_validate(base)
 
 
-def rec(item_id="lw:abc123", summary="The post claims X."):
+def rec(item_id="lw:abc123", summary="The post claims X.", signal=None, notes=()):
     return ExtractionRecord(
+        notes=list(notes),
         extraction=Extraction(
             item_id=item_id,
             summary=summary,
@@ -49,12 +50,12 @@ def rec(item_id="lw:abc123", summary="The post claims X."):
             author_stated_status=None,
             claim_type="exploratory",
             novelty=None,
-            discussion_signal=None,
+            discussion_signal=signal,
             deadline=None,
             entities=[],
             slugs=["evals"],
             importance=3,
-        )
+        ),
     )
 
 
@@ -261,11 +262,11 @@ class FakeClient:
         return [raw("c1", 83), raw("c2", 5, posted="2026-08-20T00:00:00Z")]
 
 
-def build(tmp_path, *, counts=(2, 14), extraction_day=date(2026, 8, 28), score=40):
+def build(tmp_path, *, counts=(2, 14), extraction_day=date(2026, 8, 28), score=40, record=None):
     """An archive with one extraction plus a two-day ledger for the same post."""
     archive = Archive(tmp_path)
     if extraction_day is not None:
-        archive.write_extractions(extraction_day, [rec()])
+        archive.write_extractions(extraction_day, [record or rec()])
     ledger = PostsLedger(archive.ledger_path).load()
     post = make_item(
         id="lw:abc123",
@@ -399,12 +400,97 @@ def test_a_post_with_no_new_comments_still_refreshes_and_reports_no_top_comment(
     assert mover.record.extraction.discussion_signal == "Endorsed."
 
 
-def test_an_unnotable_movement_costs_nothing(tmp_path):
+def test_an_unnotable_change_is_still_refreshed_but_is_no_mover(tmp_path):
+    """Spec 6.2: the refresh follows the change, the movers list follows the threshold. A stale
+    signal in the digest is wrong whether or not the change was dramatic."""
     archive, ledger = build(tmp_path, counts=(2, 5))
     client = FakeClient()
-    fake = FakeLLM([])
+    fake = FakeLLM([{"discussion_signal": "Endorsed."}])
+    assert refresh_comments({"lw": client}, ledger, archive, fake, S, date(2026, 8, 30)) == []
+    assert client.calls == ["abc123"] and len(fake.calls) == 1
+    stored = archive.find_extraction("lw:abc123", date(2026, 8, 30))[1]
+    assert stored.extraction.discussion_signal == "Endorsed."
+
+
+def test_a_first_sighting_is_no_mover_and_costs_nothing(tmp_path):
+    """A post the ledger has never seen has not moved, it has arrived: `movements` counts its
+    whole thread as new, which would make a week-old post look like an overnight sensation."""
+    archive = Archive(tmp_path)
+    archive.write_extractions(date(2026, 8, 28), [rec(item_id="lw:late")])
+    ledger = PostsLedger(archive.ledger_path).load()
+    other = make_item(id="lw:other", comment_count=1)
+    late = make_item(id="lw:late", comment_count=99, published_at=datetime(2026, 8, 25, tzinfo=UTC))
+    ledger.snapshot(date(2026, 8, 29), [other], {})
+    ledger.snapshot(date(2026, 8, 30), [other, late], {})
+    client, fake = FakeClient(), FakeLLM([])
     assert refresh_comments({"lw": client}, ledger, archive, fake, S, date(2026, 8, 30)) == []
     assert client.calls == [] and fake.calls == []
+
+
+def test_a_fully_floored_comment_set_costs_no_model_call_and_writes_nothing_back(tmp_path):
+    """Every comment below the floor is not evidence that the discussion went quiet, and asking
+    the model to describe an empty block would buy a null that overwrote a good signal."""
+    archive, ledger = build(tmp_path, record=rec(signal="Contested; an old but true reading."))
+    client = FakeClient([raw("low", 1), raw("also-low", 2)])
+    fake = FakeLLM([])
+    [mover] = refresh_comments({"lw": client}, ledger, archive, fake, S, date(2026, 8, 30))
+    assert client.calls == ["abc123"] and fake.calls == []
+    stored = archive.find_extraction("lw:abc123", date(2026, 8, 30))[1]
+    assert stored.extraction.discussion_signal == "Contested; an old but true reading."
+    assert stored.notes == []
+    assert mover.record.extraction.discussion_signal == "Contested; an old but true reading."
+    assert mover.top_new_comment is None
+
+
+def test_a_failed_signal_is_written_back_null_with_a_note_naming_the_attempt(tmp_path):
+    archive, ledger = build(tmp_path)
+    fake = FakeLLM([{"discussion_signal": "Contested; Bob (99 karma) disagrees."}])
+    [mover] = refresh_comments({"lw": FakeClient()}, ledger, archive, fake, S, date(2026, 8, 30))
+    stored = archive.find_extraction("lw:abc123", date(2026, 8, 30))[1]
+    assert stored.extraction.discussion_signal is None
+    assert stored.notes == ["dropped discussion_signal: Contested; Bob (99 karma) disagrees."]
+    assert mover.record.notes == stored.notes
+
+
+def test_a_signal_the_model_nulls_takes_the_old_one_with_it_and_says_so(tmp_path):
+    archive, ledger = build(tmp_path, record=rec(signal="Contested; yesterday's reading."))
+    fake = FakeLLM([{"discussion_signal": None}])
+    refresh_comments({"lw": FakeClient()}, ledger, archive, fake, S, date(2026, 8, 30))
+    stored = archive.find_extraction("lw:abc123", date(2026, 8, 30))[1]
+    assert stored.extraction.discussion_signal is None
+    assert stored.notes == ["dropped discussion_signal: Contested; yesterday's reading."]
+
+
+def test_nothing_is_noted_when_there_was_nothing_to_lose(tmp_path):
+    archive, ledger = build(tmp_path)
+    fake = FakeLLM([{"discussion_signal": None}])
+    refresh_comments({"lw": FakeClient()}, ledger, archive, fake, S, date(2026, 8, 30))
+    assert archive.find_extraction("lw:abc123", date(2026, 8, 30))[1].notes == []
+
+
+def test_the_same_dropped_signal_is_not_noted_twice(tmp_path):
+    """The record is rewritten every day the post keeps moving; an identical note says nothing
+    new the second time, and the notes list is on disk forever."""
+    comments = [raw_comment_to_comment("lw", raw("c1", 7))]
+    unverifiable = {"discussion_signal": "Contested; Bob (99 karma) disagrees."}
+    record = refresh_discussion_signal(rec(), comments, FakeLLM([dict(unverifiable)]), S)
+    again = refresh_discussion_signal(record, comments, FakeLLM([dict(unverifiable)]), S)
+    assert record.notes == ["dropped discussion_signal: Contested; Bob (99 karma) disagrees."]
+    assert again.notes == record.notes
+
+
+def test_a_second_different_failure_is_noted_alongside_the_first():
+    comments = [raw_comment_to_comment("lw", raw("c1", 7))]
+    record = refresh_discussion_signal(
+        rec(), comments, FakeLLM([{"discussion_signal": "Bob (99 karma) disagrees."}]), S
+    )
+    again = refresh_discussion_signal(
+        record, comments, FakeLLM([{"discussion_signal": "Bob (12 karma) disagrees."}]), S
+    )
+    assert again.notes == [
+        "dropped discussion_signal: Bob (99 karma) disagrees.",
+        "dropped discussion_signal: Bob (12 karma) disagrees.",
+    ]
 
 
 def test_a_notable_post_with_no_archived_extraction_is_skipped(tmp_path):
