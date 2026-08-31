@@ -1,0 +1,74 @@
+[
+ {
+  "_id": "bcvteFRYTKZARWf46",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-31T01:14:28.652000Z",
+  "baseScore": 14,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 8,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013000Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "MATS Winter applications due September 6!\n\nPitch: Come work with me and Alex Cloud in Team Shard! We have fun, make real alignment progress (pioneered steering vectors in 2023), and help scholars tap into their latent abilities.\n\nWe invest in our mentees. Not just remote meetings once a week with a distant mentor. I come into the office, eat lunch with them, work out together, and help generate ideas. (We're kinda famous for our lifting culture!)\n\n@lisathiergart is now the CEO of SL5.\n\nApplications close Sept 6\u2014just one week from now! matsprogram.org/apply or pass this along to talented friends who want to break into the field.\n\nMore info about the team: turntrout.com/team-shard"
+  }
+ },
+ {
+  "_id": "rG9TBaq55WMrZJt4D",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-30T19:17:50.727000Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "W7z4sKZKcjQuN4Jew",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Lukas Finnveden",
+   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "karma": 4188,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Commentary from Hjalmar:\n\n[...]"
+  }
+ },
+ {
+  "_id": "W7z4sKZKcjQuN4Jew",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-30T19:02:34.292000Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "gkYW7rAuYwemWbFev",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Lukas Finnveden",
+   "createdAt": "2017-10-25T22:11:28.756000Z",
+   "karma": 4188,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "What do you have in mind here / what makes you think this?\n\nI don't find it implausible but I don't remember seeing clear evidence of this.\n\n(And it seems very important to what degree they were trying to hide from humans. E.g. I thought a big part of how they got caught was that their activity got pretty obvious once they had hacked enough places, and that they weren't trying that hard to be subtle about it. If they were trying hard and just barely failed that's a lot scarier.)"
+  }
+ }
+]
