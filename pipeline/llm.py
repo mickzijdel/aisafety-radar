@@ -49,6 +49,12 @@ class LLM:
         thinking: bool,
         extra: dict[str, Any],
     ) -> Any:
+        # Enforced here rather than at each call site: only Sonnet takes a thinking parameter,
+        # and Haiku rejects one outright (CLAUDE.md, spec 4).
+        if thinking and model != self.settings.models.sonnet:
+            raise ValueError(
+                f"thinking is only available on {self.settings.models.sonnet}, not {model}"
+            )
         kwargs: dict[str, Any] = dict(
             model=model,
             max_tokens=max_tokens,
@@ -60,16 +66,26 @@ class LLM:
             kwargs["thinking"] = {"type": "adaptive"}
             kwargs["output_config"] = {**kwargs.get("output_config", {}), "effort": "medium"}
         response = self.client.messages.create(**kwargs)
-        # Record before the refusal check: a refused turn is still billed for what it generated.
+        # Record before the failure checks: a refused or truncated turn is still billed for what
+        # it generated.
         self._record(response, model)
-        if getattr(response, "stop_reason", None) == "refusal":
+        stop_reason = getattr(response, "stop_reason", None)
+        if stop_reason == "refusal":
             raise RuntimeError(f"{model} refused the request")
+        if stop_reason == "max_tokens":
+            # Caught here so a truncated structured response never reaches json.loads, where it
+            # would look like a malformed reply rather than a budget that was too small.
+            raise RuntimeError(f"{model} response truncated at max_tokens")
         return response
 
     @staticmethod
-    def _first_text(response: Any) -> str:
+    def _first_text(response: Any, model: str) -> str:
         """Skip any thinking blocks, which precede the text block on a thinking response."""
-        return next(b.text for b in response.content if b.type == "text")
+        text = next((b.text for b in response.content if b.type == "text"), None)
+        if text is None:
+            stop_reason = getattr(response, "stop_reason", None)
+            raise RuntimeError(f"{model} returned no text block (stop_reason={stop_reason})")
+        return text
 
     def structured(
         self,
@@ -87,7 +103,7 @@ class LLM:
             thinking=False,
             extra={"output_config": {"format": {"type": "json_schema", "schema": schema}}},
         )
-        return json.loads(self._first_text(response))
+        return json.loads(self._first_text(response, model))
 
     def text(
         self,
@@ -98,7 +114,7 @@ class LLM:
         thinking: bool = False,
     ) -> str:
         response = self._create(model, system, user, max_tokens, thinking=thinking, extra={})
-        return self._first_text(response)
+        return self._first_text(response, model)
 
     def count_tokens(self, text: str, model: str | None = None) -> int:
         resp = self.client.messages.count_tokens(
@@ -120,19 +136,24 @@ class FakeLLM(LLM):
         self.calls: list[dict[str, Any]] = []
         self.usage = Usage()
 
-    def _next(self, model: str, system: str, user: str) -> Any:
-        self.calls.append({"model": model, "system": system, "user": user})
+    def _next(self, model: str, system: str, user: str, **extra: Any) -> Any:
+        """Record the call, then hand back the next canned response.
+
+        Every entry carries model, system and user; `structured` adds `schema` and `max_tokens`,
+        `text` adds `max_tokens` and `thinking`, so a stage test can assert the whole contract.
+        """
+        self.calls.append({"model": model, "system": system, "user": user, **extra})
         if not self.responses:
             raise AssertionError("FakeLLM ran out of responses")
         return self.responses.pop(0)
 
     def structured(self, model, system, user, schema, max_tokens=2048):
-        out = self._next(model, system, user)
+        out = self._next(model, system, user, schema=schema, max_tokens=max_tokens)
         assert isinstance(out, dict), "structured() needs a dict response"
         return out
 
     def text(self, model, system, user, max_tokens=2048, thinking=False):
-        out = self._next(model, system, user)
+        out = self._next(model, system, user, max_tokens=max_tokens, thinking=thinking)
         assert isinstance(out, str), "text() needs a str response"
         return out
 

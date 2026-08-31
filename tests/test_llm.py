@@ -150,9 +150,32 @@ def test_count_tokens_defaults_to_haiku_and_honours_an_override(stub):
 def test_fake_llm_records_every_call_and_runs_dry():
     fake = FakeLLM(["one"])
     fake.text("m", "sys", "u")
-    assert fake.calls == [{"model": "m", "system": "sys", "user": "u"}]
+    assert fake.calls == [
+        {"model": "m", "system": "sys", "user": "u", "max_tokens": 2048, "thinking": False}
+    ]
     with pytest.raises(AssertionError):
         fake.text("m", "sys", "u")
+
+
+def test_fake_llm_records_the_full_call_contract():
+    """Stage tests assert on the schema, budget and thinking flag a stage chose."""
+    fake = FakeLLM([{"a": 1}, "text"])
+    fake.structured("m", "sys", "u", {"type": "object"}, max_tokens=64)
+    fake.text("m2", "sys2", "u2", max_tokens=128, thinking=True)
+    assert fake.calls[0] == {
+        "model": "m",
+        "system": "sys",
+        "user": "u",
+        "schema": {"type": "object"},
+        "max_tokens": 64,
+    }
+    assert fake.calls[1] == {
+        "model": "m2",
+        "system": "sys2",
+        "user": "u2",
+        "max_tokens": 128,
+        "thinking": True,
+    }
 
 
 def test_fake_llm_rejects_a_mistyped_response():
@@ -160,6 +183,62 @@ def test_fake_llm_rejects_a_mistyped_response():
         FakeLLM(["not a dict"]).structured("m", "s", "u", {})
     with pytest.raises(AssertionError):
         FakeLLM([{"a": 1}]).text("m", "s", "u")
+
+
+def _responder(stub, *, content, stop_reason):
+    def create(**kw):
+        stub.messages.calls.append(kw)
+        return SimpleNamespace(
+            content=content,
+            usage=SimpleNamespace(input_tokens=1000, output_tokens=100, cache_read_input_tokens=0),
+            stop_reason=stop_reason,
+        )
+
+    stub.messages.create = create
+
+
+def test_no_text_block_raises_a_named_error(stub):
+    """Adaptive thinking can eat the whole budget and return no text block."""
+    _responder(stub, content=[], stop_reason="end_turn")
+    s = load_settings()
+    llm = LLM(stub, s)
+    with pytest.raises(RuntimeError, match="no text block .*stop_reason=end_turn"):
+        llm.text(s.models.haiku, "SYS", "USER")
+    assert llm.usage.input_tokens == 1000
+
+
+def test_thinking_only_content_raises_rather_than_stopiteration(stub):
+    _responder(
+        stub, content=[SimpleNamespace(type="thinking", thinking="...")], stop_reason="end_turn"
+    )
+    s = load_settings()
+    with pytest.raises(RuntimeError, match="no text block"):
+        LLM(stub, s).text(s.models.sonnet, "SYS", "USER", thinking=True)
+
+
+def test_truncation_raises_before_json_parsing(stub):
+    """A response cut off at max_tokens must not reach json.loads as a decode error."""
+    _responder(
+        stub,
+        content=[SimpleNamespace(type="text", text='{"ok": tr')],
+        stop_reason="max_tokens",
+    )
+    s = load_settings()
+    llm = LLM(stub, s)
+    with pytest.raises(RuntimeError, match="truncated at max_tokens"):
+        llm.structured(s.models.haiku, "SYS", "USER", {"type": "object"})
+    with pytest.raises(RuntimeError, match="truncated at max_tokens"):
+        llm.text(s.models.haiku, "SYS", "USER")
+    # Both truncated turns are still billed.
+    assert llm.usage.input_tokens == 2000
+
+
+def test_thinking_on_haiku_is_refused_before_the_call(stub):
+    s = load_settings()
+    llm = LLM(stub, s)
+    with pytest.raises(ValueError, match="thinking"):
+        llm.text(s.models.haiku, "SYS", "USER", thinking=True)
+    assert stub.messages.calls == []
 
 
 def test_check_models_returns_only_the_ids_that_resolve():
