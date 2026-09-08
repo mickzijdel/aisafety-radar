@@ -6,6 +6,7 @@ uv = "latest"
 gitleaks = "latest"
 zizmor = "latest"         # GitHub Actions security static analysis (hk `zizmor` step + CI)
 actionlint = "latest"     # GitHub Actions workflow linter — syntax/expressions (hk `actionlint` step + CI)
+shellcheck = "latest"     # Shell linter for the three shipped *.sh files (hk `shellcheck` step + CI)
 node = "latest"            # provides npx, used to run jscpd 5.x (`npx --yes jscpd@latest`)
 # jscpd (duplication) runs via npx — see hk.pkl / .jscpd.json. It is NOT a mise tool: jscpd 5.x
 # is a Rust binary distributed through npm optional platform packages, which npx resolves but the

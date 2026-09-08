@@ -26,6 +26,9 @@ jobs:
         with:
           persist-credentials: false
 
+      # For shellcheck, pinned in mise.toml alongside actionlint and zizmor.
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
@@ -41,6 +44,13 @@ jobs:
         run: |
           uv run ruff check .
           uv run ruff format --check .
+
+      # Mirrors the hk `shellcheck` step. actionlint's shellcheck-of-`run:` pass stays off (see
+      # the actions-lint job), so this is the only thing linting shell in this repo.
+      - name: Lint shell scripts (shellcheck)
+        run: |
+          files=$(git ls-files '*.sh')
+          if [ -n "$files" ]; then shellcheck --norc $files; else echo "no shell scripts"; fi
 
       - name: Executable bits on shipped scripts
         # Any tracked file whose first line is a shebang must be mode 100755 in the

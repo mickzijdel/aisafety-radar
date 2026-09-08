@@ -183,7 +183,11 @@ Run in order. Stop at the first failure and fix it before continuing.
    check by eye: real titles, links that open, summaries that match the posts, quotes that
    appear in the source text, and no movers (the ledger has no previous day on day one). If
    anything is wrong, cancel the run before the timer ends. Cancelling costs nothing that has
-   already been published.
+   already been published - but it is not free: by the time `promote` is waiting, `generate`
+   has pushed `seen-ids.json` to the data repo, so the day's items are spent and an ordinary
+   rerun renders an empty pack. Recovering the day is a fresh dispatch with `ignore_seen=true`
+   (and `day` set to that day's UTC date if the clock has since rolled over), which pays for a
+   second full generation.
 
 4. **Watch the `promote` job's "Commit and push the publication" step.** This is the first
    time anything has pushed `main` from a runner, and it is the step a branch rule rejects

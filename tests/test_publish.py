@@ -412,6 +412,27 @@ def test_no_step_in_the_daily_workflow_uses_jq_exit_status():
         assert not found, f"{name}: jq exit-status flag in a run body: {found.group(0)!r}"
 
 
+def test_every_git_commit_in_the_daily_workflow_tolerates_an_empty_index():
+    """`git commit` exits 1 when there is nothing staged, and re-running an already-successful
+    job is the cheapest recovery this pipeline has. A promote whose push failed and was fixed by
+    hand, or a rerun of a job that already committed, must not go red on the no-op."""
+    for name, body in _run_bodies(DAILY_WORKFLOW):
+        for line in body.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("git commit"):
+                assert "||" in stripped, f"{name}: bare git commit with no fallback: {stripped!r}"
+
+
+def test_the_daily_workflow_can_be_dispatched_for_an_earlier_day():
+    """`radar run` dates itself from today's UTC date, so without a `day` input a recovery
+    dispatch only recovers the day it is dispatched on -- and the day that needs recovering is
+    usually yesterday's by the time anyone has read the health issue."""
+    # PyYAML reads the `on:` key as the boolean True (YAML 1.1).
+    inputs = yaml.safe_load(DAILY_WORKFLOW.read_text())[True]["workflow_dispatch"]["inputs"]
+    assert "day" in inputs and "ignore_seen" in inputs
+    assert any("--day" in body for _, body in _run_bodies(DAILY_WORKFLOW))
+
+
 # --- site ---------------------------------------------------------------------------------
 
 

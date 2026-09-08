@@ -10,6 +10,11 @@
 # `pages` deploys the site `promote` wrote. A bad pack is therefore cancellable for the length of
 # the timer, and cancelling costs nothing already published.
 #
+# It is not free, though, and the difference matters when the cancel is a mistake: by the time
+# `promote` is waiting, `generate` has already pushed `seen-ids.json` to the data repo. The day's
+# items are spent. Recovering it is a dispatch with `ignore_seen=true` (and `day` set, if the UTC
+# date has since rolled over), which pays for a second full generation.
+#
 # No `${{ }}` expression appears inside a `run:` body anywhere in this file — every value the
 # shell or the inline Python needs arrives through `env:` and is read from the environment. See
 # the github-actions skill's rule 4 (script injection); zizmor enforces it.
@@ -31,6 +36,13 @@ on:
         description: "Regenerate a spent day (second generation, second bill)"
         type: boolean
         default: false
+      # Which day to regenerate. `radar run` defaults to today's UTC date, so without this a
+      # recovery dispatch only ever recovers the day it is dispatched on -- and the day that
+      # needs recovering is usually yesterday's by the time anyone looks at the health issue.
+      day:
+        description: "YYYY-MM-DD to regenerate; blank means today (UTC)"
+        type: string
+        default: ""
 
 # One daily run at a time, and never cancel the one in flight: a cancelled `generate` can leave
 # the archive repo half-pushed, and a cancelled `promote` can leave `main` ahead of the site.
@@ -133,6 +145,9 @@ jobs:
           # Empty on a scheduled run, "true"/"false" on a dispatch. Read from the environment
           # rather than interpolated into the command line, like every other value in this file.
           RADAR_IGNORE_SEEN: ${{ inputs.ignore_seen }}
+          # Empty on a scheduled run; a YYYY-MM-DD on a recovery dispatch. Same rule again: read
+          # from the environment, never interpolated into the command line.
+          RADAR_DAY: ${{ inputs.day }}
         run: |
           set -o pipefail
           status=0
@@ -140,6 +155,10 @@ jobs:
           if [ "${RADAR_IGNORE_SEEN:-false}" = "true" ]; then
             extra+=(--ignore-seen)
             echo "Regenerating a spent day: --ignore-seen is set."
+          fi
+          if [ -n "${RADAR_DAY:-}" ]; then
+            extra+=(--day "$RADAR_DAY")
+            echo "Regenerating the day $RADAR_DAY rather than today."
           fi
           uv run radar run --data data --out skills/aisafety-radar/references "${extra[@]}" \
             | tee report.json || status=$?
@@ -324,7 +343,10 @@ jobs:
           RADAR_VERSION: ${{ needs.generate.outputs.version }}
         run: |
           git add -A
-          git commit -m "Publish $RADAR_VERSION"
+          # `|| echo`, like the archive and pack commits above: re-running an already-successful
+          # promote leaves nothing to commit, and a job that goes red on a no-op is a job whose
+          # rerun -- the cheapest recovery there is -- cannot succeed.
+          git commit -m "Publish $RADAR_VERSION" || echo "nothing to commit"
           git push origin main
 
       # A dead-man's switch: it must fire only when the day actually published, so it has no
