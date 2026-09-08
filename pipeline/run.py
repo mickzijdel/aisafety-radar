@@ -65,7 +65,7 @@ from pipeline.fetchers.base import Fetcher, Window, run_all
 from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient, Site
 from pipeline.fetchers.forums import raw_post_to_item
 from pipeline.floor import apply_floor
-from pipeline.ledger import PostsLedger, SeenIds
+from pipeline.ledger import WINDOW_DAYS, PostsLedger, SeenIds
 from pipeline.llm import LLM
 from pipeline.models import GateResult, Item, SourceStatus, Usage
 from pipeline.qa.gates import (
@@ -96,9 +96,11 @@ log = logging.getLogger(__name__)
 
 FORUMS_FILE = "31-today-forums.md"
 
-# How far back the ledger's live-post window reaches, and the page size the window fetch asks for.
-# The window is what makes a mover possible: a post outside it can no longer move the digest.
-WINDOW_DAYS = 14
+# The page size the window fetch asks each site for. How far back it reaches is `WINDOW_DAYS`,
+# which belongs to the ledger and is imported rather than restated: the same number bounds what a
+# ledger day carries forward, and a fetch that reached further back than the ledger keeps would
+# record posts the next morning silently drops. The window is what makes a mover possible: a post
+# outside it can no longer move the digest.
 WINDOW_LIMIT = 500
 
 

@@ -4,6 +4,20 @@ The ledger holds one map of `LedgerEntry` per day. A post that was seen on an ea
 absent today keeps its last entry copied forward with `carried=True`, so the day's map is always
 the full set of live posts rather than only today's fetch. `movements` diffs a day against the
 previous one to find what gained comments or score.
+
+Two bounds, and both are load-bearing, because this file is rewritten and pushed to the public
+data repo every morning:
+
+* `keep_days` prunes whole days off the back of the ledger.
+* `window_days` bounds what a day *contains*. The carry-forward only carries a post still inside
+  the live-post window; anything older can no longer move the digest, since the daily window fetch
+  does not ask for it either. Without that bound the carry-forward is a ratchet - every post the
+  pipeline has ever seen, copied into every later day, for ever. Simulated at 44 posts a day it
+  reached 1,320 entries by day 30 and 11,340 by day 365, which is a file that eventually fails
+  GitHub's 100 MB limit and, long before that, a diff nobody can read.
+
+The bound is on the carry-forward alone. An item this run actually fetched is recorded whatever
+its age, so nothing the run has in hand is ever thrown away here.
 """
 
 from __future__ import annotations
@@ -18,6 +32,24 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from pipeline.models import Item
+
+# How far back the live-post window reaches. It is the ledger's because two things have to agree
+# about it: `window_post_ids`, and the carry-forward that decides what a day still holds.
+# `pipeline.run` imports it rather than restating it, so the window fetch asks for exactly the
+# span the ledger will keep.
+WINDOW_DAYS = 14
+
+
+def _window_cutoff(day: date, days: int) -> datetime:
+    """Naive midnight, `days` days before `day`: the oldest `published_at` still in the window.
+
+    The offset is dropped on both sides and the timestamp read as written, so this is a
+    wall-clock comparison rather than a timezone-correct one. Deliberate: the window is a coarse
+    recency filter, and a few hours either side of the cutoff does not change what it selects.
+    Stripping the offset is also what keeps a tz-aware `published_at` from raising against the
+    naive midnight cutoff.
+    """
+    return datetime.combine(day - timedelta(days=days), datetime.min.time())
 
 
 def _atomic_write(path: Path, text: str) -> None:
@@ -83,9 +115,10 @@ class Movement:
 class PostsLedger:
     """Per-day maps of post state, pruned to the last `keep_days` days."""
 
-    def __init__(self, path: Path, keep_days: int = 30) -> None:
+    def __init__(self, path: Path, keep_days: int = 30, window_days: int = WINDOW_DAYS) -> None:
         self.path = path
         self.keep_days = keep_days
+        self.window_days = window_days
         self._days: dict[date, dict[str, LedgerEntry]] = {}
 
     def load(self) -> PostsLedger:
@@ -131,11 +164,20 @@ class PostsLedger:
         so a missing key means "no news", not "no comments ever": a refetched post keeps the
         timestamp the previous day recorded. An explicit None is treated the same as an absent
         key for that reason. Only a real datetime overwrites what is already known.
+
+        Only posts still inside the `window_days` window are carried forward. A post published
+        before the cutoff cannot become a mover -- `movements` compares against yesterday, and the
+        daily window fetch stopped asking for it -- so carrying it grows the file without ever
+        changing what the run does. Today's own `items` are recorded whatever their age: the bound
+        is on the carry-forward, never on what the run actually fetched.
         """
         today: dict[str, LedgerEntry] = {}
         prev_day = self.latest_before(day)
         if prev_day is not None:
+            cutoff = _window_cutoff(day, self.window_days)
             for pid, e in self._days[prev_day].items():
+                if e.published_at.replace(tzinfo=None) < cutoff:
+                    continue
                 today[pid] = e.model_copy(update={"carried": True})
         for item in items:
             # `today` still holds the carried entry for this post, if there was one.
@@ -158,16 +200,13 @@ class PostsLedger:
         for d in [d for d in self._days if d < cutoff]:
             del self._days[d]
 
-    def window_post_ids(self, day: date, days: int = 14) -> set[str]:
+    def window_post_ids(self, day: date, days: int = WINDOW_DAYS) -> set[str]:
         """Ids of `day`'s posts published within the last `days` days.
 
-        The offset is dropped and the timestamp read as written, so this is a wall-clock
-        comparison rather than a timezone-correct one. Deliberate: the window is a coarse
-        recency filter, and a few hours either side of the cutoff does not change what it
-        selects. Stripping the offset is also what keeps a tz-aware `published_at` from
-        raising against the naive midnight cutoff.
+        Shares `_window_cutoff` with the carry-forward in `snapshot`, so the two cannot disagree
+        about what "in the window" means. See that helper for why the comparison is wall-clock.
         """
-        cutoff = datetime.combine(day - timedelta(days=days), datetime.min.time())
+        cutoff = _window_cutoff(day, days)
         return {
             pid
             for pid, e in self.entries(day).items()

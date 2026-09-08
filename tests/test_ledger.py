@@ -40,7 +40,10 @@ def test_ledger_carries_forward_and_windows(tmp_path):
     new = make_item(id="lw:new", published_at=datetime(2026, 8, 28, tzinfo=UTC))
     ledger.snapshot(date(2026, 8, 29), [old, new], {})
     ledger.snapshot(date(2026, 8, 30), [], {})
-    assert set(ledger.entries(date(2026, 8, 30))) == {"lw:old", "lw:new"}
+    # Both were fetched on the 29th, so the 29th holds both.
+    assert set(ledger.entries(date(2026, 8, 29))) == {"lw:old", "lw:new"}
+    # The 30th carries only what is still in the window, so the day's map and the window agree.
+    assert set(ledger.entries(date(2026, 8, 30))) == {"lw:new"}
     assert ledger.window_post_ids(date(2026, 8, 30), days=14) == {"lw:new"}
 
 
@@ -295,3 +298,56 @@ def test_window_post_ids_only_looks_at_that_day(tmp_path):
 def _boom(_src, _dst):
     """Stand-in for os.replace that fails the way a full disk would."""
     raise OSError("disk full")
+
+
+# --- the carry-forward window -----------------------------------------------
+
+
+def test_carry_forward_drops_a_post_published_outside_the_window(tmp_path):
+    """The ledger is rewritten and pushed to the data repo every morning, so an unbounded
+    carry-forward is a file that grows for ever. A post older than the 14-day window can no
+    longer move the digest -- the window fetch does not even ask for it -- so carrying it costs
+    bytes and buys nothing."""
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    day = date(2026, 8, 30)
+    stale = make_item(id="lw:stale", published_at=datetime(2026, 8, 10, tzinfo=UTC))
+    live = make_item(id="lw:live", published_at=datetime(2026, 8, 20, tzinfo=UTC))
+    ledger.snapshot(day - timedelta(days=1), [stale, live], {})
+    ledger.snapshot(day, [], {})
+
+    assert set(ledger.entries(day)) == {"lw:live"}
+    assert ledger.entries(day)["lw:live"].carried is True
+
+
+def test_a_post_refetched_after_ageing_out_is_recorded_from_todays_fetch(tmp_path):
+    """The filter is on the carry-forward alone: an item this run actually fetched is recorded
+    whatever its age, so a `keep_days`-style pruning of live data can never happen by accident."""
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    day = date(2026, 8, 30)
+    stale = make_item(id="lw:stale", published_at=datetime(2026, 8, 1, tzinfo=UTC), score=11)
+    ledger.snapshot(day - timedelta(days=1), [stale], {})
+    ledger.snapshot(day, [stale], {})
+
+    entry = ledger.entries(day)["lw:stale"]
+    assert entry.carried is False and entry.score == 11
+
+
+def test_thirty_days_of_running_keeps_the_entry_count_flat(tmp_path):
+    """The growth claim, simulated. Each day publishes a fixed number of posts and the fetch
+    returns only those; everything else in the day's map is carried. Unbounded, day 30 held
+    every post of all 30 days; bounded, it holds the window and stops there."""
+    ledger = PostsLedger(tmp_path / "ledger.json").load()
+    first = date(2026, 8, 1)
+    per_day = 44
+    for offset in range(30):
+        day = first + timedelta(days=offset)
+        noon = datetime(day.year, day.month, day.day, 12, tzinfo=UTC)
+        fresh = [make_item(id=f"lw:{offset}-{n}", published_at=noon) for n in range(per_day)]
+        ledger.snapshot(day, fresh, {})
+
+    # Days D-14 to D inclusive: the cutoff is midnight, so the fifteenth day back still counts.
+    assert len(ledger.entries(first + timedelta(days=29))) == 15 * per_day
+    assert len(ledger.entries(first + timedelta(days=29))) == len(
+        ledger.entries(first + timedelta(days=20))
+    ), "flat, not growing"
+    assert len(ledger.entries(first + timedelta(days=29))) < 30 * per_day
