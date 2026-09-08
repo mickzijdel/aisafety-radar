@@ -55,6 +55,18 @@ class LLM:
             cost_usd=cost,
         )
 
+    def _check_thinking(self, model: str, thinking: bool) -> None:
+        """Refuse a thinking parameter on any model but Sonnet, before the call is made.
+
+        Enforced here rather than at each call site: only Sonnet takes one, and Haiku rejects one
+        outright (CLAUDE.md, spec 4). `FakeLLM` reuses this, so a stage test cannot ask for a
+        combination the real client would reject and stay green.
+        """
+        if thinking and model != self.settings.models.sonnet:
+            raise ValueError(
+                f"thinking is only available on {self.settings.models.sonnet}, not {model}"
+            )
+
     def _create(
         self,
         model: str,
@@ -64,12 +76,7 @@ class LLM:
         thinking: bool,
         extra: dict[str, Any],
     ) -> Any:
-        # Enforced here rather than at each call site: only Sonnet takes a thinking parameter,
-        # and Haiku rejects one outright (CLAUDE.md, spec 4).
-        if thinking and model != self.settings.models.sonnet:
-            raise ValueError(
-                f"thinking is only available on {self.settings.models.sonnet}, not {model}"
-            )
+        self._check_thinking(model, thinking)
         kwargs: dict[str, Any] = dict(
             model=model,
             max_tokens=max_tokens,
@@ -153,14 +160,23 @@ class LLM:
 class FakeLLM(LLM):
     """Replays `responses` in order and records what it was asked, for tests without a network.
 
-    Deliberately does not call `super().__init__`: there is no client and no settings to price
-    against, and a test that reaches a real client should fail loudly on the missing attribute.
+    Deliberately does not call `super().__init__`: there is no client to price against, and a
+    test that reaches a real client should fail loudly on the missing attribute.
+
+    `settings` is optional and carries exactly one thing: with it, `text` applies the same
+    thinking guard the real client would, so a stage test cannot pass `thinking=True` on Haiku
+    and stay green against a call the API rejects.
     """
 
-    def __init__(self, responses: list[dict[str, Any] | str] | None = None) -> None:
+    def __init__(
+        self,
+        responses: list[dict[str, Any] | str] | None = None,
+        settings: Settings | None = None,
+    ) -> None:
         self.responses = list(responses or [])
         self.calls: list[dict[str, Any]] = []
         self.usage = Usage()
+        self.settings = settings
 
     def _next(self, model: str, system: str, user: str, **extra: Any) -> Any:
         """Record the call, then hand back the next canned response.
@@ -179,6 +195,8 @@ class FakeLLM(LLM):
         return out
 
     def text(self, model, system, user, max_tokens=2048, thinking=False):
+        if self.settings is not None:
+            self._check_thinking(model, thinking)
         out = self._next(model, system, user, max_tokens=max_tokens, thinking=thinking)
         assert isinstance(out, str), "text() needs a str response"
         return out

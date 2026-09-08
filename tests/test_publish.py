@@ -26,6 +26,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+import yaml
 
 from pipeline.cli import _existing_versions
 from pipeline.publish import health
@@ -372,6 +373,43 @@ def test_ping_gets_the_url(monkeypatch):
     monkeypatch.setattr(health.httpx, "get", lambda url, **k: seen.append(url))
     ping("https://hc.example/uuid")
     assert seen == ["https://hc.example/uuid"]
+
+
+# --- the daily workflow's own shell -------------------------------------------------------
+
+
+DAILY_WORKFLOW = Path(__file__).parents[1] / ".github" / "workflows" / "daily.yml"
+# `-e` on its own or bundled into a short-option cluster (`-er`, `-re`, ...).
+_JQ_EXIT_STATUS = re.compile(r"\bjq\s+(?:--exit-status\b|-[a-zA-Z]*e[a-zA-Z]*\b)")
+
+
+def _run_bodies(workflow: Path) -> list[tuple[str, str]]:
+    """Every step's `run:` script in the workflow, as (step name, script).
+
+    Parsed rather than grepped, so the header comment that *explains* the rule below is not
+    mistaken for a violation of it.
+    """
+    doc = yaml.safe_load(workflow.read_text())
+    return [
+        (step.get("name") or "(unnamed)", step["run"])
+        for job in doc["jobs"].values()
+        for step in job.get("steps", [])
+        if isinstance(step, dict) and "run" in step
+    ]
+
+
+def test_no_step_in_the_daily_workflow_uses_jq_exit_status():
+    """`jq -e` exits 1 when the value it printed was `false` or `null`.
+
+    So `jq -e ... || echo false` on a *valid* blocked report prints "false" twice, and the stray
+    second line makes GitHub reject the whole $GITHUB_OUTPUT file -- failing the step on exactly
+    the path it exists to handle. The workflow's header comment says so; nothing enforced it.
+    """
+    bodies = _run_bodies(DAILY_WORKFLOW)
+    assert any("jq " in body for _, body in bodies), "no jq call left to guard"
+    for name, body in bodies:
+        found = _JQ_EXIT_STATUS.search(body)
+        assert not found, f"{name}: jq exit-status flag in a run body: {found.group(0)!r}"
 
 
 # --- site ---------------------------------------------------------------------------------

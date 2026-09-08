@@ -61,10 +61,13 @@ def fixture():
     """The golden-file scenario, wide enough that the goldens show every branch of the item and
     mover templates: an affiliation, a degraded item that still carries a verified quote, a mover
     with a discussion signal and a new top comment, and a source that was down."""
+    # Distinct author names, so the golden shows each item's byline coming from its own item:
+    # with every post written by "A", swapping two bylines changes nothing on the page.
     items = [
         make_item(
             id="lw:1",
             title="Post one",
+            author="Ada Nakamura",
             score=45,
             agreement=12,
             author_affiliation="Redwood Research",
@@ -74,6 +77,7 @@ def fixture():
             site="eaf",
             source="eaforum",
             title="Post two",
+            author="Priya Okonkwo",
             score=80,
             url="https://forum.effectivealtruism.org/posts/2/x",
             agreement=None,

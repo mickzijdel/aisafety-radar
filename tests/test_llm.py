@@ -320,3 +320,23 @@ def test_count_tokens_falls_back_to_an_estimate_when_the_api_fails(stub, caplog)
     with caplog.at_level("WARNING", logger="pipeline.llm"):
         assert LLM(stub, s).count_tokens("a" * 400) == 100
     assert "upstream 529" in caplog.text
+
+
+def test_fake_llm_enforces_the_thinking_guard_when_it_is_given_settings():
+    """A stage test that asks for thinking on Haiku must fail here, not in production.
+
+    The guard is the real `LLM`'s, reused rather than restated: a fake that is more permissive
+    than the client it stands in for is a fake that certifies calls the API rejects.
+    """
+    s = load_settings()
+    fake = FakeLLM(["answer"], settings=s)
+    with pytest.raises(ValueError, match="thinking"):
+        fake.text(s.models.haiku, "SYS", "USER", thinking=True)
+    assert fake.calls == [], "the guard must refuse before the call is recorded"
+    assert fake.text(s.models.sonnet, "SYS", "USER", thinking=True) == "answer"
+
+
+def test_fake_llm_without_settings_still_takes_any_model():
+    """Most stage tests never send thinking at all, so settings stays optional."""
+    fake = FakeLLM(["answer"])
+    assert fake.text("any-model", "SYS", "USER", thinking=True) == "answer"

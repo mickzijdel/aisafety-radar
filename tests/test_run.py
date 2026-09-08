@@ -755,3 +755,23 @@ def test_run_daily_seeds_the_judge_sampler_from_the_day(tmp_path, monkeypatch):
     )
     run_daily(_inputs(tmp_path, _clients(), rng_seed=7))
     assert seen == [(7, FixtureClient.day_of(FIX))]
+
+
+def test_a_failed_judge_verdict_degrades_a_top_item_without_blocking_the_pack(tmp_path):
+    """Gate 5's teeth. An importance-4-or-5 item whose summary the judge will not vouch for is
+    degraded -- rendered with its metadata and its verified quotes, with the summary withheld and
+    the verdict in its notes -- rather than dropped or allowed to withhold the whole day."""
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_JudgeFailsEveryItem()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    assert report.dropped == [] and report.failed == []
+
+    archived = Archive(tmp_path / "data").read_extractions(FixtureClient.day_of(FIX))
+    assert archived and all(r.degraded for r in archived)
+    assert all(any(n.startswith("judge: ") for n in r.notes) for r in archived)
+
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert rendered.count("\n- **") == report.items_selected
+    assert rendered.count("summary withheld") == report.items_selected
+    # The judge gate itself does not block on a degraded item: the pack ships, softened.
+    judge_gate = next(g for g in report.gates if g.name == "faithfulness-judge")
+    assert judge_gate.passed, judge_gate.details

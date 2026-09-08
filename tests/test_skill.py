@@ -205,3 +205,30 @@ def test_manifests_agree():
     assert plugin["name"] == "aisafety-radar"
     assert market["plugins"][0]["name"] == "aisafety-radar"
     assert plugin["version"] == market["plugins"][0]["version"]
+
+
+CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
+# `git+<url>@<40-hex>#subdirectory=<path>`: the only form that pins a git install to one commit.
+_PINNED_GIT_INSTALL = re.compile(r"git\+https://\S+@[0-9a-f]{40}#subdirectory=")
+
+
+def test_the_skills_ref_validator_is_pinned_to_a_commit():
+    """It publishes no release artifact, so it is installed from git and runs in CI.
+
+    A `git+...` install with no `@<sha>` resolves to whatever the default branch holds on the
+    morning the job runs, which is arbitrary third-party code executing in the workflow. The
+    pin is a comment away from being lost and nothing else checks it.
+    """
+    lines = [
+        ln for ln in CI_WORKFLOW.read_text().splitlines() if "skills-ref" in ln and "git+" in ln
+    ]
+    assert lines, "no skills-ref git install found in ci.yml"
+    for line in lines:
+        assert _PINNED_GIT_INSTALL.search(line), f"skills-ref install is not SHA-pinned: {line!r}"
+
+
+def test_no_git_install_anywhere_in_ci_is_left_unpinned():
+    """The same rule for any other `git+` install the workflow grows later."""
+    for line in CI_WORKFLOW.read_text().splitlines():
+        if "git+http" in line and not line.lstrip().startswith("#"):
+            assert _PINNED_GIT_INSTALL.search(line), f"unpinned git install: {line!r}"

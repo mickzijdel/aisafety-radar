@@ -18,7 +18,7 @@ Load only what the task needs. Token counts are approximate.
 | `20-current-state.md` | rolling: 30-day synthesis per area | - | not yet published |
 | `21-this-week.md` | rolling: 7-day view | - | not yet published |
 | `30-today.md` | daily: executive summary and top items across sources | - | not yet published |
-| `31-today-forums.md` | daily: LW / AF / EAF posts and discussion movers | 332 | 2026-08-30 |
+| `31-today-forums.md` | daily: LW / AF / EAF posts and discussion movers | 338 | 2026-08-30 |
 | `32-today-news.md` | daily: newsletters, journalism, lab blogs, governance, incidents | - | not yet published |
 | `33-today-papers.md` | daily: arXiv and lab papers | - | not yet published |
 | `40-events-training.md` | daily: upcoming events and the authoritative deadline list | - | not yet published |
@@ -29,7 +29,7 @@ Load only what the task needs. Token counts are approximate.
 
 ## Recipes
 
-- **what happened today**: `31-today-forums.md` (about 332 tokens); not yet published: `30-today.md`, `32-today-news.md`, `33-today-papers.md`
+- **what happened today**: `31-today-forums.md` (about 338 tokens); not yet published: `30-today.md`, `32-today-news.md`, `33-today-papers.md`
 - **this week**: not yet published: `21-this-week.md`
 - **close look at an area**: not yet published: `10-map-field-overview.md`, `20-current-state.md`
 - **career change**: not yet published: `15-careers.md`, `16-map-field-context.md`, `12-map-programmes.md`, `40-events-training.md`, `41-jobs-funding.md`

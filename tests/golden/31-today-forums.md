@@ -8,13 +8,13 @@
 
 ## Posts
 
-- **Post one** · A, Redwood Research (LW · 2026-08-29 · 45 karma · 3 comments · agree 12) · https://www.lesswrong.com/posts/abc123/x
+- **Post one** · Ada Nakamura, Redwood Research (LW · 2026-08-29 · 45 karma · 3 comments · agree 12) · https://www.lesswrong.com/posts/abc123/x
   Claims X with a 45% drop. Author's stated status: "Epistemic status: exploratory". Claim type: exploratory.
   Discussion: Contested; Bob (83 karma) disagrees.
   Why it matters: First test of X.
   > "a quote"
 
-- **Post two** · A (EAF · 2026-08-29 · 80 karma · 3 comments) · https://forum.effectivealtruism.org/posts/2/x
+- **Post two** · Priya Okonkwo (EAF · 2026-08-29 · 80 karma · 3 comments) · https://forum.effectivealtruism.org/posts/2/x
   (summary withheld: could not be verified against the source)
   > "a quote"
 

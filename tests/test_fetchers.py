@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from pipeline.fetchers.base import FetchResult, Window, run_all
 from pipeline.fetchers.forummagnum import RawPost
@@ -150,3 +150,23 @@ def test_agreement_of_a_boolean_is_not_a_vote_total():
     for value in (True, False):
         post = RAW.model_copy(update={"extendedScore": {"agreement": value}})
         assert raw_post_to_item("lw", post).agreement is None
+
+
+def test_the_window_is_half_open_at_both_ends():
+    """`window.start <= published < window.end`, pinned at both boundaries.
+
+    The boundary is what stops a post published in the seam being carried twice, and a `<`/`<=`
+    slip either way is invisible to every other test in this file.
+    """
+    window = Window.for_day(date(2026, 8, 30))
+    at_start = RAW.model_copy(update={"id": "at-start", "postedAt": window.start})
+    at_end = RAW.model_copy(update={"id": "at-end", "postedAt": window.end})
+    just_before_start = RAW.model_copy(
+        update={"id": "before", "postedAt": window.start - timedelta(microseconds=1)}
+    )
+    just_before_end = RAW.model_copy(
+        update={"id": "in", "postedAt": window.end - timedelta(microseconds=1)}
+    )
+    posts = [at_start, at_end, just_before_start, just_before_end]
+    fetcher = ForumFetcher("lw", FakeClient(posts), "lesswrong", 15)
+    assert [i.id for i in fetcher.fetch(window)] == ["lw:at-start", "lw:in"]
