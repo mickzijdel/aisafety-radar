@@ -996,3 +996,17 @@ def test_a_report_written_before_the_window_was_recorded_falls_back(tmp_path):
     window = pipeline.run._run_window(day, datetime(2026, 8, 31, 5, 26, tzinfo=UTC), archive)
     assert window.end == datetime(2026, 8, 1, 5, 40, tzinfo=UTC)
     assert (window.end - window.start).total_seconds() == 25 * 3600
+
+
+def test_the_pack_states_the_span_the_run_actually_fetched(tmp_path):
+    """The template prints `data_from` and `data_through`, which are the window's own ends, so a
+    run whose window is not a nominal one still describes itself truthfully."""
+    day = FixtureClient.day_of(FIX)
+    fetched_at = datetime(day.year, day.month, day.day, 4, 20, tzinfo=UTC)
+    report = run_daily(_inputs(tmp_path, _clients(), now=fetched_at))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    text = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert (
+        f"published between {day - timedelta(days=1):%Y-%m-%d} 03:20 and {day:%Y-%m-%d} 04:20 UTC"
+    ) in text
+    assert "24 hours" not in text

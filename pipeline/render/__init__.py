@@ -204,6 +204,10 @@ BUNDLES: dict[str, list[str]] = {
 class PackMeta:
     version: str
     generated_at: datetime
+    # Both ends of the window the run fetched, because the pack states the span it covers and a
+    # nominal one would be wrong on the two days a reader looks hardest: day one, and a
+    # regeneration, whose window is the one the first run recorded rather than a round 24 hours.
+    data_from: datetime
     data_through: datetime
     latest_base: str = f"{PAGES_BASE}/latest"
 

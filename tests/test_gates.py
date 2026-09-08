@@ -28,6 +28,7 @@ VERSION = "2026.08.30a"
 META = PackMeta(
     version=VERSION,
     generated_at=datetime(2026, 8, 30, 6, 14, tzinfo=UTC),
+    data_from=datetime(2026, 8, 29, 4, 40, tzinfo=UTC),
     data_through=datetime(2026, 8, 30, 5, 40, tzinfo=UTC),
 )
 WINDOW_START = datetime(2026, 8, 29, 5, 40, tzinfo=UTC)
@@ -436,6 +437,7 @@ def test_freshness_does_not_accept_a_version_that_merely_starts_with_the_expecte
             PackMeta(
                 version="2026.08.30ab",
                 generated_at=META.generated_at,
+                data_from=META.data_from,
                 data_through=META.data_through,
             ),
             [],

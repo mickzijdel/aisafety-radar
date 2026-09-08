@@ -413,7 +413,12 @@ def run_daily(inputs: RunInputs) -> RunReport:
             log.exception("comment refresh failed; publishing without discussion movers")
             refresh_status = _side_status("refresh", ok=False, items=0, error=str(exc))
 
-    meta = PackMeta(version=inputs.version, generated_at=datetime.now(UTC), data_through=window.end)
+    meta = PackMeta(
+        version=inputs.version,
+        generated_at=datetime.now(UTC),
+        data_from=window.start,
+        data_through=window.end,
+    )
     rendered = render_all(
         meta,
         build_render_items(rendered_items, list(records.values())),

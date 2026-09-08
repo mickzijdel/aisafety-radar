@@ -1,7 +1,7 @@
 {% include 'header.j2' %}
 # Today on the forums · {{ meta.data_through.strftime('%Y-%m-%d') }}
 
-{{ items|length|plural('post') }} from LessWrong, the Alignment Forum and the EA Forum in the 24 hours to {{ meta.data_through.strftime('%Y-%m-%d %H:%M') }} UTC, ordered by importance.{% for s in statuses if not s.ok %} Source unavailable today: {{ s.source|oneline }}.{% endfor %}
+{{ items|length|plural('post') }} from LessWrong, the Alignment Forum and the EA Forum, published between {{ meta.data_from.strftime('%Y-%m-%d %H:%M') }} and {{ meta.data_through.strftime('%Y-%m-%d %H:%M') }} UTC, ordered by importance.{% for s in statuses if not s.ok %} Source unavailable today: {{ s.source|oneline }}.{% endfor %}
 
 ## Posts
 

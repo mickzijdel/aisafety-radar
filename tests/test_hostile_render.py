@@ -33,6 +33,7 @@ VERSION = "2026.08.30a"
 META = PackMeta(
     version=VERSION,
     generated_at=datetime(2026, 8, 30, 6, 14, tzinfo=UTC),
+    data_from=datetime(2026, 8, 29, 4, 40, tzinfo=UTC),
     data_through=datetime(2026, 8, 30, 5, 40, tzinfo=UTC),
 )
 FORUMS = "31-today-forums.md"

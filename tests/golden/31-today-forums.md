@@ -4,7 +4,7 @@
 
 # Today on the forums · 2026-08-30
 
-2 posts from LessWrong, the Alignment Forum and the EA Forum in the 24 hours to 2026-08-30 05:40 UTC, ordered by importance. Source unavailable today: alignmentforum.
+2 posts from LessWrong, the Alignment Forum and the EA Forum, published between 2026-08-29 04:40 and 2026-08-30 05:40 UTC, ordered by importance. Source unavailable today: alignmentforum.
 
 ## Posts
 

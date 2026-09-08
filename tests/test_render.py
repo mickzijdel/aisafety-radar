@@ -29,6 +29,8 @@ SPEC = (
 META = PackMeta(
     version="2026.08.30a",
     generated_at=datetime(2026, 8, 30, 6, 14, tzinfo=UTC),
+    # 25 hours before `data_through`: the span a live run fetches.
+    data_from=datetime(2026, 8, 29, 4, 40, tzinfo=UTC),
     data_through=datetime(2026, 8, 30, 5, 40, tzinfo=UTC),
 )
 
@@ -216,6 +218,18 @@ def test_failed_sources_are_named_in_the_lead_paragraph():
     assert "ordered by importance. Source unavailable today: alignmentforum." in lead
     # The healthy sources are not named: the line reports failures, not a roll call.
     assert "lesswrong." not in lead and "eaforum." not in lead
+
+
+def test_the_lead_paragraph_states_the_span_the_pack_actually_covers():
+    """It used to claim "the 24 hours to <end>" against a 25-hour window, and the two days that
+    sentence is furthest from true are day one and a regeneration - which are exactly the days a
+    human reads the pack closely. Both ends of the window are printed instead of a round number
+    nothing computes."""
+    items, records, movers, statuses = fixture()
+    text = render_forums(META, build_render_items(items, records), movers, statuses)
+    lead = text.split("## Posts")[0]
+    assert "published between 2026-08-29 04:40 and 2026-08-30 05:40 UTC" in lead
+    assert "24 hours" not in text
 
 
 def test_no_posts_renders_a_sentence_rather_than_an_empty_section():
