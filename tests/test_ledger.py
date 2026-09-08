@@ -42,9 +42,9 @@ def test_ledger_carries_forward_and_windows(tmp_path):
     ledger.snapshot(date(2026, 8, 30), [], {})
     # Both were fetched on the 29th, so the 29th holds both.
     assert set(ledger.entries(date(2026, 8, 29))) == {"lw:old", "lw:new"}
-    # The 30th carries only what is still in the window, so the day's map and the window agree.
+    # The 30th carries only what is still in the window: a post older than that can no longer
+    # move the digest, and carrying it grows a file that is rewritten and pushed every morning.
     assert set(ledger.entries(date(2026, 8, 30))) == {"lw:new"}
-    assert ledger.window_post_ids(date(2026, 8, 30), days=14) == {"lw:new"}
 
 
 def test_ledger_prunes_old_days(tmp_path):
@@ -262,17 +262,32 @@ def test_pruning_keeps_a_full_keep_days_window(tmp_path):
     assert ledger.days()[-1] == date(2026, 8, 9)
 
 
-def test_window_post_ids_boundary_is_inclusive_at_midnight(tmp_path):
+def test_the_window_cutoff_is_naive_midnight_that_many_days_before_the_day(tmp_path):
+    """The one piece of arithmetic the carry-forward rests on, pinned on its own.
+
+    Naive, because the comparison it feeds drops the offset on the other side too; midnight,
+    because a cutoff at the run's own hour would make what a day carries depend on when it ran.
+    """
+    cutoff = ledger_module._window_cutoff(date(2026, 8, 30), 14)
+    assert cutoff == datetime(2026, 8, 16, 0, 0)
+    assert cutoff.tzinfo is None
+
+
+def test_the_carry_forward_boundary_is_inclusive_at_midnight(tmp_path):
+    """A post published exactly on the cutoff is still in the window; a minute earlier is out."""
     ledger = PostsLedger(tmp_path / "ledger.json").load()
     on_cutoff = make_item(id="lw:on", published_at=datetime(2026, 8, 16, 0, 0, tzinfo=UTC))
     before_cutoff = make_item(
         id="lw:before", published_at=datetime(2026, 8, 15, 23, 59, tzinfo=UTC)
     )
-    ledger.snapshot(date(2026, 8, 30), [on_cutoff, before_cutoff], {})
-    assert ledger.window_post_ids(date(2026, 8, 30), days=14) == {"lw:on"}
+    ledger.snapshot(date(2026, 8, 29), [on_cutoff, before_cutoff], {})
+    # Both were fetched on the 29th, so the 29th holds both whatever their age.
+    assert set(ledger.entries(date(2026, 8, 29))) == {"lw:on", "lw:before"}
+    ledger.snapshot(date(2026, 8, 30), [], {})
+    assert set(ledger.entries(date(2026, 8, 30))) == {"lw:on"}
 
 
-def test_window_post_ids_handles_aware_published_at_without_crashing(tmp_path):
+def test_the_carry_forward_handles_an_aware_published_at_without_crashing(tmp_path):
     """A tz-aware `published_at` from real data must not raise.
 
     The comparison drops the offset and reads the timestamp as written (deliberate simplicity),
@@ -283,16 +298,24 @@ def test_window_post_ids_handles_aware_published_at_without_crashing(tmp_path):
     kiritimati = timezone(timedelta(hours=13))
     late = make_item(id="lw:late", published_at=datetime(2026, 8, 16, 1, 0, tzinfo=kiritimati))
     naive = make_item(id="lw:naive", published_at=datetime(2026, 8, 20, 12, 0))
-    ledger.snapshot(date(2026, 8, 30), [late, naive], {})
+    ledger.snapshot(date(2026, 8, 29), [late, naive], {})
+    ledger.snapshot(date(2026, 8, 30), [], {})
 
-    assert ledger.window_post_ids(date(2026, 8, 30), days=14) == {"lw:late", "lw:naive"}
+    assert set(ledger.entries(date(2026, 8, 30))) == {"lw:late", "lw:naive"}
 
 
-def test_window_post_ids_only_looks_at_that_day(tmp_path):
+def test_a_day_the_ledger_never_recorded_holds_nothing(tmp_path):
     ledger = PostsLedger(tmp_path / "ledger.json").load()
     ledger.snapshot(date(2026, 8, 29), [make_item(id="lw:a")], {})
-    assert ledger.window_post_ids(date(2026, 8, 31), days=14) == set()
     assert ledger.entries(date(2026, 8, 31)) == {}
+
+
+def test_the_ledger_no_longer_exposes_window_post_ids(tmp_path):
+    """It was `set(entries(day))` with the carry-forward's own cutoff applied a second time, and
+    after the mover path started reading that cutoff directly nothing in production called it.
+    A public method nothing uses is a method the next caller uses for the wrong thing: it looks
+    like "the posts in the window" and is really "the day's map, filtered again"."""
+    assert not hasattr(PostsLedger, "window_post_ids")
 
 
 def _boom(_src, _dst):

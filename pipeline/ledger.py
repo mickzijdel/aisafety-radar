@@ -33,10 +33,9 @@ from pydantic import BaseModel, ConfigDict
 
 from pipeline.models import Item
 
-# How far back the live-post window reaches. It is the ledger's because two things have to agree
-# about it: `window_post_ids`, and the carry-forward that decides what a day still holds.
-# `pipeline.run` imports it rather than restating it, so the window fetch asks for exactly the
-# span the ledger will keep.
+# How far back the live-post window reaches. It is the ledger's because the carry-forward decides
+# what a day still holds by it, and `pipeline.run` imports it rather than restating it, so the
+# window fetch asks for exactly the span the ledger will keep.
 WINDOW_DAYS = 14
 
 
@@ -199,19 +198,6 @@ class PostsLedger:
         cutoff = day - timedelta(days=self.keep_days - 1)
         for d in [d for d in self._days if d < cutoff]:
             del self._days[d]
-
-    def window_post_ids(self, day: date, days: int = WINDOW_DAYS) -> set[str]:
-        """Ids of `day`'s posts published within the last `days` days.
-
-        Shares `_window_cutoff` with the carry-forward in `snapshot`, so the two cannot disagree
-        about what "in the window" means. See that helper for why the comparison is wall-clock.
-        """
-        cutoff = _window_cutoff(day, days)
-        return {
-            pid
-            for pid, e in self.entries(day).items()
-            if e.published_at.replace(tzinfo=None) >= cutoff
-        }
 
     def movements(self, day: date) -> list[Movement]:
         """What changed on `day` against the previous recorded day.
