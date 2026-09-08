@@ -541,8 +541,12 @@ accepted gap.
 moved does not trigger a refresh, and neither does an edited comment. The site-wide comment pull of
 step 1 is not what drives the refresh either - the ledger diff selects the posts and step 3's
 per-post `postCommentsTop` fetch supplies the text, so the pull costs a request per post rather
-than a request per site. `comments_since` remains on the client for the phase-3 comment recorder,
-which needs the site-wide view for its own reasons.
+than a request per site. `comments_since` and `comments_since_raw` remain on the client, with
+their recorded fixtures, for the phase-3 comment recorder, which needs the site-wide view for its
+own reasons - they are not dead code to be deleted, and they are not the change detector to be
+wired back in. The ledger diff is the better mechanism and stays: it asks each site for post
+metadata it already fetches, where step 1 as written asks three sites for every comment they
+received, most of them on posts outside the window.
 
 ### 6.3 Stage 1: triage and extraction (Haiku 4.5, synchronous)
 
@@ -614,8 +618,8 @@ Jinja templates turn JSON into the appendices and into task bundles. The model's
 inserted verbatim into slots; everything factual on the metadata line (URL, author,
 affiliation, date, karma, agreement, comment counts, version, generated timestamp) is filled by
 the template from Stage 0 data. Expired deadlines are dropped. `00-index.md` is generated with
-the token count of every appendix (counted with the API's token counter, cached per file hash)
-and the recipes with live totals. Bundles are concatenations for one fetch each:
+the token count of every appendix (counted with the API's token counter) and the recipes with
+live totals. Bundles are concatenations for one fetch each:
 `latest/today.md` (30 + 31 + 32 + 33), `latest/week.md` (21), `latest/careers.md`
 (15 + 16 + 12 + 40 + 41), `latest/map.md` (10 to 14).
 
@@ -695,10 +699,19 @@ leaves the previous version as `latest`.
 - **Rollback.** `latest` is a symlink-style pointer in Pages to a versioned directory; reverting
   is moving the pointer, one manual workflow.
 - **Health, not issue spam.** One pinned health issue is updated in place (found by label,
-  never created twice) with per-source status, gate results and cost. Blocking failures also
-  push a notification (ntfy or email). A Healthchecks.io ping closes every successful run, so a
-  schedule that stops firing (GitHub disables schedules after 60 days of failures, silently)
-  is noticed within a day.
+  never created twice) with per-source status, gate results and cost. A Healthchecks.io ping
+  closes every successful run, so a schedule that stops firing (GitHub disables schedules after
+  60 days of failures, silently) is noticed within a day.
+
+  **Not implemented in phase 2, by ruling.** There is no push notification (ntfy or email) on a
+  blocking failure. The substitutes are the pinned issue itself, GitHub's own workflow-failure
+  email, and the Healthchecks dead-man's switch, which together cover a crashed run and a
+  workflow that stopped running at all. What they do not cover, stated so nobody assumes
+  otherwise: a run that *completed* but whose gates withheld the pack is red in the Actions tab
+  and written into the pinned issue, and then quiet - the Healthchecks ping is what would raise
+  it, and the switch does not fire until the next day's window closes. So the worst case is one
+  quiet day. A push channel is worth adding when the pipeline publishes something a reader would
+  miss within hours rather than within a day.
 - **Secrets and permissions.** `ANTHROPIC_API_KEY` (needed in Stage 1, not only at publish),
   the data-repo deploy key, a Healthchecks URL, later a Metaculus token. Each job declares its
   own minimal `permissions:`; actions are pinned to SHAs; `uv sync --locked` with hashes. A hard
@@ -709,7 +722,9 @@ leaves the previous version as `latest`.
 
 ### 6.10 Cost
 
-At list prices (Haiku 4.5 $1 in / $5 out per million tokens, Sonnet 5 $2 / $10), a typical
+At list prices (Haiku 4.5 $1 in / $5 out per million tokens, Sonnet 5 $2 / $10, and a 5-minute
+cache write at 1.25x the input rate - the pipeline prices all four rates, so the figure below is
+comparable with the Console bill), a typical
 day: triage of ~300 items on excerpts (~180k in), extraction of ~80 items at ~4k tokens each
 (~320k in) and ~30 comment refreshes (~180k in), the injection scan over the outputs, the daily
 digest, the faithfulness judge on the top items, and the rolling state (~60k in with medium
