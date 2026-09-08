@@ -46,7 +46,9 @@ Rules:
   filler such as "this post discusses". Use absolute dates. Every number and date you write
   must appear verbatim in the document.
 - key_quotes: 0-2 verbatim quotes, at most 40 words each, copied character for character.
-- author_stated_status: the author's own epistemic-status line if there is one, verbatim, else null.
+- author_stated_status: the author's own epistemic-status line if there is one, copied character
+  for character, else null. It is checked against the document like a quote and dropped if it is
+  not there word for word.
 - claim_type: your reading of how confident the AUTHOR is: confident-empirical (experimental
   results), confident-argument, exploratory, speculation, question, announcement.
 - novelty: one clause on what is new versus the standard discourse, or null.
@@ -127,6 +129,8 @@ def _repair_notes(original: Extraction, res: VerifyResult) -> list[str]:
     already had the failing deadline replaced with `None`, so it can no longer name what was lost.
     """
     notes = [f"dropped quote: {q}" for q in res.dropped_quotes]
+    if res.author_status_dropped:
+        notes.append(f"dropped author_stated_status: {original.author_stated_status}")
     if res.deadline_dropped:
         notes.append(f"dropped deadline: {original.deadline}")
     return notes

@@ -133,3 +133,35 @@ def test_bad_tokens_are_deduplicated_in_first_seen_order():
         SOURCE,
     )
     assert r.bad_tokens == ["46%", "99%"]
+
+
+def test_author_stated_status_must_appear_in_the_source():
+    """`item.j2` renders it inside quotation marks as the author's own words (spec 4.3 says
+    verbatim), so an invented one is a forgery in the reader's face. Checked like a quote."""
+    e, r = verify(
+        ex(summary="ok", author_stated_status="Epistemic status: 95% confident, replicated"),
+        SOURCE,
+    )
+    assert e.author_stated_status is None and r.author_status_dropped
+    assert r.ok, "a repaired field does not fail verification, the same as a dropped quote"
+
+
+def test_a_verbatim_author_stated_status_survives():
+    e, r = verify(ex(author_stated_status='"Figure 2" shows it.'), SOURCE)
+    assert e.author_stated_status == '"Figure 2" shows it.' and not r.author_status_dropped
+
+
+def test_author_stated_status_is_checked_against_the_source_only_not_the_comments():
+    """It is presented as the *author's* stated status; a commenter's words are not the author's,
+    exactly as for `key_quotes`."""
+    e, r = verify(
+        ex(author_stated_status="Epistemic status: hunch"),
+        SOURCE,
+        comments_text="Bob (83 karma): Epistemic status: hunch",
+    )
+    assert e.author_stated_status is None and r.author_status_dropped
+
+
+def test_a_null_author_stated_status_is_not_a_drop():
+    _, r = verify(ex(author_stated_status=None), SOURCE)
+    assert not r.author_status_dropped

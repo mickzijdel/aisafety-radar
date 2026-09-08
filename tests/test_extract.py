@@ -61,11 +61,20 @@ def test_extract_verified_passes_first_time():
 
 
 def test_extract_verified_retries_with_feedback_then_degrades():
-    fake = FakeLLM([resp("A 46% drop."), resp("A 47% drop.")])
+    """The status the model sends here is not in the source, so it is dropped and noted rather
+    than published: `item.j2` renders it inside quotation marks as the author's own words."""
+    invented = "Epistemic status: 95% confident, replicated 3 times"
+    fake = FakeLLM(
+        [
+            resp("A 46% drop.", author_stated_status=invented),
+            resp("A 47% drop.", author_stated_status=invented),
+        ]
+    )
     rec = extract_verified(make_item(text=SOURCE), fake, S)
     assert len(fake.calls) == 2 and "46%" in fake.calls[1]["user"]
     assert rec.degraded and rec.extraction.summary == "" and "47%" in " ".join(rec.notes)
-    assert rec.extraction.author_stated_status == "Epistemic status: exploratory"
+    assert rec.extraction.author_stated_status is None
+    assert f"dropped author_stated_status: {invented}" in rec.notes
 
 
 def test_extract_verified_retry_can_succeed():
@@ -91,6 +100,7 @@ def test_degrade_keeps_the_item_and_everything_still_verifiable():
     assert (e.summary, e.novelty, e.discussion_signal) == ("", None, None)
     assert e.item_id == "lw:abc123" and e.key_quotes == ["45% drop"]
     assert e.claim_type == "exploratory" and e.slugs == ["evals"] and e.importance == 3
+    # Kept because it is verbatim in SOURCE, not because it is passed through unchecked.
     assert e.author_stated_status == "Epistemic status: exploratory"
 
 
@@ -274,3 +284,20 @@ def test_a_repeated_bad_token_is_named_once_in_the_feedback():
     fake = FakeLLM([resp("A 46% drop.", novelty="the 46% figure is new"), resp("ok")])
     extract_verified(make_item(text=SOURCE), fake, S)
     assert fake.calls[1]["user"].count("46%") == 1
+
+
+def test_an_invented_author_stated_status_is_dropped_and_noted_without_a_retry():
+    """Like a dropped quote: repaired in place, named in the notes, and not worth a second call
+    -- the prose tokens are what `ok` tracks."""
+    fake = FakeLLM(
+        [
+            resp(
+                "A 45% drop across 12 models.",
+                author_stated_status="Epistemic status: certain, peer reviewed",
+            )
+        ]
+    )
+    rec = extract_verified(make_item(text=SOURCE), fake, S)
+    assert len(fake.calls) == 1 and not rec.degraded
+    assert rec.extraction.author_stated_status is None
+    assert "dropped author_stated_status: Epistemic status: certain, peer reviewed" in rec.notes
