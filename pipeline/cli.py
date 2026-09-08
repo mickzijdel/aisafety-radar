@@ -13,8 +13,11 @@ whatever the sources did, because its output *is* the report.
 `--ignore-seen` is the one recovery switch. A run whose gates passed marks its items seen, so a
 day that generated but never promoted has already spent everything it would republish, and an
 ordinary rerun of it renders an empty pack. The flag skips that filter for one run and still
-records the ids on the way out. Re-running the failed `promote` job is cheaper where that is
-possible: the pack is intact on the `generated` branch and needs no second generation.
+records the ids on the way out. Pair it with `--day` when the clock has rolled over: the run then
+reuses the window that day's own `run.json` recorded, so the recovery fetches the span the
+original run fetched rather than a nominal one that misses its leading edge. Re-running the failed
+`promote` job is cheaper where that is possible: the pack is intact on the `generated` branch and
+needs no second generation.
 """
 
 from __future__ import annotations

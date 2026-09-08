@@ -12,6 +12,7 @@ module's.
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
@@ -879,10 +880,12 @@ def test_consecutive_run_windows_overlap_rather_than_tile(tmp_path):
 
 def test_a_run_for_an_earlier_day_keeps_the_fixed_boundary(tmp_path):
     """A backfill or a fixture replay is not a run happening now: using the wall clock for its
-    window would fetch the last 25 hours and call it that day."""
+    window would fetch the last 25 hours and call it that day. Its span is still 25 hours, so a
+    day with no report on file is fetched a quarter of an hour off a live run rather than an
+    hour and a quarter off it."""
     window = pipeline.run._run_window(date(2026, 8, 1), datetime(2026, 8, 31, 5, 26, tzinfo=UTC))
     assert window.end == datetime(2026, 8, 1, 5, 40, tzinfo=UTC)
-    assert (window.end - window.start).total_seconds() == 24 * 3600
+    assert (window.end - window.start).total_seconds() == 25 * 3600
 
 
 def test_the_pack_header_says_the_moment_the_run_actually_fetched(tmp_path):
@@ -914,3 +917,82 @@ def test_a_post_in_the_overlap_hour_that_was_already_seen_does_not_render_twice(
     # ...and every one of them is already spent, so nothing renders twice.
     assert second.items_selected == 0
     assert (tmp_path / "out" / "31-today-forums.md").read_text().count("\n- **") == 0
+
+
+# --- the recorded window: a regeneration fetches what the first run fetched ------------------
+
+
+def test_the_run_records_the_window_it_fetched_in_the_report(tmp_path):
+    """`run.json` is the only record of what a day's window actually was.
+
+    Without it a regeneration can only guess, and the nominal boundary is not the guess the
+    original run made: a live run for day D ends at the fetch, around 05:26, and a recovery that
+    fell back to 05:40 would drop the 04:26-04:40 slice the original pack carried.
+    """
+    day = FixtureClient.day_of(FIX)
+    fetched_at = datetime(day.year, day.month, day.day, 5, 26, tzinfo=UTC)
+    report = run_daily(_inputs(tmp_path, _clients(), now=fetched_at))
+    assert report.window is not None
+    assert report.window.end == fetched_at
+    assert report.window.start == fetched_at - timedelta(hours=25)
+    written = json.loads(
+        (tmp_path / "data" / f"{day:%Y}" / f"{day:%m}" / f"{day:%d}" / "run.json").read_text()
+    )
+    assert written["window"] == {
+        "start": f"{day - timedelta(days=1):%Y-%m-%d}T04:26:00Z",
+        "end": f"{day:%Y-%m-%d}T05:26:00Z",
+    }
+
+
+def test_a_cross_day_regeneration_reuses_the_recorded_window_exactly(tmp_path):
+    """The recovery gap F5 opened against M5.
+
+    A live run for day D fetches `[D-1 04:26, D 05:26)`. A `--day D` recovery run happening on
+    D+1 is not a run happening now, so it used to fall back to the nominal `[D-1 05:40, D 05:40)`
+    and omit 74 minutes at the leading edge -- items the original run had already marked seen, so
+    they would appear in no pack at all. The recorded window closes that exactly.
+    """
+    clients = _clients()
+    day = FixtureClient.day_of(FIX)
+    fetched_at = datetime(day.year, day.month, day.day, 5, 26, tzinfo=UTC)
+    first = run_daily(_inputs(tmp_path, clients, now=fetched_at))
+    assert first.published, [g.details for g in first.gates if not g.passed]
+
+    tomorrow = day + timedelta(days=1)
+    recovery = run_daily(
+        _inputs(
+            tmp_path,
+            clients,
+            ignore_seen=True,
+            now=datetime(tomorrow.year, tomorrow.month, tomorrow.day, 9, 0, tzinfo=UTC),
+        )
+    )
+    assert recovery.published, [g.details for g in recovery.gates if not g.passed]
+    assert recovery.window == first.window
+    assert recovery.items_selected == first.items_selected
+    assert (tmp_path / "out" / "31-today-forums.md").read_text().count(
+        f"data through {day:%Y-%m-%d}T05:26Z"
+    ) == 1
+
+
+def test_a_day_with_no_prior_report_gets_the_nominal_25_hour_window(tmp_path):
+    """The fallback is still the nominal boundary -- a backfill has no fetch time to honour --
+    but it reaches back 25 hours like a live run, so the two paths differ by the 14 minutes
+    between the nominal end and the real one rather than by 74."""
+    archive = Archive(tmp_path / "data")
+    window = pipeline.run._run_window(
+        date(2026, 8, 1), datetime(2026, 8, 31, 5, 26, tzinfo=UTC), archive
+    )
+    assert window.end == datetime(2026, 8, 1, 5, 40, tzinfo=UTC)
+    assert (window.end - window.start).total_seconds() == 25 * 3600
+
+
+def test_a_report_written_before_the_window_was_recorded_falls_back(tmp_path):
+    """Reports already in the archive have no `window` key, and a regeneration of one of those
+    days must fall back rather than raise: the field arrived after the first packs did."""
+    archive = Archive(tmp_path / "data")
+    day = date(2026, 8, 1)
+    archive.write_run(day, {"version": "2026.08.01a", "published": True, "statuses": []})
+    window = pipeline.run._run_window(day, datetime(2026, 8, 31, 5, 26, tzinfo=UTC), archive)
+    assert window.end == datetime(2026, 8, 1, 5, 40, tzinfo=UTC)
+    assert (window.end - window.start).total_seconds() == 25 * 3600

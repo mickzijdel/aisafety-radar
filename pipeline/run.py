@@ -57,7 +57,7 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from statistics import median
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from pipeline.archive import Archive
 from pipeline.config import Settings
@@ -121,8 +121,45 @@ def _judge_rng(seed: int, day: date) -> random.Random:
     return random.Random(seed + day.toordinal())
 
 
-def _run_window(day: date, now: datetime | None = None) -> Window:
-    """The window this run fetches: ending at the fetch, starting 25 hours before it.
+class RunWindow(BaseModel):
+    """The span a run actually fetched, as recorded in `run.json`.
+
+    It is recorded because a regeneration cannot otherwise know it. A live run's window ends at
+    the moment it fetched, which no later run can reconstruct from the day alone, and a recovery
+    that guessed the nominal boundary would fetch a different span from the one the original pack
+    was built out of -- while the original run has already marked its items seen, so the slice it
+    dropped would appear in no pack at all. See `_run_window`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    start: datetime
+    end: datetime
+
+
+def _recorded_window(archive: Archive, day: date) -> Window | None:
+    """The window `day`'s own run report recorded, if it has one that parses.
+
+    Every failure here is "no recorded window" rather than an error: a report written before the
+    field existed simply has no `window` key, and a regeneration of one of those days has to fall
+    back rather than crash. A malformed one is treated the same way for the same reason - the
+    fallback is a defensible window, and a run that refuses to start is not.
+    """
+    report = archive.read_run(day)
+    if not report:
+        return None
+    recorded = report.get("window")
+    if not isinstance(recorded, dict):
+        return None
+    try:
+        window = RunWindow.model_validate(recorded)
+    except ValidationError:
+        log.warning("%s: run.json records an unreadable window; recomputing it", day)
+        return None
+    return Window(day=day, start=window.start, end=window.end)
+
+
+def _run_window(day: date, now: datetime | None = None, archive: Archive | None = None) -> Window:
+    """The window this run fetches: the one it already recorded, or 25 hours ending at the fetch.
 
     `Window.for_day`'s nominal 05:40 end tiled exactly against a boundary the pipeline never
     actually reaches. The cron fires at 05:23 and the fetch lands around 05:26, so a post
@@ -136,12 +173,21 @@ def _run_window(day: date, now: datetime | None = None) -> Window:
 
     A run whose `day` is not today gets the nominal boundary instead. That is a backfill or a
     fixture replay, and reading the wall clock for it would fetch the last 25 hours and label
-    them with a day they have nothing to do with.
+    them with a day they have nothing to do with. It is still 25 hours long: the nominal end is
+    14 minutes after the real one a live run would have had, and reaching back only 24 hours from
+    it would start the window an hour *after* the live run started, dropping the leading edge.
+
+    A day that already has a run report is neither. It has a window on record, and a regeneration
+    of it reuses that rather than recomputing anything: the first run marked its items seen, so an
+    approximate second window silently loses whatever falls outside it. Recovering a day is what
+    `--ignore-seen` is for, and it is only a recovery if it fetches the same span.
     """
+    recorded = _recorded_window(archive, day) if archive is not None else None
+    if recorded is not None:
+        return recorded
     now = now or datetime.now(UTC)
-    if now.date() != day:
-        return Window.for_day(day)
-    return Window.for_day(day, hours=RUN_WINDOW_HOURS, now=now)
+    # `now` only reaches `for_day` when it is this day's own fetch time; otherwise the nominal end.
+    return Window.for_day(day, hours=RUN_WINDOW_HOURS, now=now if now.date() == day else None)
 
 
 @dataclass
@@ -198,6 +244,9 @@ class RunReport(BaseModel):
     # minimums are computed from, and these are neither.
     window_statuses: list[SourceStatus] = Field(default_factory=list)
     refresh_status: SourceStatus | None = None
+    # The span this run fetched, so a regeneration of the day can fetch exactly it again. None
+    # only for a report written before the field existed; every run since records one.
+    window: RunWindow | None = None
 
 
 def _source_medians(archive: Archive, day: date) -> dict[str, int]:
@@ -285,7 +334,7 @@ def _window_posts(
 
 def run_daily(inputs: RunInputs) -> RunReport:
     settings, llm, archive, day = inputs.settings, inputs.llm, inputs.archive, inputs.day
-    window = _run_window(day, inputs.now)
+    window = _run_window(day, inputs.now, archive)
     rng = _judge_rng(inputs.rng_seed, day)
     clients = inputs.clients or {}
 
@@ -430,6 +479,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
         failed=failed,
         window_statuses=window_statuses,
         refresh_status=refresh_status,
+        window=RunWindow(start=window.start, end=window.end),
     )
     archive.write_run(day, report.model_dump(mode="json"))
     if published:

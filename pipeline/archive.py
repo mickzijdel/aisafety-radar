@@ -117,6 +117,24 @@ class Archive:
             json.dumps(payload, indent=1, default=_json_default),
         )
 
+    def read_run(self, day: date) -> dict[str, Any] | None:
+        """`day`'s run report, or None if that day has none.
+
+        The one reader that asks about a *specific* day rather than a span, and the only one that
+        has to cope with a report written by an older version of the pipeline: `_run_window` reads
+        the window a first run recorded so a regeneration fetches the same span. Everything here
+        is therefore forgiving -- an absent file and an unreadable one are both "no report" -- and
+        the caller treats a missing key the same way.
+        """
+        path = self.day_dir(day) / "run.json"
+        if not path.exists():
+            return None
+        try:
+            report = json.loads(path.read_text())
+        except ValueError:
+            return None
+        return report if isinstance(report, dict) else None
+
     def recent_runs(self, before: date, n: int) -> list[dict[str, Any]]:
         """The run reports of the `n` days *preceding* `before`, newest first, skipping the gaps.
 

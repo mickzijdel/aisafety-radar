@@ -704,7 +704,11 @@ leaves the previous version as `latest`.
   leaves a day whose items are already spent: re-run that run's failed `promote` job, which reads
   the intact pack off the `generated` branch and costs no second generation. A full workflow
   rerun would render an empty pack instead, and needs `radar run --ignore-seen` (the `ignore_seen`
-  workflow input) plus another day's API spend.
+  workflow input) plus another day's API spend. That regeneration fetches the window the first
+  run recorded in the day's `run.json` rather than recomputing one: a live run's window ends at
+  the moment it fetched, and a recovery that guessed the nominal 05:40 boundary would miss the
+  leading edge of a span whose items are already marked seen, so they would appear in no pack at
+  all. A day with no report on file still falls back to the nominal boundary, over 25 hours.
 - **Rollback.** `latest` is a symlink-style pointer in Pages to a versioned directory; reverting
   is moving the pointer, one manual workflow.
 - **Health, not issue spam.** One pinned health issue is updated in place (found by label,
