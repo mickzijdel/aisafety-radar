@@ -164,6 +164,11 @@ class ForumClient:
                 raise RuntimeError(f"{self.cfg.site} graphql: {failed['errors']}")
         resp.raise_for_status()
         body = resp.json()
+        if not isinstance(body, dict):
+            # A 200 whose body is a list or a string is a proxy or a WAF answering, not the
+            # forum. Named here, or it surfaces as an AttributeError from inside the client
+            # that says neither which site answered nor what it said.
+            raise RuntimeError(f"{self.cfg.site} graphql: response body was not an object")
         if body.get("errors"):
             raise RuntimeError(f"{self.cfg.site} graphql: {body['errors']}")
         data = body.get("data")
@@ -240,7 +245,14 @@ class ForumClient:
         return posts
 
     def comments_since_raw(self, after: datetime, limit: int = 5000) -> list[dict[str, Any]]:
-        """The server's own comment records, unfiltered — what the fixture recorder stores."""
+        """The server's own comment records, unfiltered — what the fixture recorder stores.
+
+        Carries `comments_since`'s naive-datetime guard, because it is also called directly (by
+        the fixture recorder): without it `astimezone` reads a naive `after` as *local* time and
+        the recorder asks a different window than the pipeline does.
+        """
+        if after.tzinfo is None:
+            after = after.replace(tzinfo=UTC)
         terms: dict[str, Any] = {"view": "recentComments", "limit": limit}
         if self.cfg.comments_after_supported:
             terms["after"] = after.astimezone(UTC).isoformat().replace("+00:00", "Z")
@@ -255,6 +267,8 @@ class ForumClient:
         )
 
     def comments_since(self, after: datetime, limit: int = 5000) -> list[RawComment]:
+        # Applied here as well as in the raw method: the `postedAt >= after` comparison below
+        # needs the aware value too, and comparing aware to naive raises.
         if after.tzinfo is None:
             after = after.replace(tzinfo=UTC)
         raw = self.comments_since_raw(after, limit=limit)

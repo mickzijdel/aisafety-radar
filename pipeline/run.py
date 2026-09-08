@@ -99,6 +99,18 @@ WINDOW_DAYS = 14
 WINDOW_LIMIT = 500
 
 
+def _judge_rng(seed: int, day: date) -> random.Random:
+    """The judge sampler's generator, seeded from the day as well as the configured seed.
+
+    `needs_judge` draws once per item, walking an importance-sorted list. Seeded from `rng_seed`
+    alone, the same sequence of draws lands on the same *positions* every morning, so gate 5's
+    5% sample would audit the same ranks for ever and leave the rest of the list unmeasured --
+    which is the one thing the sample exists to do. Mixing the day in keeps a rerun of one day
+    deterministic while moving the sample across days.
+    """
+    return random.Random(seed + day.toordinal())
+
+
 @dataclass
 class RunInputs:
     settings: Settings
@@ -206,7 +218,7 @@ def _window_posts(
 def run_daily(inputs: RunInputs) -> RunReport:
     settings, llm, archive, day = inputs.settings, inputs.llm, inputs.archive, inputs.day
     window = Window.for_day(day)
-    rng = random.Random(inputs.rng_seed)
+    rng = _judge_rng(inputs.rng_seed, day)
     clients = inputs.clients or {}
 
     fetched = run_all(inputs.fetchers, window)
@@ -257,6 +269,11 @@ def run_daily(inputs: RunInputs) -> RunReport:
             records[item.id] = record
         except Exception:  # noqa: BLE001 - one item is not the run
             log.exception("item %s failed during extraction, scan or judging; skipping it", item.id)
+            # `judges[id]` is set a few lines before `records[id]`, and the invariant that the
+            # two agree is asserted outside this loop. An exception raised in that window would
+            # leave a judged id with no record and turn a contained per-item failure into an
+            # AssertionError that kills the whole run.
+            judges.pop(item.id, None)
             failed.append(item.id)
     # An item selected but never recorded is one `build_render_items` would drop in silence. That
     # is the scan-flagged set plus the failed one; all three are reported, so a pack that shrank

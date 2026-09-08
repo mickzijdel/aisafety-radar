@@ -226,8 +226,9 @@ def test_issue_body_gives_the_7_day_minimums_a_row_per_shortfall():
         )
     )
     assert "## 7-day minimums" in body
-    assert "| lesswrong | 7 items in 7 days, below the minimum 15 |" in body
-    assert "| category forums | 7 items in 7 days, below the minimum 23 |" in body
+    section = body.split("## 7-day minimums")[1]
+    assert "| lesswrong | 7 items in 7 days, below the minimum 15 |" in section
+    assert "| category forums | 7 items in 7 days, below the minimum 23 |" in section
 
 
 def test_issue_body_says_so_when_every_source_cleared_its_7_day_minimum():
@@ -237,9 +238,27 @@ def test_issue_body_says_so_when_every_source_cleared_its_7_day_minimum():
 
 
 def test_issue_body_passes_on_the_gates_own_words_when_there_is_no_week_yet():
+    """A passing gate must not render a row that reads like a shortfall.
+
+    The insufficient-history line carries a colon of its own, so the `"<name>: <what went
+    wrong>"` split turns it into `| 3 of the last 7 runs recorded | too little history ... |`,
+    which is a source name and a count to anyone skimming the section. Anchored inside the
+    section rather than the whole body: the generic Gates table prints the same detail verbatim,
+    so a whole-body assertion passes even with `_minimum_rows` deleted.
+    """
     detail = "3 of the last 7 runs recorded: too little history to judge a week"
     body = render_issue_body(_report(gates=[_minimums(True, [detail])]))
-    assert f"| {detail} |" in body
+    section = body.split("## 7-day minimums")[1]
+    assert f"| {detail} |" in section
+    assert "| 3 of the last 7 runs recorded |" not in section
+
+
+def test_issue_body_never_splits_a_passing_minimums_detail_into_two_columns():
+    """Any passing detail is prose, not a shortfall, however many colons it happens to carry."""
+    detail = "note: everything above minimum: nothing to do"
+    body = render_issue_body(_report(gates=[_minimums(True, [detail])]))
+    section = body.split("## 7-day minimums")[1]
+    assert f"| {detail} |" in section
 
 
 def test_issue_body_says_the_minimums_were_not_checked_when_the_gate_is_absent():
@@ -286,6 +305,18 @@ def test_refusal_reason_counts_dropped_not_failed_so_a_scan_wave_cannot_publish_
     assert reason is not None
     assert "0 rendered items" in reason
     assert "5 dropped" in reason and "5 scan-flagged" in reason
+
+
+def test_refusal_reason_refuses_a_report_with_no_dropped_list():
+    """`dropped` is the subtrahend, so an absent key would read as zero drops.
+
+    A report shaped differently -- an older run, a truncated write, a schema change -- is a
+    report this guard cannot verify, and "cannot verify" has to mean refuse.
+    """
+    report = _report()
+    del report["dropped"]
+    reason = refusal_reason(report)
+    assert reason is not None and "dropped" in reason
 
 
 def test_update_pinned_issue_edits_the_existing_issue(monkeypatch):

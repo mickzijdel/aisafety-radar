@@ -18,13 +18,17 @@ _WS = re.compile(r"\s+")
 
 # Tags whose boundaries are a word break in the rendered text. Everything else is
 # inline and must be joined with no separator, or "<strong>45</strong>%" becomes "45 %".
+# `details`/`summary` are here because ForumMagnum renders spoiler blocks with them: without
+# the break, "word</summary>next" glues into one token and corrupts the verification corpus.
 _BLOCK_TAGS = [
     "address",
     "article",
     "aside",
     "blockquote",
     "br",
+    "caption",
     "dd",
+    "details",
     "div",
     "dl",
     "dt",
@@ -48,6 +52,7 @@ _BLOCK_TAGS = [
     "p",
     "pre",
     "section",
+    "summary",
     "table",
     "tbody",
     "td",
@@ -105,9 +110,12 @@ def html_to_markdown(html: str) -> str:
 
 
 def normalize(s: str) -> str:
-    # Fold before NFKC: NFKC decomposes U+2033 into two primes, which would defeat
-    # the double-prime mapping above.
-    return _WS.sub(" ", unicodedata.normalize("NFKC", s.translate(_FOLD))).strip()
+    # Fold, NFKC, fold again. The first fold has to come before NFKC, which decomposes U+2033
+    # into two primes and would defeat the double-prime mapping above. The second has to come
+    # after it, because NFKC *produces* characters the fold is for: U+207B superscript minus
+    # decomposes to U+2212, which without a second pass survives into the normalised text and
+    # makes every quote and token that crosses it unverifiable.
+    return _WS.sub(" ", unicodedata.normalize("NFKC", s.translate(_FOLD)).translate(_FOLD)).strip()
 
 
 def contains(source: str, needle: str) -> bool:

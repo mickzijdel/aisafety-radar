@@ -10,10 +10,17 @@ pipeline without an API key.
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from pipeline.config import Settings
 from pipeline.models import Usage
+
+log = logging.getLogger(__name__)
+
+# Four characters a token: the estimate `count_tokens` degrades to, and the one `FakeLLM` and
+# `CannedLLM` answer with, so a degraded budget check is measured the same way the tests are.
+CHARS_PER_TOKEN = 4
 
 
 class LLM:
@@ -29,16 +36,22 @@ class LLM:
     def _record(self, response: Any, model: str) -> None:
         u = response.usage
         cached = getattr(u, "cache_read_input_tokens", 0) or 0
+        # The first call of a run writes the system prompt into the cache and is billed for it
+        # at a premium over the input rate. Counted separately from `input_tokens`, which the
+        # API already reports net of both cache fields.
+        written = getattr(u, "cache_creation_input_tokens", 0) or 0
         price = self.settings.prices[model]
         cost = (
             u.input_tokens * price.input
             + cached * price.cache_read
+            + written * price.cache_write
             + u.output_tokens * price.output
         ) / 1_000_000
         self.usage = self.usage + Usage(
             input_tokens=u.input_tokens,
             output_tokens=u.output_tokens,
             cache_read_tokens=cached,
+            cache_creation_tokens=written,
             cost_usd=cost,
         )
 
@@ -119,10 +132,21 @@ class LLM:
         return self._first_text(response, model)
 
     def count_tokens(self, text: str, model: str | None = None) -> int:
-        resp = self.client.messages.count_tokens(
-            model=model or self.settings.models.haiku,
-            messages=[{"role": "user", "content": text}],
-        )
+        """The API's token count for `text`, or a four-characters-a-token estimate if it fails.
+
+        This runs at render time, after the day's extraction and judging are already paid for,
+        and it feeds nothing but the budget gate's comparison against a per-file token cap. A
+        transient failure here must therefore not raise: it would throw away a fully extracted
+        day for a number that only has to be approximately right.
+        """
+        try:
+            resp = self.client.messages.count_tokens(
+                model=model or self.settings.models.haiku,
+                messages=[{"role": "user", "content": text}],
+            )
+        except Exception as exc:  # noqa: BLE001 - a lost count is not a lost day
+            log.warning("count_tokens failed (%s); estimating from the character count", exc)
+            return len(text) // CHARS_PER_TOKEN
         return resp.input_tokens
 
 
@@ -160,7 +184,7 @@ class FakeLLM(LLM):
         return out
 
     def count_tokens(self, text, model=None):
-        return len(text) // 4
+        return len(text) // CHARS_PER_TOKEN
 
 
 class CannedLLM(LLM):
@@ -249,7 +273,7 @@ class CannedLLM(LLM):
         return "canned text"
 
     def count_tokens(self, text, model=None):
-        return len(text) // 4
+        return len(text) // CHARS_PER_TOKEN
 
 
 def check_models(client: Any, settings: Settings) -> list[str]:

@@ -97,10 +97,15 @@ def coerce_slugs(value: Any, limit: int, fallback: tuple[str, ...] = ()) -> list
 
 
 def coerce_importance(value: Any) -> int:
-    """`value` as an int clamped to 1-5, or 1 if it is not a number at all."""
+    """`value` as an int clamped to 1-5, or 1 if it is not a number at all.
+
+    `OverflowError` is in the tuple because `json.loads` accepts the bare literal `Infinity`,
+    and `int(float("inf"))` raises it rather than the ValueError `NaN` raises. Uncaught, that
+    takes the item out of the digest over a field with a safe default.
+    """
     try:
         return min(5, max(1, int(value)))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return 1
 
 
@@ -187,6 +192,10 @@ class Usage(Strict):
     input_tokens: int = 0
     output_tokens: int = 0
     cache_read_tokens: int = 0
+    # Writing the system prompt into the cache is billed separately, at a premium over the input
+    # rate. Left out, the run's cost reads low against the Console bill the README invites the
+    # reader to check it against.
+    cache_creation_tokens: int = 0
     cost_usd: float = 0.0
 
     def __add__(self, other: Usage) -> Usage:
@@ -194,6 +203,7 @@ class Usage(Strict):
             input_tokens=self.input_tokens + other.input_tokens,
             output_tokens=self.output_tokens + other.output_tokens,
             cache_read_tokens=self.cache_read_tokens + other.cache_read_tokens,
+            cache_creation_tokens=self.cache_creation_tokens + other.cache_creation_tokens,
             cost_usd=self.cost_usd + other.cost_usd,
         )
 

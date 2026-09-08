@@ -28,7 +28,8 @@ def test_load_settings_reads_the_given_path(tmp_path):
     config = tmp_path / "other.toml"
     config.write_text(
         '[models]\nhaiku = "h"\nsonnet = "s"\n[prices.h]\ninput = 1.0\noutput = 2.0\n'
-        "cache_read = 0.5\n"
+        "cache_read = 0.5\ncache_write = 1.25\n"
+        "[prices.s]\ninput = 2.0\noutput = 4.0\ncache_read = 1.0\ncache_write = 2.5\n"
     )
     s = load_settings(config)
     assert s.models.haiku == "h"
@@ -50,3 +51,22 @@ def test_unknown_key_is_rejected(tmp_path):
 def test_settings_requires_models():
     with pytest.raises(ValidationError):
         Settings.model_validate({"prices": {}})
+
+
+def test_a_configured_model_without_a_price_row_is_rejected_at_load(tmp_path):
+    """A typo in a model id is otherwise a `KeyError` in `LLM._record` -- after the call is
+    billed, on the first item of a real run."""
+    config = tmp_path / "typo.toml"
+    config.write_text(
+        '[models]\nhaiku = "claude-haiku-4-5"\nsonnet = "claude-sonnet-5-typo"\n'
+        '[prices."claude-haiku-4-5"]\ninput = 1.0\noutput = 5.0\ncache_read = 0.1\n'
+        "cache_write = 1.25\n"
+    )
+    with pytest.raises(ValidationError, match="claude-sonnet-5-typo"):
+        load_settings(config)
+
+
+def test_every_configured_model_has_a_cache_write_price():
+    s = load_settings()
+    assert s.prices[s.models.haiku].cache_write == 1.25
+    assert s.prices[s.models.sonnet].cache_write == 2.5

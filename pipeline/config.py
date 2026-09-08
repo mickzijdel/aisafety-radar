@@ -10,7 +10,7 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from pipeline.floor import FloorConfig
 from pipeline.models import Strict
@@ -22,11 +22,17 @@ class ModelIds(Strict):
 
 
 class Price(Strict):
-    """USD per million tokens."""
+    """USD per million tokens.
+
+    Four rates, not three: writing the system prompt into the cache is billed at a premium over
+    the input rate (1.25x for a 5-minute TTL), and a run that leaves it out reports a cost the
+    Console bill does not agree with.
+    """
 
     input: float
     output: float
     cache_read: float
+    cache_write: float
 
 
 class Caps(Strict):
@@ -52,6 +58,19 @@ class Settings(Strict):
     thresholds: Thresholds = Field(default_factory=Thresholds)
     floor: FloorConfig = Field(default_factory=FloorConfig)
     paths: Paths = Field(default_factory=Paths)
+
+    @model_validator(mode="after")
+    def _every_model_is_priced(self) -> Settings:
+        """Reject a configured model id with no `[prices.*]` row.
+
+        `LLM._record` indexes `prices` by the model the call was made with, so a typo in a model
+        id is otherwise a `KeyError` raised *after* the first call is billed, on the first item
+        of a real run. Checking it at load turns that into a startup error.
+        """
+        missing = [m for m in (self.models.haiku, self.models.sonnet) if m not in self.prices]
+        if missing:
+            raise ValueError(f"configured model with no [prices.*] row: {', '.join(missing)}")
+        return self
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.toml")

@@ -254,3 +254,69 @@ def test_check_models_returns_only_the_ids_that_resolve():
     client = SimpleNamespace(models=SimpleNamespace(retrieve=retrieve))
     assert check_models(client, s) == [s.models.haiku]
     assert retrieved == [s.models.haiku, s.models.sonnet]
+
+
+def test_cache_writes_are_priced_and_recorded(stub):
+    """Every call writes the system prompt into the cache the first time it is seen.
+
+    A cache write is billed at 1.25x the input rate, and leaving it out of the arithmetic
+    understates the day's cost against the figure the README and spec 6.10 quote.
+    """
+    stub.messages.create = lambda **kw: SimpleNamespace(
+        content=[SimpleNamespace(type="text", text="hi")],
+        usage=SimpleNamespace(
+            input_tokens=1000,
+            output_tokens=100,
+            cache_read_input_tokens=500,
+            cache_creation_input_tokens=800,
+        ),
+        stop_reason="end_turn",
+    )
+    s = load_settings()
+    llm = LLM(stub, s)
+    llm.text(s.models.haiku, "SYS", "USER")
+    assert llm.usage.cache_creation_tokens == 800
+    # 1000 in at $1/M, 500 cached-read at $0.1/M, 800 cache-write at $1.25/M, 100 out at $5/M.
+    assert llm.usage.cost_usd == pytest.approx(0.001 + 0.00005 + 0.001 + 0.0005)
+
+
+def test_usage_survives_a_response_without_a_cache_write_field(stub):
+    s = load_settings()
+    llm = LLM(stub, s)
+    llm.text(s.models.haiku, "SYS", "USER")
+    assert llm.usage.cache_creation_tokens == 0
+
+
+def test_cache_write_is_priced_from_the_calls_own_model(stub):
+    stub.messages.create = lambda **kw: SimpleNamespace(
+        content=[SimpleNamespace(type="text", text="hi")],
+        usage=SimpleNamespace(
+            input_tokens=0,
+            output_tokens=0,
+            cache_read_input_tokens=0,
+            cache_creation_input_tokens=1_000_000,
+        ),
+        stop_reason="end_turn",
+    )
+    s = load_settings()
+    llm = LLM(stub, s)
+    llm.text(s.models.sonnet, "SYS", "USER")
+    assert llm.usage.cost_usd == pytest.approx(2.50)
+
+
+def test_count_tokens_falls_back_to_an_estimate_when_the_api_fails(stub, caplog):
+    """`count_tokens` runs at render time, after the day's extraction is paid for.
+
+    A transient failure there would throw away a fully extracted day for a number the budget
+    gate only needs approximately, so it degrades to the same four-characters-a-token estimate
+    `FakeLLM` uses and says so in the log.
+    """
+
+    def boom(**kw):
+        raise RuntimeError("upstream 529")
+
+    stub.messages.count_tokens = boom
+    s = load_settings()
+    with caplog.at_level("WARNING", logger="pipeline.llm"):
+        assert LLM(stub, s).count_tokens("a" * 400) == 100
+    assert "upstream 529" in caplog.text

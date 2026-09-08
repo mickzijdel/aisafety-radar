@@ -56,8 +56,11 @@ def _minimum_rows(report: dict) -> list[str]:
     pack published fine, and the news is that a fetcher has probably stopped matching anything.
     Buried in a truncated cell next to five passing gates, that is a line nobody reads.
 
-    A gate detail is `"<name>: <what went wrong>"`, which splits into the two columns. The
-    insufficient-history line has no such split and is passed through whole.
+    A *failing* gate's detail is `"<name>: <what went wrong>"`, which splits into the two
+    columns. A passing gate's detail is prose and is passed through whole: the only one the gate
+    writes is the insufficient-history line, which carries a colon of its own, so splitting it
+    would render "3 of the last 7 runs recorded | too little history to judge a week" -- a row
+    that reads as a source and a shortfall to anyone skimming the section.
     """
     gate = next((g for g in report.get("gates", []) if g.get("name") == SOURCE_MINIMUMS_GATE), None)
     lines = ["", "## 7-day minimums", "", "| source | 7-day count |", "|---|---|"]
@@ -68,7 +71,8 @@ def _minimum_rows(report: dict) -> list[str]:
         return [*lines, "| every source and category | above its 7-day minimum |"]
     for detail in details:
         name, sep, rest = detail.partition(": ")
-        lines.append(f"| {_cell(name)} | {_cell(rest)} |" if sep else f"| {_cell(detail)} |  |")
+        split = sep and not gate.get("passed")
+        lines.append(f"| {_cell(name)} | {_cell(rest)} |" if split else f"| {_cell(detail)} |  |")
     return lines
 
 
@@ -139,6 +143,10 @@ def refusal_reason(report: dict) -> str | None:
         return "no report.json: the run crashed before it could write one"
     if not report.get("published"):
         return "the run did not publish: a blocking gate withheld the pack"
+    if "dropped" not in report:
+        # `dropped` is the subtrahend below, so an absent key would read as zero drops and let
+        # a report this guard cannot actually check through as a healthy run.
+        return "the report carries no `dropped` list: cannot verify the pack is not empty"
     selected = int(report.get("items_selected", 0))
     dropped = report.get("dropped") or []
     rendered = selected - len(dropped)

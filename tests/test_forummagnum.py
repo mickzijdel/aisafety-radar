@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -156,6 +157,37 @@ def test_comments_since_treats_a_naive_after_as_utc():
     assert [c.id for c in comments] == ["c1"]  # and the comparison does not blow up
 
 
+@pytest.fixture
+def far_from_utc(monkeypatch):
+    """Run the body in a timezone that is not UTC, so a naive-vs-aware bug cannot hide."""
+    monkeypatch.setenv("TZ", "Asia/Tokyo")
+    time.tzset()
+    yield
+    monkeypatch.undo()
+    time.tzset()
+
+
+@respx.mock
+@pytest.mark.usefixtures("far_from_utc")
+def test_comments_since_raw_treats_a_naive_after_as_utc():
+    """The raw method is what the fixture recorder calls, and it needs its sibling's guard.
+
+    Without it, `astimezone` reads a naive `after` as *local* time, so the recorder asks a
+    different window than `comments_since` would and the fixtures stop matching the code.
+    """
+    route = mock_site("lw", "comments", [COMMENT])
+    ForumClient("lw", UA, pause_seconds=0).comments_since_raw(datetime(2026, 8, 29))
+    assert 'after: "2026-08-29T00:00:00Z"' in sent_query(route)
+
+
+@respx.mock
+@pytest.mark.usefixtures("far_from_utc")
+def test_comments_since_agrees_with_the_raw_method_in_any_local_timezone():
+    route = mock_site("lw", "comments", [COMMENT])
+    ForumClient("lw", UA, pause_seconds=0).comments_since(datetime(2026, 8, 29))
+    assert 'after: "2026-08-29T00:00:00Z"' in sent_query(route)
+
+
 @respx.mock
 def test_top_comments_sends_post_comments_top_view_and_post_id():
     route = mock_site("lw", "comments", [COMMENT])
@@ -295,6 +327,19 @@ def test_http_error_without_a_graphql_body_still_raises_for_status():
     )
     with pytest.raises(httpx.HTTPStatusError):
         ForumClient("lw", UA, pause_seconds=0).posts_since(date(2026, 8, 29))
+
+
+@respx.mock
+def test_a_non_object_200_body_raises_the_site_named_error():
+    """A proxy or a WAF can answer 200 with a JSON list or string.
+
+    `body.get` on one is an `AttributeError` from inside the client, which says nothing about
+    which site answered or what it said.
+    """
+    for payload in ([], "maintenance", 3):
+        respx.post(SITES["lw"].graphql_url).mock(return_value=httpx.Response(200, json=payload))
+        with pytest.raises(RuntimeError, match="lw graphql"):
+            ForumClient("lw", UA, pause_seconds=0).posts_since(date(2026, 8, 29))
 
 
 @respx.mock

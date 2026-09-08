@@ -231,3 +231,27 @@ def test_both_stages_send_a_strict_schema():
     schema = fake.calls[0]["schema"]
     assert schema["additionalProperties"] is False
     assert set(schema["required"]) == {"traceable", "status_matches", "dense", "notes"}
+
+
+def test_scan_text_does_not_bill_a_call_for_empty_text():
+    """A fully degraded record composes to nothing, and there is no instruction in nothing.
+
+    `FakeLLM` with no responses raises if it is called at all, which is the assertion.
+    """
+    fake = FakeLLM([])
+    for empty in ("", "   ", "\n\n \t"):
+        res = scan_text(empty, fake, S)
+        assert res.flagged is False and res.reason is None
+    assert fake.calls == []
+
+
+def test_scan_record_of_a_record_with_nothing_model_written_is_free():
+    """Every model-written field can be empty at once: `_model_written` then returns "".
+
+    The scan still has to answer, and it must answer "not flagged" rather than the fail-safe
+    "flagged" it gives a malformed verdict: there is no text to have been poisoned.
+    """
+    fake = FakeLLM([])
+    record = rec(summary="", entities=[], key_quotes=[])
+    assert scan_record(record, fake, S).flagged is False
+    assert fake.calls == []

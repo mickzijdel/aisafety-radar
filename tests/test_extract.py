@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import UTC, datetime
 
@@ -216,8 +217,11 @@ def test_extract_system_states_the_rules_the_stripped_schema_cannot_enforce():
 def test_extract_survives_a_malformed_importance():
     """`_strict_schema` strips the 1-5 bound, so nothing but this coercion stands between a
     model that answers "lots" and an item vanishing from the digest."""
-    for bad in ("lots", None, [], {}, "", float("nan")):
+    # `json.loads` accepts the bare literals `Infinity`, `-Infinity` and `NaN`, so the model can
+    # hand back a float `int()` refuses: nan raises ValueError, the infinities raise OverflowError.
+    for bad in ("lots", None, [], {}, "", float("nan"), float("inf"), float("-inf")):
         assert extract(make_item(), FakeLLM([resp("ok", importance=bad)]), S).importance == 1
+    assert json.loads("Infinity") == float("inf")
     assert extract(make_item(), FakeLLM([resp("ok", importance="4")]), S).importance == 4
     assert extract(make_item(), FakeLLM([resp("ok", importance=3.7)]), S).importance == 3
 

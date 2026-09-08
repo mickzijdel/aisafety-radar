@@ -146,3 +146,9 @@ def test_usage_adds():
     total = Usage(input_tokens=10, cost_usd=0.1) + Usage(output_tokens=5, cost_usd=0.2)
     assert (total.input_tokens, total.output_tokens) == (10, 5)
     assert total.cost_usd == pytest.approx(0.3)
+
+
+def test_usage_adds_cache_creation_tokens_too():
+    """A field left out of `__add__` reads as zero for the whole run, however much was billed."""
+    total = Usage(cache_creation_tokens=10) + Usage(cache_creation_tokens=5)
+    assert total.cache_creation_tokens == 15

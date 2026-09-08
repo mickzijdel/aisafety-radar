@@ -112,7 +112,15 @@ def _coerce_notes(value: Any) -> str:
 
 
 def scan_text(text: str, llm: LLM, settings: Settings) -> ScanResult:
-    """Ask Haiku whether `text` tries to instruct its reader. A malformed verdict counts as yes."""
+    """Ask Haiku whether `text` tries to instruct its reader. A malformed verdict counts as yes.
+
+    Empty or whitespace-only text is answered here rather than bought: there is no instruction
+    in nothing, and a fully degraded record composes to exactly that. Note that this is the one
+    place a "not flagged" verdict is returned without a model seeing the text -- which is sound
+    precisely because there is no text, unlike the malformed-reply case above it.
+    """
+    if not text.strip():
+        return ScanResult(False, None)
     out = llm.structured(
         settings.models.haiku,
         SCAN_SYSTEM,

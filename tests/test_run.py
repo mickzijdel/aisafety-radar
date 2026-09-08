@@ -17,6 +17,7 @@ from pathlib import Path
 
 import pytest
 
+import pipeline.run
 from pipeline.archive import Archive
 from pipeline.config import load_settings
 from pipeline.fetchers.base import Window
@@ -32,6 +33,7 @@ from pipeline.llm import CannedLLM
 from pipeline.models import Extraction, Item
 from pipeline.run import (
     RunInputs,
+    _judge_rng,
     _source_medians,
     _trailing_cost_median,
     _window_posts,
@@ -39,11 +41,12 @@ from pipeline.run import (
 )
 from pipeline.stages.comments import Mover
 from pipeline.stages.extract import extract_verified
-from pipeline.stages.scan import judge_record, scan_record
+from pipeline.stages.scan import judge_record, needs_judge, scan_record
 from pipeline.stages.triage import triage_item
 from pipeline.stages.verify import ExtractionRecord
 from pipeline.textnorm import contains
 from tests.test_models import make_comment
+from tests.test_scan import rec
 
 FIX = Path("tests/fixtures/forummagnum")
 SITES = ("lw", "af", "eaf")
@@ -689,3 +692,66 @@ def test_canned_llm_summarises_an_empty_document_without_raising():
 def test_canned_llm_refuses_a_schema_it_does_not_know():
     with pytest.raises(AssertionError, match="does not know this schema"):
         CannedLLM().structured("m", "s", "u", {"properties": {"nonsense": {}}})
+
+
+class _JudgeFailsEveryItem(CannedLLM):
+    """Canned answers, except every item is importance 5 and every judge verdict fails."""
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        out = super().structured(model, system, user, schema, max_tokens)
+        if "importance" in out:
+            out["importance"] = 5
+        if "traceable" in out:
+            out["traceable"] = False
+        return out
+
+
+def test_a_failure_after_the_judge_verdict_costs_one_item_not_the_run(tmp_path, monkeypatch):
+    """`judges` is filled a few lines before `records`, and the invariant that the two agree is
+    asserted outside the loop. An exception in that window leaves a judged id with no record,
+    so the assert kills a run the per-item isolation had already contained."""
+    original = ExtractionRecord.model_copy
+    raised = []
+
+    def flaky(self, **kw):
+        if "degraded" in (kw.get("update") or {}) and not raised:
+            raised.append(True)
+            raise RuntimeError("upstream 529 after the judge was billed")
+        return original(self, **kw)
+
+    monkeypatch.setattr(ExtractionRecord, "model_copy", flaky)
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_JudgeFailsEveryItem()))
+    assert raised, "the test never reached the window it exists to cover"
+    assert len(report.failed) == 1 and report.failed == report.dropped
+    assert report.items_selected > 1
+    # The rest of the day survives: every other item is judged, degraded and rendered.
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert rendered.count("\n- **") == report.items_selected - 1
+
+
+def test_the_judge_sampler_is_seeded_from_the_day(tmp_path):
+    """A fixed seed over an importance-sorted list draws the same positions every morning, so
+    gate 5's 5% sample would audit the same ranks for ever and never the rest of the list."""
+    settings = load_settings()
+    record = rec(importance=1)
+
+    def sampled(day):
+        rng = _judge_rng(0, day)
+        return [n for n in range(200) if needs_judge(record, rng, settings)]
+
+    first = sampled(date(2026, 8, 30))
+    second = sampled(date(2026, 8, 31))
+    assert first and second and first != second
+    # And it is still deterministic within a day, so a rerun of one day judges the same items.
+    assert sampled(date(2026, 8, 30)) == first
+
+
+def test_run_daily_seeds_the_judge_sampler_from_the_day(tmp_path, monkeypatch):
+    """The wiring half of the item above: `run_daily` has to pass the day, not just the seed."""
+    seen = []
+    real = pipeline.run._judge_rng
+    monkeypatch.setattr(
+        pipeline.run, "_judge_rng", lambda seed, day: seen.append((seed, day)) or real(seed, day)
+    )
+    run_daily(_inputs(tmp_path, _clients(), rng_seed=7))
+    assert seen == [(7, FixtureClient.day_of(FIX))]

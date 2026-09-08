@@ -166,3 +166,30 @@ def test_data_block_leaves_quotes_and_ampersands_in_the_body_alone():
     readable, and readable is what the model has to work from."""
     block = data_block("item", {}, 'He said "no" & meant it')
     assert 'He said "no" & meant it' in block
+
+
+def test_normalize_folds_a_dash_nfkc_only_produces_on_the_way_through():
+    """U+207B superscript minus decomposes to U+2212, which is a dash the fold has to see.
+
+    Folding once, before NFKC, is not enough: the minus sign only exists after the compatibility
+    decomposition, so a token like `10⁻⁶` kept a character no quote of it would ever match.
+    """
+    assert normalize("10⁻⁶") == "10-6"
+    assert contains("a 10⁻⁶ failure rate", "10-6")
+    # The original reason for folding first is still met: U+2033 stays one double quote.
+    assert normalize("5″ wide") == '5" wide'
+
+
+def test_html_to_text_separates_spoiler_and_caption_blocks():
+    """ForumMagnum spoilers are `<details><summary>`; a caption sits above a table.
+
+    Treated as inline, `word</summary>next` glues into one token, and every number that lands on
+    the seam verifies against nothing.
+    """
+    assert html_to_text("<details><summary>Answer</summary>42 is the number</details>") == (
+        "Answer 42 is the number"
+    )
+    assert html_to_text("<table><caption>Table 1</caption><tr><td>3</td></tr></table>") == (
+        "Table 1 3"
+    )
+    assert find_numbers_and_dates(html_to_text("<summary>see</summary>42 posts")) == ["42"]

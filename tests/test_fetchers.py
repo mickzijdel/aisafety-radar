@@ -139,3 +139,14 @@ def test_forum_fetchers_covers_the_three_sites():
     # A fetcher's name has to be the source its items carry, or a SourceStatus cannot be
     # joined back to the items it accounts for.
     assert all(raw_post_to_item(f.site, RAW).source == f.name for f in fetchers)
+
+
+def test_agreement_of_a_boolean_is_not_a_vote_total():
+    """`extendedScore` is an untyped blob, and `bool` is an `int` to isinstance.
+
+    `{"agreement": true}` would otherwise render as `agree 1`, a number the source does not
+    contain -- which the provenance and judge gates then have to explain away.
+    """
+    for value in (True, False):
+        post = RAW.model_copy(update={"extendedScore": {"agreement": value}})
+        assert raw_post_to_item("lw", post).agreement is None

@@ -25,9 +25,15 @@ def raw_post_to_item(site: Site, post: RawPost) -> Item:
     if user is not None:
         affiliation = user.organization or user.jobTitle
     # Only two-axis-voting sites carry an agreement score, and extendedScore is an untyped
-    # blob, so anything but a number is treated as absent.
+    # blob, so anything but a number is treated as absent. `bool` is an `int` to isinstance, and
+    # a vote total of True is not a vote total: it would render as "agree 1", a number the source
+    # does not contain. (`pipeline/stages/comments.py` guards the comment side the same way.)
     raw_agreement = (post.extendedScore or {}).get("agreement")
-    agreement = int(raw_agreement) if isinstance(raw_agreement, int | float) else None
+    agreement = (
+        int(raw_agreement)
+        if isinstance(raw_agreement, int | float) and not isinstance(raw_agreement, bool)
+        else None
+    )
     return Item(
         id=f"{site}:{post.id}",
         source=SOURCE_NAMES[site],
