@@ -233,7 +233,9 @@ jobs:
           git config user.name "aisafety-radar bot"
           git config user.email "claude@mickzijdel.com"
           git add -A
-          git commit -m "Archive ${RADAR_VERSION:-unknown}" || echo "nothing to commit"
+          # Ask the index rather than tolerating a failed commit: an empty index is a no-op, and
+          # a commit that fails for any other reason has to fail the step.
+          git diff --cached --quiet || git commit -m "Archive ${RADAR_VERSION:-unknown}"
           # `origin HEAD`, not a bare `git push`: the checkout sets no upstream branch, and a
           # bare push then fails with "no upstream" instead of pushing.
           git push origin HEAD
@@ -270,7 +272,7 @@ jobs:
           git config user.email "claude@mickzijdel.com"
           git checkout -B generated
           git add skills/aisafety-radar/references
-          git commit -m "Pack ${RADAR_VERSION:-unknown}" || echo "nothing to commit"
+          git diff --cached --quiet || git commit -m "Pack ${RADAR_VERSION:-unknown}"
           git push --force origin generated
 
   # `environment: production` is the canary: its wait timer holds this job for long enough that a
@@ -343,10 +345,12 @@ jobs:
           RADAR_VERSION: ${{ needs.generate.outputs.version }}
         run: |
           git add -A
-          # `|| echo`, like the archive and pack commits above: re-running an already-successful
+          # Guarded like the archive and pack commits above: re-running an already-successful
           # promote leaves nothing to commit, and a job that goes red on a no-op is a job whose
-          # rerun -- the cheapest recovery there is -- cannot succeed.
-          git commit -m "Publish $RADAR_VERSION" || echo "nothing to commit"
+          # rerun -- the cheapest recovery there is -- cannot succeed. `|| echo` would have bought
+          # that by swallowing a genuine failure too, and this is the commit that must not be
+          # swallowed: without it the push is a no-op and the Healthchecks switch still fires.
+          git diff --cached --quiet || git commit -m "Publish $RADAR_VERSION"
           git push origin main
 
       # A dead-man's switch: it must fire only when the day actually published, so it has no

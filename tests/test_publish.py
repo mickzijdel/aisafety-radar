@@ -412,15 +412,30 @@ def test_no_step_in_the_daily_workflow_uses_jq_exit_status():
         assert not found, f"{name}: jq exit-status flag in a run body: {found.group(0)!r}"
 
 
-def test_every_git_commit_in_the_daily_workflow_tolerates_an_empty_index():
+def test_every_git_commit_in_the_daily_workflow_skips_an_empty_index_and_fails_on_a_real_error():
     """`git commit` exits 1 when there is nothing staged, and re-running an already-successful
     job is the cheapest recovery this pipeline has. A promote whose push failed and was fixed by
-    hand, or a rerun of a job that already committed, must not go red on the no-op."""
+    hand, or a rerun of a job that already committed, must not go red on the no-op.
+
+    `git commit || echo` bought that at the price of swallowing every *other* reason a commit
+    fails - a bad identity, a rejected hook, a full disk - and for the publish commit that means
+    the job goes green, the push is a no-op, and the Healthchecks switch still fires on a day
+    that published nothing. Asking about the index first separates the two: an empty index skips
+    the commit, and a failing commit fails the step."""
+    guarded = 0
     for name, body in _run_bodies(DAILY_WORKFLOW):
         for line in body.splitlines():
             stripped = line.strip()
-            if stripped.startswith("git commit"):
-                assert "||" in stripped, f"{name}: bare git commit with no fallback: {stripped!r}"
+            if "git commit" not in stripped or stripped.startswith("#"):
+                continue
+            assert stripped.startswith("git diff --cached --quiet || git commit"), (
+                f"{name}: git commit is not guarded by an empty-index check: {stripped!r}"
+            )
+            assert "|| echo" not in stripped, (
+                f"{name}: git commit swallows a real failure: {stripped!r}"
+            )
+            guarded += 1
+    assert guarded == 3, f"expected the archive, pack and publish commits, found {guarded}"
 
 
 def test_the_daily_workflow_can_be_dispatched_for_an_earlier_day():
