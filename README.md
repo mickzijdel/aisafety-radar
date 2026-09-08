@@ -71,10 +71,10 @@ per-source entry floor, triages what is left, and extracts a summary, tags and u
 quotes per item with an LLM that never writes a URL or a number itself. Seven QA gates then
 check link and number provenance, prompt injection, freshness, token budgets, a judge's read
 of the output, cost against the trailing median, and each source's rolling 7-day item count;
-a run that fails a blocking gate publishes nothing and says why in the health issue. The day's raw data is committed to the
-public archive repository either way; what passes the gates is written to a `generated`
-branch, held there for a 30-minute canary window, and only then fast-forwarded onto `main`
-and deployed to GitHub Pages.
+a run that fails a blocking gate publishes nothing and says why in the health issue. The
+day's raw data is committed to the public archive repository either way; what passes the
+gates is written to a `generated` branch, held there for a 30-minute canary window, and
+only then fast-forwarded onto `main` and deployed to GitHub Pages.
 
 Full detail, including every source, prompt, gate and threshold, is in
 [the design spec](docs/superpowers/specs/2026-08-30-aisafety-radar-design.md).

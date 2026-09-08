@@ -297,9 +297,15 @@ def gate_scan(scans: dict[str, ScanResult], rendered_ids: set[str]) -> GateResul
 def gate_judge(judges: dict[str, JudgeResult], records: dict[str, ExtractionRecord]) -> GateResult:
     """Every important item that failed the faithfulness judge was degraded rather than published.
 
-    Only importance 4 and 5 block: those are judged on every run, so a failure there is a measured
-    fact. The rest are judged on a sample, and blocking the pack on one sampled failure would make
-    the sample rate a lottery over whether the digest ships.
+    Only importance 4 and 5 block: every one of those that is judged at all is judged on its own
+    merits rather than by lottery, so a failure there is a measured fact. The rest are judged on a
+    sample, and blocking the pack on one sampled failure would make the sample rate a lottery over
+    whether the digest ships.
+
+    "Judged at all" is the qualification: `needs_judge` keeps a degraded record out of the sample
+    whatever its importance, because its prose is already blank and the rubric would audit an
+    empty summary. The loop below skips a degraded record for the same reason - it has already
+    said in the pack that it could not be checked, which is the outcome this gate exists to force.
     """
     details: list[str] = []
     for iid, j in judges.items():
