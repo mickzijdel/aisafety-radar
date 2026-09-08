@@ -85,7 +85,8 @@ def test_select_caps_and_orders():
         },
     ]
     fake = FakeLLM(results)
-    chosen = select(items, triage(items, fake, S), cap=3)
+    results, _ = triage(items, fake, S)
+    chosen = select(items, results, cap=3)
     assert [i.id for i in chosen] == ["lw:2", "lw:4", "lw:3"]
 
 
@@ -128,7 +129,7 @@ def test_item_id_comes_from_the_item_not_the_model():
 def test_triage_calls_the_model_once_per_item_with_that_item_id():
     items = [make_item(id=f"lw:{n}") for n in range(3)]
     fake = FakeLLM([_raw(item_id=f"lw:{n}") for n in range(3)])
-    results = triage(items, fake, S)
+    results, _ = triage(items, fake, S)
     assert [r.item_id for r in results] == ["lw:0", "lw:1", "lw:2"]
     assert len(fake.calls) == 3
     assert [c["user"].split('id="')[1].split('"')[0] for c in fake.calls] == [
@@ -204,14 +205,15 @@ def test_triage_item_does_not_mutate_the_response_it_was_given():
 
 def test_select_ignores_items_with_no_triage_result():
     items = [make_item(id="lw:0"), make_item(id="lw:1")]
-    results = triage([items[0]], FakeLLM([_raw(item_id="lw:0")]), S)
+    results, _ = triage([items[0]], FakeLLM([_raw(item_id="lw:0")]), S)
     assert [i.id for i in select(items, results, cap=10)] == ["lw:0"]
 
 
 def test_select_tolerates_a_missing_score():
     items = [make_item(id="lw:0", score=None), make_item(id="lw:1", score=10)]
     fake = FakeLLM([_raw(item_id="lw:0", importance=3), _raw(item_id="lw:1", importance=3)])
-    assert [i.id for i in select(items, triage(items, fake, S), cap=10)] == ["lw:1", "lw:0"]
+    results, _ = triage(items, fake, S)
+    assert [i.id for i in select(items, results, cap=10)] == ["lw:1", "lw:0"]
 
 
 def test_a_hostile_id_or_source_cannot_forge_an_attribute_in_the_open_tag():
@@ -245,3 +247,38 @@ def test_triage_survives_malformed_slugs():
     # A list is still filtered element by element, unhashable members included.
     res = triage_item(make_item(), FakeLLM([_raw(secondary_slugs=["evals", None, {}, ["x"]])]), S)
     assert res.secondary_slugs == ["evals"]
+
+
+class _RaisesOnTheThirdCall(FakeLLM):
+    """Replays canned triage answers, except the third call dies the way a refusal does.
+
+    `llm.structured` raises on a refusal and on a `max_tokens` truncation, so this is the shape
+    of the real failure the stage has to survive.
+    """
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        if len(self.calls) == 2:
+            self.calls.append({"model": model, "system": system, "user": user})
+            raise RuntimeError("stop_reason=refusal")
+        return super().structured(model, system, user, schema, max_tokens)
+
+
+def test_one_failing_triage_call_costs_that_item_and_not_the_others(caplog):
+    """The one un-isolated model loop. A refusal on one item used to propagate out of `triage`
+    and out of `run_daily` itself: no archive write, no run.json, no ledger save, no pack."""
+    items = [make_item(id=f"lw:{n}") for n in range(5)]
+    fake = _RaisesOnTheThirdCall([_raw(item_id=f"lw:{n}") for n in (0, 1, 3, 4)])
+    results, failed = triage(items, fake, S)
+    assert [r.item_id for r in results] == ["lw:0", "lw:1", "lw:3", "lw:4"]
+    assert failed == ["lw:2"]
+    assert len(fake.calls) == 5, "every other item was still triaged"
+    assert "stop_reason=refusal" in caplog.text
+
+
+def test_an_item_whose_triage_failed_is_not_selected():
+    """A failed triage call means "not relevant": the item is skipped rather than guessed at."""
+    items = [make_item(id=f"lw:{n}") for n in range(4)]
+    fake = _RaisesOnTheThirdCall([_raw(item_id=f"lw:{n}") for n in (0, 1, 3)])
+    results, failed = triage(items, fake, S)
+    assert failed == ["lw:2"]
+    assert [i.id for i in select(items, results, cap=10)] == ["lw:0", "lw:1", "lw:3"]

@@ -282,3 +282,25 @@ def test_the_judge_rubric_does_not_promise_a_comments_block():
     excuse an unsupported claim as coming from comments it never saw."""
     assert "comments" not in JUDGE_SYSTEM
     assert "<comments>" not in build_judge_message(rec(), make_item())
+
+
+def test_the_judge_message_leaves_out_a_blanked_field():
+    """A degraded record's summary is `""`, not None, so a `is not None` filter rendered
+    `summary: ` followed by nothing and asked the judge to audit it."""
+    degraded = ExtractionRecord(
+        extraction=rec(summary="").extraction.model_copy(
+            update={"novelty": None, "discussion_signal": ""}
+        ),
+        degraded=True,
+    )
+    msg = build_judge_message(degraded, make_item())
+    assert "summary:" not in msg and "discussion_signal:" not in msg
+    assert "claim_type: exploratory" in msg
+
+
+def test_a_degraded_record_is_never_judged():
+    """`gate_judge` skips a degraded record anyway, so judging one is a Sonnet call spent
+    auditing a blank summary that nothing downstream will read."""
+    degraded = ExtractionRecord(extraction=rec(importance=5).extraction, degraded=True)
+    assert not any(needs_judge(degraded, random.Random(i), S) for i in range(50))
+    assert needs_judge(rec(importance=5), random.Random(1), S), "precondition: it would be judged"

@@ -10,6 +10,8 @@ the bounds so the model rarely tests them.
 
 from __future__ import annotations
 
+import logging
+
 from pipeline.config import Settings
 from pipeline.llm import LLM
 from pipeline.models import (
@@ -22,6 +24,8 @@ from pipeline.models import (
     coerce_slugs,
 )
 from pipeline.textnorm import data_block, truncate_tokens_approx
+
+log = logging.getLogger(__name__)
 
 TRIAGE_SYSTEM = f"""You triage items for an AI-safety landscape digest read by other AI agents.
 You receive ONE item: its title, source and the first part of its text, inside a data block.
@@ -68,8 +72,27 @@ def triage_item(item: Item, llm: LLM, settings: Settings) -> TriageResult:
     return TriageResult.model_validate(raw)
 
 
-def triage(items: list[Item], llm: LLM, settings: Settings) -> list[TriageResult]:
-    return [triage_item(item, llm, settings) for item in items]
+def triage(items: list[Item], llm: LLM, settings: Settings) -> tuple[list[TriageResult], list[str]]:
+    """Triage every item, and return the results plus the ids whose own call failed.
+
+    Isolated per item, on `run_daily`'s own principle that a failure costs its own contribution
+    and nothing else. `llm.structured` raises on a refusal and on a `max_tokens` truncation, and
+    this loop runs before anything has been archived, so an un-isolated one cost the whole day:
+    no archive write, no run report, no ledger save and no pack, over one item out of hundreds.
+
+    A failed call means "not relevant". The item simply has no result, which is exactly what
+    `select` already skips, and its id is returned so the run report can name it rather than
+    leaving a shrunken pack to explain itself.
+    """
+    results: list[TriageResult] = []
+    failed: list[str] = []
+    for item in items:
+        try:
+            results.append(triage_item(item, llm, settings))
+        except Exception:  # noqa: BLE001 - one item is not the run
+            log.exception("triage failed for %s; treating it as not relevant", item.id)
+            failed.append(item.id)
+    return results, failed
 
 
 def select(items: list[Item], results: list[TriageResult], cap: int) -> list[Item]:

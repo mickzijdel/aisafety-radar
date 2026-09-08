@@ -17,11 +17,14 @@ stating, because each is easy to get subtly wrong and cheap to get right here:
   stage therefore scans its own refreshed signal and refuses to touch a record an earlier scan
   flagged; nothing here would catch either case.
 * **Failure isolation is per source and per item.** `run_all` already isolates a daily fetch; the
-  14-day window fetch, the comment refresh and every item's own extract/scan/judge are isolated
-  here on the same principle, so one forum being down or one API call failing costs its own
-  contribution and nothing else. The extract/scan/judge loop is where a run's money is spent, and
-  a failure on the last item of it must not throw away everything already paid for. The refresh
-  has no per-post isolation inside it, so a failure there costs the day's movers, not the run.
+  14-day window fetch, the comment refresh, every item's own triage, and every item's own
+  extract/scan/judge are isolated on the same principle, so one forum being down or one API call
+  failing costs its own contribution and nothing else. The extract/scan/judge loop is where a
+  run's money is spent, and a failure on the last item of it must not throw away everything
+  already paid for; triage runs *before* anything has been archived, so a failure there used to
+  cost more than money -- the archive, the run report, the ledger save and the pack, over one
+  item. The refresh has no per-post isolation inside it, so a failure there costs the day's
+  movers, not the run.
 * **Files and seen ids are written last, and only if no blocking gate failed.** The archive, the
   ledger and the run report are written either way -- a run that could not publish is still a run
   that happened, and the next day's medians and cost comparison read those files -- but an item is
@@ -134,8 +137,13 @@ class RunReport(BaseModel):
 
     `dropped`, `scan_flagged` and `failed` exist so a shrunken pack is never silent: an item can
     leave the render set without failing a gate, and a count that only ever appears in a log line
-    is a count nobody reads. `dropped` is the union -- every selected item that never reached the
-    render set -- and the other two say why.
+    is a count nobody reads. `dropped` is the union -- every *selected* item that never reached
+    the render set -- and the other two say why.
+
+    `failed` is the one list that reaches past `dropped`: an item whose triage call failed never
+    reached selection at all, so it is named here and not in `dropped`. That is deliberate, and
+    `refusal_reason` depends on it: its empty-pack arithmetic subtracts `dropped` from the
+    selected count, and an id that was never selected must not be subtracted from it.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -229,14 +237,15 @@ def run_daily(inputs: RunInputs) -> RunReport:
     for note in floor.anomalies:
         log.warning("anomaly: %s", note)
 
-    results = triage(floor.kept, llm, settings)
+    # `triage` isolates its own calls and hands back the ids it could not triage; those items
+    # are treated as not relevant, so they never reach `selected` and never reach `dropped`.
+    results, failed = triage(floor.kept, llm, settings)
     selected = select(floor.kept, results, settings.caps.forums_per_day)
 
     records: dict[str, ExtractionRecord] = {}
     scans: dict[str, ScanResult] = {}
     judges: dict[str, JudgeResult] = {}
     quarantined: list[ExtractionRecord] = []
-    failed: list[str] = []
     for item in selected:
         # Isolated per item, because this loop is where the run's money goes: one transient API
         # error on the fortieth of fifty items must cost that item, not the thirty-nine already

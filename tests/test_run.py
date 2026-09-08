@@ -775,3 +775,34 @@ def test_a_failed_judge_verdict_degrades_a_top_item_without_blocking_the_pack(tm
     # The judge gate itself does not block on a degraded item: the pack ships, softened.
     judge_gate = next(g for g in report.gates if g.name == "faithfulness-judge")
     assert judge_gate.passed, judge_gate.details
+
+
+class _RefusesOneTriage(CannedLLM):
+    """Canned answers, except the third triage call refuses the way the API does."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.triages = 0
+
+    def structured(self, model, system, user, schema, max_tokens=2048):
+        if "relevant" in schema.get("properties", {}) and "summary" not in schema["properties"]:
+            self.triages += 1
+            if self.triages == 3:
+                raise RuntimeError("stop_reason=refusal")
+        return super().structured(model, system, user, schema, max_tokens)
+
+
+def test_one_refused_triage_call_still_publishes_the_day(tmp_path, caplog):
+    """`llm.structured` raises on a refusal and on a `max_tokens` truncation, and the triage
+    comprehension used to be the one model loop `run_daily` called with no `try`: one refusal
+    took the archive, the run report, the ledger save and the pack with it."""
+    report = run_daily(_inputs(tmp_path, _clients(), llm=_RefusesOneTriage()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    assert len(report.failed) == 1
+    assert "stop_reason=refusal" in caplog.text
+    # The refused item was never selected, so it is not a *dropped* selected item.
+    assert report.failed[0] not in report.dropped
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert rendered.count("\n- **") == report.items_selected
+    assert report.failed[0].split(":", 1)[1] not in rendered
+    assert (tmp_path / "data" / "seen-ids.json").exists()

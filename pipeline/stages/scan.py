@@ -163,11 +163,18 @@ def scan_record(record: ExtractionRecord, llm: LLM, settings: Settings) -> ScanR
 
 
 def needs_judge(record: ExtractionRecord, rng: random.Random, settings: Settings) -> bool:
-    """True for importance 4 and 5, else with probability `judge_sample_rate`.
+    """True for importance 4 and 5, else with probability `judge_sample_rate`. Never degraded.
 
     The sample is what makes the rate on the items nobody checks knowable: judging only the top
     items would leave the error rate of the rest unmeasured (spec 6.8 gate 5).
+
+    A degraded record is out of the sample altogether, whatever its importance. Its prose has
+    already been blanked by `extract_verified`, so the rubric would audit an empty summary, and
+    `gate_judge` skips a degraded record whatever the verdict says -- so the call is a Sonnet
+    call spent on an answer nothing downstream reads.
     """
+    if record.degraded:
+        return False
     if record.extraction.importance >= 4:
         return True
     return rng.random() < settings.thresholds.judge_sample_rate
@@ -185,9 +192,11 @@ def build_judge_message(record: ExtractionRecord, item: Item) -> str:
     about the source document.
     """
     e = record.extraction
-    # Null fields are left out rather than interpolated, which would put the literal string
-    # "None" in the block and ask the judge to trace the word back to the source. Same rule as
-    # `_model_written` above: a field the model did not answer is a field with nothing to audit.
+    # Empty fields are left out rather than interpolated. A null would put the literal string
+    # "None" in the block and ask the judge to trace the word back to the source; a degraded
+    # record's blanked summary is `""` rather than None and would emit a dangling "summary: "
+    # with nothing after it. The filter is falsy, not `is not None`, so both go -- the same rule
+    # `_model_written` above applies, and the claim of parity with it is now true.
     fields = [
         ("summary", e.summary),
         ("novelty", e.novelty),
@@ -204,7 +213,7 @@ def build_judge_message(record: ExtractionRecord, item: Item) -> str:
             data_block(
                 "summary_fields",
                 {},
-                "\n".join(f"{name}: {value}" for name, value in fields if value is not None),
+                "\n".join(f"{name}: {value}" for name, value in fields if value),
             ),
         ]
     )
