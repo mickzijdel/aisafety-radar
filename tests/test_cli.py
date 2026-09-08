@@ -7,12 +7,15 @@ Every test here stays off the network: `--fixtures` swaps the forum clients for 
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from pathlib import Path
 
-from pipeline.cli import main
+import pipeline.run
+from pipeline.cli import main, probe_call_shapes
 from pipeline.fetchers.fixtures import FixtureClient
+from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN
 from pipeline.models import GateResult, Usage
-from pipeline.run import RunReport
+from pipeline.run import RunReport, _window_posts
 
 FIX = "tests/fixtures/forummagnum"
 
@@ -141,3 +144,57 @@ def test_cli_probe_reports_a_failing_window_call_as_a_row_and_still_exits_0(monk
     # The other sites are unaffected, and the daily fetch table is still there.
     assert "| af-window | yes |" in out
     assert "| lesswrong | yes |" in out
+
+
+class _RecordsItsCalls:
+    """A client that answers nothing and remembers exactly how it was asked."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[object, dict]] = []
+
+    def posts_since(self, after, **kwargs):
+        self.calls.append((after, kwargs))
+        return []
+
+    def top_comments(self, post_id):  # pragma: no cover - no post to ask about
+        return []
+
+
+def _window_calls(fn) -> dict[str, tuple[object, dict]]:
+    """The window `posts_since` call `fn` makes per site, as (after, kwargs)."""
+    clients = {site: _RecordsItsCalls() for site in ("lw", "af", "eaf")}
+    fn(clients, date(2026, 8, 30))
+    return {site: client.calls[0] for site, client in clients.items()}
+
+
+def test_the_probe_sends_the_window_call_production_sends(monkeypatch):
+    """The probe exists to prove the two shapes the daily fetch never sends still work. It proves
+    nothing if it sends a shape production does not: the kwargs were hand-copied from `run.py`,
+    and nothing kept the copies in step. Both call sites now go through one helper, and this
+    fails if either grows its own copy again."""
+    assert _window_calls(probe_call_shapes) == _window_calls(_window_posts)
+
+    # And they agree because there is one definition, not two that happen to match today: a
+    # change to it has to reach both call sites.
+    monkeypatch.setattr(
+        pipeline.run, "WINDOW_FETCH_KWARGS", {"view": "changed", "limit": 7, "fields": ["_id"]}
+    )
+    probed, produced = _window_calls(probe_call_shapes), _window_calls(_window_posts)
+    assert probed == produced
+    assert produced["lw"][1] == {
+        "view": "changed",
+        "limit": 7,
+        "fields": ["_id"],
+        "require_ai_tag": True,
+    }
+
+
+def test_the_window_call_asks_the_af_without_an_ai_tag_filter():
+    """The AF is an AI-safety forum end to end and carries no AI tag to filter on, so the one
+    kwarg that is not shared between sites is the one that must stay per site."""
+    calls = _window_calls(_window_posts)
+    assert calls["af"][1]["require_ai_tag"] is False
+    assert calls["lw"][1]["require_ai_tag"] is True and calls["eaf"][1]["require_ai_tag"] is True
+    # Every site is asked for the same 14 days back, in the lean field set.
+    assert {after for after, _ in calls.values()} == {date(2026, 8, 30) - timedelta(days=14)}
+    assert calls["lw"][1]["view"] == "new" and calls["lw"][1]["fields"] == POST_FIELDS_LEAN

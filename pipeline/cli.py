@@ -25,7 +25,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pipeline
@@ -33,12 +33,11 @@ from pipeline.archive import Archive
 from pipeline.config import load_settings, user_agent
 from pipeline.fetchers.base import Window, run_all
 from pipeline.fetchers.fixtures import FixtureClient
-from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient
+from pipeline.fetchers.forummagnum import ForumClient
 from pipeline.fetchers.forums import MIN_ITEMS_7D, SOURCE_NAMES, ForumFetcher
-from pipeline.ledger import WINDOW_DAYS
 from pipeline.llm import LLM, CannedLLM
 from pipeline.models import SourceStatus
-from pipeline.run import WINDOW_LIMIT, RunInputs, run_daily
+from pipeline.run import RunInputs, fetch_window_posts, run_daily
 from pipeline.versioning import next_letter, pack_version
 
 # A blocked run is not a crashed one, and argparse already owns 2 for a usage error, so the two
@@ -116,10 +115,12 @@ def probe_call_shapes(clients, day: date) -> list[SourceStatus]:
     """The two call shapes the daily fetch does *not* make, one row each per site.
 
     `_fetchers` sends `posts_since(view="top")` with the full field set, and that is all a probe
-    used to exercise. Production makes two more shapes every morning: the 14-day window fetch
-    (`view="new"`, `POST_FIELDS_LEAN`, a 500-post page) and `top_comments`, which is the
-    `postCommentsTop` view. Neither reaches a gate and neither is in `RunReport.statuses`, so
-    before this the first time either was sent from a GitHub runner was the first real daily run.
+    used to exercise. Production makes two more shapes every morning: the 14-day window fetch and
+    `top_comments`, which is the `postCommentsTop` view. The window fetch is made through
+    `fetch_window_posts`, the same helper the morning run calls, so what is proved here is the
+    call production sends rather than a copy of it that drifted. Neither reaches a gate and
+    neither is in `RunReport.statuses`, so before this the first time either was sent from a
+    GitHub runner was the first real daily run.
 
     Read-only and no more traffic than one morning: two extra requests per site, and
     `ForumClient` already paces itself between calls. Every failure becomes a row rather than a
@@ -131,14 +132,7 @@ def probe_call_shapes(clients, day: date) -> list[SourceStatus]:
     statuses: list[SourceStatus] = []
     for site, client in clients.items():
         try:
-            posts = client.posts_since(
-                day - timedelta(days=WINDOW_DAYS),
-                view="new",
-                limit=WINDOW_LIMIT,
-                # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
-                require_ai_tag=site != "af",
-                fields=POST_FIELDS_LEAN,
-            )
+            posts = fetch_window_posts(client, site, day)
         except Exception as exc:  # noqa: BLE001 - the table is the report
             statuses.append(_row(f"{site}-window", ok=False, items=0, error=str(exc)))
             statuses.append(

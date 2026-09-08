@@ -62,7 +62,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from pipeline.archive import Archive
 from pipeline.config import Settings
 from pipeline.fetchers.base import Fetcher, Window, run_all
-from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient, Site
+from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient, RawPost, Site
 from pipeline.fetchers.forums import raw_post_to_item
 from pipeline.floor import apply_floor
 from pipeline.ledger import WINDOW_DAYS, PostsLedger, SeenIds
@@ -103,10 +103,36 @@ FORUMS_FILE = "31-today-forums.md"
 # outside it can no longer move the digest.
 WINDOW_LIMIT = 500
 
+# The window fetch's call shape, as one definition because two call sites make it: `_window_posts`
+# every morning, and the probe from a runner. `require_ai_tag` is not in here because it is the one
+# kwarg that differs per site; everything else is shared, and two hand-copied dicts would let a
+# change to the production call leave the probe proving a shape production no longer sends.
+WINDOW_FETCH_KWARGS: dict[str, object] = {
+    "view": "new",
+    "limit": WINDOW_LIMIT,
+    "fields": POST_FIELDS_LEAN,
+}
+
 # The daily window's length, in hours: 24 hours of new posts plus an hour of deliberate overlap
 # with the previous run. Exact tiling is what left the blind spot `_run_window` describes, and
 # the overlap costs one refetch of posts `seen` already holds while a gap costs a post for good.
 RUN_WINDOW_HOURS = 25
+
+
+def fetch_window_posts(client: ForumClient, site: Site, day: date) -> list[RawPost]:
+    """The last `WINDOW_DAYS` of posts from one site, in the shape production asks for them.
+
+    Both the morning's window fetch and the probe call this rather than assembling their own
+    kwargs, so the probe cannot end up exercising a call shape production has stopped making -
+    which is the only thing the probe's window row is for. Raises whatever the client raises;
+    isolation belongs to the callers, which record a failure differently.
+    """
+    return client.posts_since(
+        day - timedelta(days=WINDOW_DAYS),
+        # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
+        require_ai_tag=site != "af",
+        **WINDOW_FETCH_KWARGS,
+    )
 
 
 def _judge_rng(seed: int, day: date) -> random.Random:
@@ -312,14 +338,7 @@ def _window_posts(
     statuses: list[SourceStatus] = []
     for site, client in clients.items():
         try:
-            posts = client.posts_since(
-                day - timedelta(days=WINDOW_DAYS),
-                view="new",
-                limit=WINDOW_LIMIT,
-                # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
-                require_ai_tag=site != "af",
-                fields=POST_FIELDS_LEAN,
-            )
+            posts = fetch_window_posts(client, site, day)
             converted = [(raw_post_to_item(site, p), p.lastCommentedAt) for p in posts]
         except Exception as exc:  # noqa: BLE001 - isolation is the point
             log.exception("%s: 14-day window fetch failed; no movers from this site today", site)
