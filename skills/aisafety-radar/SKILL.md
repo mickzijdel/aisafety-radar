@@ -12,8 +12,9 @@ metadata:
 A context pack about AI safety, regenerated every day by a pipeline. It has three layers:
 a slow **map** of the field (areas, orgs, programmes, careers, norms), **rolling** views
 (this week, the last 30 days), and **today** (every item from the last 25 hours, with
-verified links and quotes; the daily appendix states the span it covers). Summaries are machine-generated; links, authors, dates, karma
-and quotes are copied verbatim from the sources.
+verified links and quotes; the daily appendix states the span it covers). Summaries are
+machine-generated; links, authors, dates, karma and quotes are copied verbatim from the
+sources.
 
 ## How to use it
 

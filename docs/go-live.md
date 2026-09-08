@@ -233,7 +233,12 @@ Run in order. Stop at the first failure and fix it before continuing.
 - **`generate` failed at "Check out the data repository".** `DATA_DEPLOY_KEY` is wrong, is
   missing its trailing newline, or its public half is not a write deploy key on the data repo.
 - **`generate` succeeded but `promote` never started.** The run did not publish: read the
-  health issue, which names the blocking gate or the refusal reason.
+  health issue, which names the blocking gate or the refusal reason. A blocked run leaves its
+  items unspent, so an ordinary rerun is the recovery once the cause is fixed. Since the window
+  is recorded in `run.json` and reused, that rerun refetches the original run's window rather
+  than one ending at the rerun's own clock: nothing is lost, the pack covers the span its
+  header states, and the hours since the original fetch stay with tomorrow's window instead of
+  being pulled into today's pack and marked seen.
 - **`promote` is stuck.** That is the wait timer. Check the `production` environment's timer
   is 30 minutes and not something larger.
 - **`promote` failed at "Commit and push the publication" with `GH006: Protected branch update
@@ -255,8 +260,14 @@ Run in order. Stop at the first failure and fix it before continuing.
   possible, dispatch the workflow with the recovery input instead:
 
   ```bash
-  gh workflow run daily.yml -f ignore_seen=true
+  gh workflow run daily.yml -f ignore_seen=true -f day=YYYY-MM-DD
   ```
+
+  `day` has to be the day being recovered, in UTC, not the day you are dispatching on: the
+  exact window is on record in that day's own `run.json` and is reused only for that day. Left
+  blank, the run dates itself today, fetches a window disjoint from the recorded one, selects
+  nothing, and the empty-pack refusal correctly stops it - a second generation bought for
+  nothing.
 
   That skips the seen-ids filter for one run and regenerates the day from scratch. It costs a
   second full generation - another day's API spend - so it is the fallback, not the first move.

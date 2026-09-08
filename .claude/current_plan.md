@@ -52,15 +52,18 @@ so they run after the merge rather than as part of the SDD task sequence.
 4. **The live steps**: part 2 of `docs/go-live.md`. Run `probe.yml` and record the table in
    `docs/probe-results.md` (that file does not exist yet, and the workflow does not create it:
    `radar probe` writes only to `$GITHUB_STEP_SUMMARY`, and the operator copies the table out
-   of the job summary by hand, as `docs/go-live.md` step 4 says); run
+   of the job summary by hand, as `docs/go-live.md` part 2 step 1 says); run
    `daily.yml`; eyeball the pack on the `generated` branch during the 30-minute canary
    window; watch `promote`'s push step (the first push of `main` from a runner); verify Pages
    and `fetch-latest.sh`; install the marketplace plugin and smoke-test the skill.
 
    If `promote` fails, re-run **that run's failed jobs**, not the workflow: the day's items are
    already marked seen (the gates pass in `generate`), so a fresh `daily.yml` run publishes an
-   empty pack. `gh workflow run daily.yml -f ignore_seen=true` regenerates a spent day at the
-   cost of a second generation, and is the fallback when the old run can no longer be rerun.
+   empty pack. `gh workflow run daily.yml -f ignore_seen=true -f day=YYYY-MM-DD` regenerates a
+   spent day at the cost of a second generation, and is the fallback when the old run can no
+   longer be rerun. `day` has to be the day being recovered, in UTC: the exact window is on
+   record in that day's own `run.json` and is reused only for that day, and a dispatch without
+   it dates itself today, fetches a disjoint window and selects nothing.
 5. **Write the Phase 3 plan**: news, labs, the governance set, papers, the X-Risk Daily
    import, appendices `30`, `32`, `33` and `60`, and the bundles. Feed into it whatever the
    probe found and anything that misfired in the skill smoke test. Phase 3 also owns two things
