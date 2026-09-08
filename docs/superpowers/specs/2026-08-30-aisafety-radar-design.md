@@ -584,6 +584,12 @@ sends the item back for one re-extraction with the failure named, and if it fail
 item is rendered with metadata and quotes only (no model prose) and logged. Items are never
 dropped for formatting reasons.
 
+Phase 2 runs this extraction on the post body alone, so `discussion_signal` is null for every item
+on the day it first appears and is filled in only when the post comes back as a mover through the
+comment refresh (section 6.2); passing top comments into the daily extraction of every selected
+item would roughly double the day's extraction input to describe a thread a few hours old, so it
+is deferred to phase 3.
+
 Haiku 4.5 runs without extended thinking (it has no adaptive thinking; the tasks are
 extraction, not reasoning). The model IDs live in one config file and a CI test calls
 `models.retrieve` on each so a retirement fails the build before it fails the daily run.

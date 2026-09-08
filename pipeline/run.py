@@ -36,7 +36,12 @@ stating, because each is easy to get subtly wrong and cheap to get right here:
 
 Note that `archive.write_comments` is not called: phase 2 fetches comments only inside the refresh,
 which writes back extractions rather than comment rows. The comment archive is phase 3's, when the
-digest starts quoting threads directly.
+digest starts quoting threads directly. For the same reason today's posts are extracted without
+comments - `extract_verified` is called here with no `comments` argument - so `discussion_signal`
+is null for every item on the day it first appears, and is filled in only by the next morning's
+mover refresh: reading a thread that is a few hours old would double the day's extraction input to
+describe a discussion that has barely started, and phase 3 revisits that when it wires top comments
+per selected item (spec 6.3).
 """
 
 from __future__ import annotations
