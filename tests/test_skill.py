@@ -68,11 +68,15 @@ def test_fetch_script_verifies_a_checksum_before_printing():
     assert "set -euo pipefail" in script
     assert "checksums.txt" in script
     assert "sha256sum" in script
-    # Two failure classes, two exit codes: 1 for "could not reach it" (both fetches), 2 for
-    # "fetched it but cannot vouch for it" (no checksum published, or a mismatch). SKILL.md
-    # routes the agent differently on each, so the two must not share a code.
-    assert script.count("exit 1") == 2
-    assert script.count("exit 2") == 2
+    # Two failure classes, two exit codes, split on whether the file arrived: 1 only for "the
+    # file itself could not be fetched", 2 for every way "fetched it but cannot vouch for it"
+    # happens (no checksum list, no checksum for this file, or a mismatch). SKILL.md routes the
+    # agent differently on each, so the two must not share a code. Count statements rather than
+    # substrings: the header comment names both codes while explaining where the line between
+    # them falls, and a comment is not control flow.
+    exits = [line.strip() for line in script.splitlines() if line.strip().startswith("exit ")]
+    assert exits.count("exit 1") == 1, exits
+    assert exits.count("exit 2") == 3, exits
     assert script.index("sha256sum") < script.index("cat ")
 
 
@@ -144,11 +148,20 @@ def test_the_fetch_script_exits_2_and_prints_nothing_on_an_integrity_failure(lab
     assert (code, out) == (2, ""), label
 
 
-@pytest.mark.parametrize("broken", ["body", "sums"])
-def test_the_fetch_script_exits_1_when_the_site_cannot_be_reached(broken, tmp_path):
-    # Distinct from an integrity failure on purpose: this one is worth retrying by another route.
-    code, out = run_fetch(tmp_path, f"{BODY_SHA}  31-today-forums.md", fail=broken)
-    assert (code, out) == (1, ""), broken
+def test_a_missing_checksums_file_is_an_integrity_failure_not_a_transport_one(tmp_path):
+    """The file downloaded; the list that would vouch for it did not. That is precisely the state
+    exit 2 names, and it used to exit 1 -- which sends the agent to the URL-fetch tool to get the
+    same unverifiable bytes by another route, with nothing checking them at the far end. "Could
+    not reach the site" is also simply false: the site answered for the file a moment earlier."""
+    code, out = run_fetch(tmp_path, f"{BODY_SHA}  31-today-forums.md", fail="sums")
+    assert (code, out) == (2, "")
+
+
+def test_the_fetch_script_exits_1_when_the_file_itself_cannot_be_fetched(tmp_path):
+    # Nothing was downloaded, so there is nothing whose integrity is in question. This is the one
+    # worth retrying by another route, and SKILL.md sends the agent to do exactly that.
+    code, out = run_fetch(tmp_path, f"{BODY_SHA}  31-today-forums.md", fail="body")
+    assert (code, out) == (1, "")
 
 
 def test_the_skill_routes_the_two_exit_codes_differently():
