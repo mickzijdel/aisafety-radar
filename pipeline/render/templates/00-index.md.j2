@@ -1,0 +1,15 @@
+{% include 'header.j2' %}
+# aisafety-radar index · version {{ meta.version }}
+
+Load only what the task needs. Token counts are approximate.
+
+| File | Purpose | Tokens | Generated |
+|---|---|---|---|
+{% for row in rows %}| `{{ row.name }}` | {{ row.purpose }} | {{ row.tokens }} | {{ row.generated }} |
+{% endfor %}
+## Recipes
+
+{% for r in recipes %}- **{{ r.name }}**: {% if r.files %}{{ r.files|code_list }} (about {{ r.tokens }} tokens){% if r.missing %}; {% endif %}{% endif %}{% if r.missing %}not yet published: {{ r.missing|code_list }}{% endif %}
+{% endfor %}
+{% if bundles %}Bundles for one fetch: {% for b in bundles %}`{{ meta.latest_base }}/{{ b }}`{% if not loop.last %}, {% endif %}{% endfor %}.
+{% endif %}

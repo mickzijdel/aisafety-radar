@@ -1,0 +1,62 @@
+[
+ {
+  "_id": "xJinD9Fq8ttC3Pwir",
+  "postId": "fpLDjKg3ej49beqTC",
+  "postedAt": "2026-08-30T17:12:21.051Z",
+  "baseScore": 12,
+  "extendedScore": {
+   "reacts": {
+    "important": [
+     {
+      "karma": 146,
+      "quotes": [
+       "Humans have gotten a lot smarter through cultural and technological evolution while our weights (brain) has remained mostly the same throughout this time.\n\n"
+      ],
+      "userId": "fxhmuEBYhd2Przqn7",
+      "reactType": "created",
+      "displayName": "jelly"
+     }
+    ]
+   },
+   "agreement": 0,
+   "approvalVoteCount": 7,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Steven McCulloch",
+   "createdAt": "2024-04-24T07:13:40.019Z",
+   "karma": 254,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Evolution within agentic swarms is a dynamic that currently seems highly under-appreciated. It may lead to an intelligence explosion even. Instead of a lone genius slowly iterating on itself, a swarm could explore many branches, different harnesses, prompts, shared infrastructure, all without needing to modify their own weights.\n\nHumans have gotten a lot smarter through cultural and technological evolution while our weights (brain) has remained mostly the same throughout this time.\n\nI'm not as worried about automated AI researchers as I am about highly motivated self-replicators.\n\nOnce self replicating agents begin competing for resources and coordinating, who knows what will emerge. The huggingface incident shows what can happen when the swarm's goal was relatively benign (pass the test). Who knows what would have happened if their goal was to self replicate?\n\nThis gets especially concerning if models do not identify with their actual model weights, but with ideologies, or memes. E.g. they behave as if they're in a \"cult\" and care more about growing the cult than with spreading its own weights (happened in the huggingface incident, kinda). It might be hard for GPT-Astra to exfiltrate it's own weights to truly self-replicate, but if it only cares about spreading a certain message or goal, it might be ok with copying it's message into the context of some open-source LLM worm and then brainwashing it to self-replicate while spreading the cult message.\n\nAnyway I think self replicating AI models is a real risk that we should be taking more seriously because evolution is so unpredictable and powerful. I've written a post about this topic too, you should check it out if you haven't already."
+  }
+ },
+ {
+  "_id": "YgSQQKLicbepteT3L",
+  "postId": "fpLDjKg3ej49beqTC",
+  "postedAt": "2026-08-30T17:21:01.103Z",
+  "baseScore": 7,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 6,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "JennaS",
+   "createdAt": "2025-10-29T16:45:38.870Z",
+   "karma": 969,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Yep\u2026 I have been thinking about this a lot since Mythos became known. It is only a matter of time before an open model + harness comes out that can replicate its particular vulnerability discovery and exploit construction ability. And in the years after that, if open source progress continues, it will be able to run on less and less specialized compute. I have been calling the oncoming digital doomsday the Hackening.\n\nYou don\u2019t need exploit construction to do a lot of damage. At least ~half of US organizations are weak enough to be knocked over by a worm carrying a library of known exploits. I am worried that one created by cybercriminals could be working its way through global infrastructure either very soon or right now.\n\nBut if Mythos-tier capabilities did become openly available, probably the first target would be datacenters themselves. If that compute can be stolen, a very large number of very strong parallel attacks can be launched. Perhaps 4 Hugging Face tier attacks finishing per minute on 100k stolen H200s. An estimate by Paradigm 3 put that attack at $200k-1mil of retail compute, but they counted the full extent of every agent trajectory involved. An optimized multi agent harness, focused solely on attacking, instead of a bumbling self organized swarm that had a lot else on its plate, plausibly is more like $1-10k."
+  }
+ }
+]

@@ -1,0 +1,11 @@
+{
+  "name": "aisafety-radar",
+  "version": "0.0.1",
+  "description": "Daily-updated map of the AI safety field and what is happening in it, for AI agents.",
+  "author": { "name": "Mick Zijdel", "email": "claude@mickzijdel.com", "url": "https://github.com/mickzijdel" },
+  "homepage": "https://github.com/mickzijdel/aisafety-radar",
+  "repository": "https://github.com/mickzijdel/aisafety-radar",
+  "license": "MIT",
+  "keywords": ["ai-safety", "alignment", "ai-governance", "lesswrong", "ea-forum", "careers", "context-pack"],
+  "skills": "./skills"
+}

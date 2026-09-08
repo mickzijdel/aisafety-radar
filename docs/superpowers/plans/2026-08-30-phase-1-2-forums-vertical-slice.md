@@ -1,5 +1,17 @@
 # aisafety-radar Phases 1-2: Skeleton, Runner Probe and Forums Vertical Slice
 
+## Corrections
+
+Recorded here rather than by editing the task text below, which stays as it was written and
+executed.
+
+- **Task 17's skill-validation command must be pinned by commit SHA.** The task shows a
+  `uvx --from "git+https://github.com/agentskills/agentskills#subdirectory=skills-ref"` invocation
+  with no ref, which resolves to whatever that repository's default branch holds at the moment CI
+  runs: a third party choosing what executes in this repository's workflow. The implemented form,
+  in `.github/workflows/ci.yml`, pins that git ref to a commit SHA with the resolution date in a
+  trailing comment. Bump it deliberately, the way the action pins are bumped.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** An installable `aisafety-radar` skill whose `31-today-forums.md` and `00-index.md` are regenerated every day by GitHub Actions from LessWrong, Alignment Forum and EA Forum posts and comments, with verified quotes, an injection scan, QA gates and a two-step publish.

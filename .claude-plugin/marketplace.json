@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "aisafety-radar",
+  "version": "0.0.1",
+  "description": "The aisafety-radar skill: a daily-updated AI safety landscape for AI agents.",
+  "owner": { "name": "Mick Zijdel", "email": "claude@mickzijdel.com", "url": "https://github.com/mickzijdel" },
+  "plugins": [
+    {
+      "name": "aisafety-radar",
+      "displayName": "AI Safety Radar",
+      "description": "Daily-updated map of the AI safety field and what is happening in it: forums, news, papers, governance, events, careers.",
+      "version": "0.0.1",
+      "source": "./",
+      "category": "knowledge",
+      "author": { "name": "Mick Zijdel", "email": "claude@mickzijdel.com", "url": "https://github.com/mickzijdel" },
+      "homepage": "https://github.com/mickzijdel/aisafety-radar",
+      "keywords": ["ai-safety", "alignment", "ai-governance", "careers"]
+    }
+  ]
+}

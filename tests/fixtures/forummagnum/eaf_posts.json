@@ -1,0 +1,33 @@
+[
+ {
+  "_id": "DsswxCejkpSmWmGf9",
+  "title": "Dwarkesh on the HuggingFace Incident",
+  "pageUrl": "https://forum-bots.effectivealtruism.org/posts/DsswxCejkpSmWmGf9/dwarkesh-on-the-huggingface-incident",
+  "postedAt": "2026-08-31T03:01:40.341Z",
+  "baseScore": 4,
+  "voteCount": 1,
+  "extendedScore": {},
+  "commentCount": 0,
+  "lastCommentedAt": "2026-08-31T03:01:40.341Z",
+  "curatedDate": null,
+  "frontpageDate": "2026-08-31T03:01:40.340Z",
+  "user": {
+   "displayName": "Falk Lieder",
+   "createdAt": "2021-10-17T07:17:55.347Z",
+   "karma": 392,
+   "jobTitle": "Assistant Professor of Psychology",
+   "organization": "UCLA"
+  },
+  "tags": [
+   {
+    "name": "AI safety"
+   },
+   {
+    "name": "OpenAI"
+   }
+  ],
+  "contents": {
+   "html": "<p>\"Over the course of 3 months at OpenAI, 3 consecutive secret AI civilizations got started, then got wiped out, only to reemerge from the predecessor\u2019s ashes. This culminated in the third one taking over part of OpenAI itself. All this happened while humans remained more-or-less in the dark about the scope of the conspiracy.\" -- Dwarkesh Patel</p>"
+  }
+ }
+]

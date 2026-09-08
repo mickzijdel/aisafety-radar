@@ -224,7 +224,7 @@ Every daily appendix renders items from JSON with the same template. The templat
 model, writes the metadata line and the link.
 
 ```
-- **Title** · Author, Affiliation (LW · 2026-08-29 · 145 karma · 60 comments · agree 40 / disagree 12) · https://www.lesswrong.com/posts/...
+- **Title** · Author, Affiliation (LW · 2026-08-29 · 145 karma · 60 comments · agree 12) · https://www.lesswrong.com/posts/...
   Two or three sentences stating the post's actual claims, not its topic. Author's stated
   status: "Epistemic status: exploratory" (verbatim) · Claim type: exploratory.
   Discussion: contested; the strongest pushback is X (top comment by Y, 83 karma).
@@ -233,7 +233,10 @@ model, writes the metadata line and the link.
 ```
 
 Affiliation comes from the forum user profile fields when present, else from the org directory
-lookup, else is omitted. Agreement votes are rendered where the forum exposes them. Discussion
+lookup, else is omitted. Agreement votes are rendered where the forum exposes them: ForumMagnum's
+`extendedScore.agreement` is a single net score rather than an agree/disagree split, and a zero is
+rendered as absence (the segment is omitted) rather than as neutrality, because an unvoted post and
+a post whose votes cancelled are indistinguishable in it. Discussion
 movers (posts older than 24h whose comments moved) use the same template plus a
 `+31 comments since 2026-08-29` marker and the new top comment. Dated lines in events and
 careers read `closes 2026-09-15 AoE (feed 2026-08-27)`; rolling admissions are rendered as
@@ -341,7 +344,7 @@ because they shape the fetchers.
 
 | Source | Access | Notes |
 |---|---|---|
-| LessWrong | GraphQL `https://www.lesswrong.com/graphql`, no auth. Posts: `posts(input:{terms:{view:"top", after:"YYYY-MM-DD", limit:N}})`. AI tag id `sYm3HiWcfZvrGu3ui` | **verified.** Also an agent Markdown API (`/api/SKILL.md`, `/api/latest`, `/api/post/<id>/comments?sort=top`, `/api/tag/<slug>`), used for live lookup from the skill; it has no "since" parameter, so the pipeline uses GraphQL |
+| LessWrong | GraphQL `https://www.lesswrong.com/graphql`, no auth. Posts: `posts(input:{terms:{view:"top", after:"YYYY-MM-DD", limit:N}})`. AI tag id `sYm3HiWcfZvrGu3ui` | **verified.** Also an agent Markdown API (`/api/SKILL.md`, `/api/latest`, `/api/post/<id>/comments?sort=top`, `/api/tag/<slug>`), used for live lookup from the skill; it has no "since" parameter, so the pipeline uses GraphQL. LW HTML pages sit behind a Vercel bot checkpoint for datacenter egress; the GraphQL API is unaffected - never page-scrape |
 | Alignment Forum | Same GraphQL at `https://www.alignmentforum.org/graphql`; all posts (low volume, all relevant) | **verified.** Same agent API exists |
 | EA Forum | GraphQL at `https://forum-bots.effectivealtruism.org/graphql` (bot mirror, rewrite `pageUrl` back to the main domain); AI safety tag id `oNiQsBHA3i837sySD` with `filterMode:"Required"` | **verified.** `after` works on posts but is **silently ignored on comment views**; no agent API |
 
@@ -533,11 +536,32 @@ because the discussion often matters more than the post and arrives over days.
 Edited comments are not tracked (no ForumMagnum view sorts by `lastEditedAt`); this is an
 accepted gap.
 
+**As implemented in phase 2, narrowed by ruling.** Change detection is a `commentCount` or
+`baseScore` diff against the previous day's ledger entry: a post whose `lastCommentedAt` alone
+moved does not trigger a refresh, and neither does an edited comment. The site-wide comment pull of
+step 1 is not what drives the refresh either - the ledger diff selects the posts and step 3's
+per-post `postCommentsTop` fetch supplies the text, so the pull costs a request per post rather
+than a request per site. `comments_since` and `comments_since_raw` remain on the client, with
+their recorded fixtures, for the phase-3 comment recorder, which needs the site-wide view for its
+own reasons - they are not dead code to be deleted, and they are not the change detector to be
+wired back in. The ledger diff is the better mechanism and stays: it asks each site for post
+metadata it already fetches, where step 1 as written asks three sites for every comment they
+received, most of them on posts outside the window.
+
 ### 6.3 Stage 1: triage and extraction (Haiku 4.5, synchronous)
 
 **Roundup split** runs first, on full text: posts from sources flagged as roundups (Zvi, weekly
 briefings) are cut at their headings into sub-items, each carrying the parent URL plus its
 anchor and any outbound link it names. Sub-items then enter triage like any other item.
+
+**Not implemented in phase 2, by ruling.** The split does not exist in code or in tests, and it
+is deferred to phase 3 rather than built now. The roundups it was designed for - Zvi, the weekly
+briefings - are phase-3 sources, so a splitter built today would be tuned against forum
+crossposts alone and then tuned again against the real thing. What phase 2 does instead, stated
+so nobody assumes otherwise: a roundup is a single item. A crossposted one therefore carries one
+summary and up to two quotes for a very long post, its sub-items get no entry of their own, and
+the outbound links it names are just links inside a body nothing extracts. The split arrives in
+phase 3, alongside the sources that need it, and section 14 lists it there.
 
 **Triage** sees the title and the first ~500 tokens of each item and returns `relevant`
 (boolean), `primary_slug`, `secondary_slugs`, `importance` 1-5. Per-section caps then keep the
@@ -573,6 +597,12 @@ sends the item back for one re-extraction with the failure named, and if it fail
 item is rendered with metadata and quotes only (no model prose) and logged. Items are never
 dropped for formatting reasons.
 
+Phase 2 runs this extraction on the post body alone, so `discussion_signal` is null for every item
+on the day it first appears and is filled in only when the post comes back as a mover through the
+comment refresh (section 6.2); passing top comments into the daily extraction of every selected
+item would roughly double the day's extraction input to describe a thread a few hours old, so it
+is deferred to phase 3.
+
 Haiku 4.5 runs without extended thinking (it has no adaptive thinking; the tasks are
 extraction, not reasoning). The model IDs live in one config file and a CI test calls
 `models.retrieve` on each so a retirement fails the build before it fails the daily run.
@@ -597,8 +627,8 @@ Jinja templates turn JSON into the appendices and into task bundles. The model's
 inserted verbatim into slots; everything factual on the metadata line (URL, author,
 affiliation, date, karma, agreement, comment counts, version, generated timestamp) is filled by
 the template from Stage 0 data. Expired deadlines are dropped. `00-index.md` is generated with
-the token count of every appendix (counted with the API's token counter, cached per file hash)
-and the recipes with live totals. Bundles are concatenations for one fetch each:
+the token count of every appendix (counted with the API's token counter) and the recipes with
+live totals. Bundles are concatenations for one fetch each:
 `latest/today.md` (30 + 31 + 32 + 33), `latest/week.md` (21), `latest/careers.md`
 (15 + 16 + 12 + 40 + 41), `latest/map.md` (10 to 14).
 
@@ -663,16 +693,38 @@ leaves the previous version as `latest`.
   then fast-forwards `main`, bumps the manifest versions, regenerates `CHANGELOG.md` (last 30
   versions, changes per appendix), and deploys Pages (`latest/`, bundles, `llms.txt`) **inside
   the same workflow**, because pushes made with `GITHUB_TOKEN` do not trigger other workflows.
-  Branch protection on `main` allows only the promote job's identity to fast-forward it.
+  Branch protection on `main` carries no required status checks and no push restriction in phase
+  2: the promote job pushes a runner-built SHA daily that no check has run against, and the
+  workflow token cannot be granted a fine-grained bypass; revisit with a merge queue or deploy
+  environment in a later phase.
 - **Idempotent reruns.** Archive writes are keyed by item id and day, so a rerun overwrites
   rather than appends; the ledger is written last.
+- **Recovering an unpublished day.** The gates passing is what marks a day's items seen, and that
+  happens in `generate`, one job before `promote` moves `main`. A promotion that failed therefore
+  leaves a day whose items are already spent: re-run that run's failed `promote` job, which reads
+  the intact pack off the `generated` branch and costs no second generation. A full workflow
+  rerun would render an empty pack instead, and needs `radar run --ignore-seen` (the `ignore_seen`
+  workflow input) plus another day's API spend. That regeneration fetches the window the first
+  run recorded in the day's `run.json` rather than recomputing one: a live run's window ends at
+  the moment it fetched, and a recovery that guessed the nominal 05:40 boundary would miss the
+  leading edge of a span whose items are already marked seen, so they would appear in no pack at
+  all. A day with no report on file still falls back to the nominal boundary, over 25 hours.
 - **Rollback.** `latest` is a symlink-style pointer in Pages to a versioned directory; reverting
   is moving the pointer, one manual workflow.
 - **Health, not issue spam.** One pinned health issue is updated in place (found by label,
-  never created twice) with per-source status, gate results and cost. Blocking failures also
-  push a notification (ntfy or email). A Healthchecks.io ping closes every successful run, so a
-  schedule that stops firing (GitHub disables schedules after 60 days of failures, silently)
-  is noticed within a day.
+  never created twice) with per-source status, gate results and cost. A Healthchecks.io ping
+  closes every successful run, so a schedule that stops firing (GitHub disables schedules after
+  60 days of failures, silently) is noticed within a day.
+
+  **Not implemented in phase 2, by ruling.** There is no push notification (ntfy or email) on a
+  blocking failure. The substitutes are the pinned issue itself, GitHub's own workflow-failure
+  email, and the Healthchecks dead-man's switch, which together cover a crashed run and a
+  workflow that stopped running at all. What they do not cover, stated so nobody assumes
+  otherwise: a run that *completed* but whose gates withheld the pack is red in the Actions tab
+  and written into the pinned issue, and then quiet - the Healthchecks ping is what would raise
+  it, and the switch does not fire until the next day's window closes. So the worst case is one
+  quiet day. A push channel is worth adding when the pipeline publishes something a reader would
+  miss within hours rather than within a day.
 - **Secrets and permissions.** `ANTHROPIC_API_KEY` (needed in Stage 1, not only at publish),
   the data-repo deploy key, a Healthchecks URL, later a Metaculus token. Each job declares its
   own minimal `permissions:`; actions are pinned to SHAs; `uv sync --locked` with hashes. A hard
@@ -683,7 +735,9 @@ leaves the previous version as `latest`.
 
 ### 6.10 Cost
 
-At list prices (Haiku 4.5 $1 in / $5 out per million tokens, Sonnet 5 $2 / $10), a typical
+At list prices (Haiku 4.5 $1 in / $5 out per million tokens, Sonnet 5 $2 / $10, and a 5-minute
+cache write at 1.25x the input rate - the pipeline prices all four rates, so the figure below is
+comparable with the Console bill), a typical
 day: triage of ~300 items on excerpts (~180k in), extraction of ~80 items at ~4k tokens each
 (~320k in) and ~30 comment refreshes (~180k in), the injection scan over the outputs, the daily
 digest, the faithfulness judge on the top items, and the rolling state (~60k in with medium
@@ -847,11 +901,12 @@ per-area sub-packs; the Batch API as a split submit/collect workflow if cost eve
 1. **Skeleton and probe**: repo, manifests, SKILL.md, index, empty appendices, CI, `probe.yml`
    run once from a runner and every source's status recorded; `skills-ref validate`.
    Installable from day one even though the content is thin. Taxonomy frozen at the end.
-2. **Forums vertical slice**: LW/AF/EAF fetchers with entry floor and comment refresh, roundup
-   split, triage, extraction, provenance and injection gates, render `31-today-forums.md`,
-   two-step publish with health issue and Healthchecks. First real daily version.
+2. **Forums vertical slice**: LW/AF/EAF fetchers with entry floor and comment refresh, triage,
+   extraction, provenance and injection gates, render `31-today-forums.md`, two-step publish
+   with health issue and Healthchecks. First real daily version. (The roundup split moved to
+   phase 3 by ruling; see the deviation note in 6.3.)
 3. **Breadth**: news, labs, governance set, papers, the X-Risk Daily import, `30`, `32`, `33`,
-   `60`, bundles.
+   `60`, bundles, and the 6.3 roundup split, with the roundup sources it was designed for.
 4. **Rolling views and structured feeds**: `20`, `21`, `40` with deadlines, `41`, `50`.
 5. **Map, careers and field context**: hand-curated first pass of `10`-`16`, drift branch,
    80k scraping, wiki-driven glossary, opt-out and correction routes.

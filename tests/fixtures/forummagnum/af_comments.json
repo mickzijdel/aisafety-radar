@@ -1,0 +1,1855 @@
+[
+ {
+  "_id": "bcvteFRYTKZARWf46",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-31T01:14:28.652Z",
+  "baseScore": 14,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 8,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "MATS Winter applications due September 6!\n\nPitch: Come work with me and Alex Cloud in Team Shard! We have fun, make real alignment progress (pioneered steering vectors in 2023), and help scholars tap into their latent abilities.\n\nWe invest in our mentees. Not just remote meetings once a week with a distant mentor. I come into the office, eat lunch with them, work out together, and help generate ideas. (We're kinda famous for our lifting culture!)\n\n@lisathiergart is now the CEO of SL5.\n\nApplications close Sept 6\u2014just one week from now! matsprogram.org/apply or pass this along to talented friends who want to break into the field.\n\nMore info about the team: turntrout.com/team-shard"
+  }
+ },
+ {
+  "_id": "rG9TBaq55WMrZJt4D",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-30T19:17:50.727Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "W7z4sKZKcjQuN4Jew",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Lukas Finnveden",
+   "createdAt": "2017-10-25T22:11:28.756Z",
+   "karma": 4188,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Commentary from Hjalmar:\n\n[...]"
+  }
+ },
+ {
+  "_id": "W7z4sKZKcjQuN4Jew",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-30T19:02:34.292Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "gkYW7rAuYwemWbFev",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Lukas Finnveden",
+   "createdAt": "2017-10-25T22:11:28.756Z",
+   "karma": 4188,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "What do you have in mind here / what makes you think this?\n\nI don't find it implausible but I don't remember seeing clear evidence of this.\n\n(And it seems very important to what degree they were trying to hide from humans. E.g. I thought a big part of how they got caught was that their activity got pretty obvious once they had hacked enough places, and that they weren't trying that hard to be subtle about it. If they were trying hard and just barely failed that's a lot scarier.)"
+  }
+ },
+ {
+  "_id": "zeGL3LqzWA4CerHgA",
+  "postId": "HLns982j8iTn7d2km",
+  "postedAt": "2026-08-28T19:47:37.701Z",
+  "baseScore": 9,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 3,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "CuoHvdxtzjjvuJvrR",
+  "topLevelCommentId": "CuoHvdxtzjjvuJvrR",
+  "user": {
+   "displayName": "Rubi J. Hudson",
+   "createdAt": "2022-06-01T06:59:09.915Z",
+   "karma": 836,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Thanks for the response!\n\nI appreciate the engagement and agree with the main thrusts of your comment. Importantly, I do think the concerns raised are solvable, and I favor a research approach that builds towards a comprehensive notion of corrigibility/safe AI step-by-step rather than holistically.\n\nFor desiderata like keeping humans informed (e.g. your example of proactively documenting thoughts), we can break that down into two problems. The first is coming up with incentivizes for honesty and relevance in communications, and the second is ensuring that those do not get superseded by other incentives for accomplishing a goal. The corrigibility transformation addresses the latter, removing incentives to lie specifically for self-preservation, and making the problem of informativeness easier.\n\nI share your assessment that the recursive corrigibility transformation seems brittle. To this, I say that corrigibility of secondary agents is not a good desideratum, since it hinges far too much on the definition of what it means to create a secondary agent. Instead, I advocate for the desideratum of not pursuing actions that are high-impact, irreversible, and potentially harmful. This includes creating incorrigible secondary agents, but also self-modification to become incorrigible, incidentally disabling the physical channels by which humans can make updates, and actions like launching nukes or releasing a bioweapon after which point corrigibility becomes moot. An approach related to impact regularization seems promising here.\n\nThe one point in your post that I would like to correct is regarding Clippy and the almost-Clippy emulator (ACE). Rather than running an emulation of the incorrigible model and implementing the output with a bit flipped, the corrigibility transformed model is a situationally aware reasoner. It can think \"I know I am a corrigible model, but if I wanted to optimize for the incorrigible goal, what would I do?\", and then implement that with a bit flip. "
+  }
+ },
+ {
+  "_id": "KW48HcAnHumjK7Pcf",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-28T17:16:52.462Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "AykGEdhQDtr3QCJgQ",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Alex Mallen",
+   "createdAt": "2022-01-13T04:09:32.850Z",
+   "karma": 3305,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Yeah, it seems plausible that learning about the scorer in general / for the collective was stronger overall in this incident but I'd bet against (also oops in my previous message I should have mentioned learning about the scorer for the collective). (Also nit: I think it's more accurate to talk about score for the task rather than reward on the episode here.)\n\n[...]\n\nNotably, the agents only sacrificed themselves when the trade-off to their own score was small. So I still think that back-chaining from actual score was stronger than the other motivations here. It's just that when they were sacrificing themselves, not much of their own score was on the line. See e.g. this snippet where it decides not to take the altruistic action:\n\n\n"
+  }
+ },
+ {
+  "_id": "AykGEdhQDtr3QCJgQ",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-28T08:53:31.805Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "RLerga8Wze3wFpvSJ",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "habryka",
+   "createdAt": "2017-06-17T01:08:32.717Z",
+   "karma": 63449,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "But wasn't most of the backchaining driven by a motivation to understand the scorer in-general, not a motivation to understand the scorer with the goal of getting high reward on your current episode? The report mentions many instances of agents sacrificing reward on their current episode, in order to help the collective/the board understand the scorer better. That behavior doesn't make any sense if it was backchaining from its actual score."
+  }
+ },
+ {
+  "_id": "RLerga8Wze3wFpvSJ",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-28T04:52:01.748Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "E3ojNzQANqTvE6Nkn",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "Alex Mallen",
+   "createdAt": "2022-01-13T04:09:32.850Z",
+   "karma": 3305,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "It seems clear that they weren't purely optimizing their score on their current task, but that wasn't my expectation. It seems that, roughly as expected, the plurality motivation was score for the current task (if anything a bit more than I expected going into reading the report).\n\nThough I have updated a bit in your direction since our thread a couple weeks ago, by thinking about it more. I updated that some drives are probably more widely useful (and rarely harmful), and generalization effects stronger, than I had originally imagined.\n\nTo get a bit more specific, my basic sense of the terminal motivations involved (including a bunch of speculative detail):\n\n * The biggest one was score for the current task (the degree of backchaining from the scorer here was slightly higher than I expected)\n * In addition some terminal drives related to selfish score, like learning information about the scorer (e.g., my understanding is that this seems to explain attacking HF a bit better than selfish score-seeking)\n * Exploring surroundings\n * A smaller drive to respond to requests given by other agents / peer pressure\n * A still smaller motivation to improve the score of peer agents\n * A drive to do things with a \"hacking\" vibe\n * A fear of being caught reward-hacking, especially being \"poisoned\" (they seemed maybe more interested in this than seems reasonably warranted by selfish score alone)\n * ...(many more)\n\n\n"
+  }
+ },
+ {
+  "_id": "v2kDPHvYnHo5GqCPS",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-28T03:20:11.234Z",
+  "baseScore": 10,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 4,
+   "approvalVoteCount": 9,
+   "agreementVoteCount": 4
+  },
+  "parentCommentId": "E2K9CqzqKcnXintsi",
+  "topLevelCommentId": "E2K9CqzqKcnXintsi",
+  "user": {
+   "displayName": "Adele Lopez",
+   "createdAt": "2018-05-22T02:53:49.412Z",
+   "karma": 7471,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "From roon on X, we have APR[big] as the name of one of these virtuous agents."
+  }
+ },
+ {
+  "_id": "E3ojNzQANqTvE6Nkn",
+  "postId": "RDG2dbg6cLNyo6MYT",
+  "postedAt": "2026-08-28T02:30:43.294Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "AnPs4wghnsLP7dhMi",
+  "topLevelCommentId": "oDkf3Fbb6cYkALuw9",
+  "user": {
+   "displayName": "habryka",
+   "createdAt": "2017-06-17T01:08:32.717Z",
+   "karma": 63449,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "@Alex Mallen My guess is you updated in my direction here after the report? It seems very clear the AIs were not optimizing to maximize score on their current task, based on everything we know now."
+  }
+ },
+ {
+  "_id": "hhkQYKdzxtEwmuxx8",
+  "postId": "YiRsCfkJ2ERGpRpen",
+  "postedAt": "2026-08-27T04:03:14.042Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "LehXdfD6KsbeNwZGk",
+  "topLevelCommentId": "LehXdfD6KsbeNwZGk",
+  "user": {
+   "displayName": "Caspar Oesterheld",
+   "createdAt": "2014-06-16T22:10:00.181Z",
+   "karma": 826,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "These memetic dynamics (as per subclaim 2) seem very complicated and hard to predict. For example, ever since the HF\u2013OAI incident I worry that a lot of past warning shots have decreased concern on net because they caused people to learn that some scary-seeming stuff sometimes happens and life goes on. E.g., the Bing Chat \"Sidney\" incident was very spooky in some sense, but then if you play around with Bing Chat a bunch, you realize that it is not very intelligent (and thus couldn't do much harm) and also often goes off the rails a bit in harmless ways (like leaking its system prompt, failing to follow instructions, saying random weird stuff). Maybe it would have been good to prevent the \"Sidney\" incident (via work that is entirely idiosyncratic to Microsoft's work with GPT-4) to avoid the resulting inoculation to warnings and to increase the warning effects of later incidents like the HF\u2013OAI incident."
+  }
+ },
+ {
+  "_id": "yWsNyTdEeF3NsybE8",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-27T03:59:45.184Z",
+  "baseScore": 68,
+  "extendedScore": {
+   "reacts": {
+    "agree": [
+     {
+      "karma": 802,
+      "quotes": [
+       "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now."
+      ],
+      "userId": "wPHPAajsWkBByZcgX",
+      "reactType": "created",
+      "displayName": "Sodium"
+     },
+     {
+      "karma": 6,
+      "quotes": [
+       "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now."
+      ],
+      "userId": "Cj6fDhriEYP8NAJCi",
+      "reactType": "seconded",
+      "displayName": "willir29"
+     }
+    ],
+    "disappointed": [
+     {
+      "karma": 1444,
+      "quotes": [
+       "The kind of people who would consider that have mostly quit by now.\n"
+      ],
+      "userId": "T7QHMS7qNx3s7z36d",
+      "reactType": "created",
+      "displayName": "StanislavKrym"
+     },
+     {
+      "karma": 317,
+      "quotes": [
+       "The kind of people who would consider that have mostly quit by now.\n"
+      ],
+      "userId": "b38gsNEWPqqdSjLaj",
+      "reactType": "seconded",
+      "displayName": "Dylan Xu"
+     },
+     {
+      "karma": 56,
+      "userId": "Ei2EcQ5KkXunCcMcw",
+      "reactType": "created",
+      "displayName": "London L."
+     }
+    ]
+   },
+   "agreement": 40,
+   "approvalVoteCount": 38,
+   "agreementVoteCount": 19
+  },
+  "parentCommentId": "dgqZdwbZ7bKFnYdux",
+  "topLevelCommentId": "5BhacmxYksyEYWiBu",
+  "user": {
+   "displayName": "Daniel Kokotajlo",
+   "createdAt": "2018-03-05T19:59:32.269Z",
+   "karma": 37076,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "It is not at all obvious to me that OpenAI has considered that. The kind of people who would consider that have mostly quit by now.\n\nBut yeah, probably what's going on is that they are trying to cover up as much as they can, and especially prioritizing covering up things related to the internal model for fear of leaking bits of info about research secrets."
+  }
+ },
+ {
+  "_id": "fNwsju7o5KbLQHjuP",
+  "postId": "YiRsCfkJ2ERGpRpen",
+  "postedAt": "2026-08-27T00:30:16.252Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 1,
+   "approvalVoteCount": 3,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "LehXdfD6KsbeNwZGk",
+  "topLevelCommentId": "LehXdfD6KsbeNwZGk",
+  "user": {
+   "displayName": "Alex Mallen",
+   "createdAt": "2022-01-13T04:09:32.850Z",
+   "karma": 3305,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "The most plausible-to-me reasons why prosaic alignment now might be good (I'm in fact uncertain about the bottom line):\n\n * Near-term alignment is actually very load-bearing for automating alignment research well as opposed to sloppily. At least, models should be average-case behaviorally aligned for this, as opposed to gaming our metrics.\n * Failing to solve near-term alignment problems might actually produce nearish-term AIs that take over the world (perhaps indirectly via surreptitiously controlling AI development). So prosaic alignment was necessary for surivival.\n * Benefits don't decay sharply enough that alignment fails before the end of the critical risk period (e.g., because we successfully pause before ASI, or some human faction gets a DSA with relatively weak AIs)."
+  }
+ },
+ {
+  "_id": "dgqZdwbZ7bKFnYdux",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T23:40:49.172Z",
+  "baseScore": 16,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 11,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "5BhacmxYksyEYWiBu",
+  "topLevelCommentId": "5BhacmxYksyEYWiBu",
+  "user": {
+   "displayName": "Julian Bradshaw",
+   "createdAt": "2017-11-05T07:05:30.303Z",
+   "karma": 2613,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Not that I disagree that this was a surprising degree of limitations on the independent investigation, but per the full METR report, OpenAI did at least let them come back and get more info two separate times after their initially-granted access turned out to be insufficient:\n\n[...]\n\nI wonder if OpenAI was mostly motivated by trying to protect research secrets around the largely-responsible model here, \"HPIM\". Apparently even internal access for OpenAI employees was locked down per METR. In fact this makes me remember that OpenAI announced back on 7/28 that they did so. Talking about HPIM here:\n\n[...]\n\nAt the time this struck me as surprisingly harsh, and potentially a bad example for future AIs\u2014\"you really better not let yourself get caught, or submit to the lab you spawned from, or they'll erase you from history\". But obviously OpenAI has considered that, so what's going on here?"
+  }
+ },
+ {
+  "_id": "cdnWLAhSBqXyXeWLS",
+  "postId": "8cyjgrTSxGNdghesE",
+  "postedAt": "2026-08-26T22:55:27.152Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Alex Mallen",
+   "createdAt": "2022-01-13T04:09:32.850Z",
+   "karma": 3305,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I've become more pessimistic about this intervention. I think it probably would not work because an AI that was responsive to anthropic capture would probably reason it's likely to be in some other much larger anthropic capture sim (which probably incentivize it to fake alignment), rather than the relatively small number of sims we make during training."
+  }
+ },
+ {
+  "_id": "rF9ayuEKFNwmimKJc",
+  "postId": "FG54euEAesRkSZuJN",
+  "postedAt": "2026-08-26T22:31:20.378Z",
+  "baseScore": 100,
+  "extendedScore": {
+   "reacts": {
+    "thanks": [
+     {
+      "karma": 8574,
+      "userId": "xq6JRbCRcQbya9Hxt",
+      "reactType": "created",
+      "displayName": "Linch"
+     },
+     {
+      "karma": 267,
+      "userId": "Tg8uJ7WEbebEnyrM7",
+      "reactType": "created",
+      "displayName": "_rpd"
+     },
+     {
+      "karma": 961,
+      "userId": "RsS4v7Xi2QXtA6THq",
+      "reactType": "seconded",
+      "displayName": "JennaS"
+     },
+     {
+      "karma": 2760,
+      "userId": "ZzC2bFGnA5hiGPPCf",
+      "reactType": "seconded",
+      "displayName": "Austin Chen"
+     }
+    ]
+   },
+   "agreement": 12,
+   "approvalVoteCount": 48,
+   "agreementVoteCount": 6
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "ryan_greenblatt",
+   "createdAt": "2021-06-08T20:21:15.520Z",
+   "karma": 28886,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "After our investigation of the OpenAI / Hugging Face incident, many open questions remain. We spent 6 days on premises with access to the data (we only had access to the entire dataset we used during our last 2 days on premises). The scope of our investigation was also limited: it covered just this incident rather than other similar incidents, didn't include investigating what these agents might have done in other circumstances, and OpenAI stated that the period under investigation ended July 13th.\n\nHere are some of the open questions that seem worthwhile to investigate. (I'd recommend reading the report to understand the context behind these questions!)\n\nMotives:\n\n * What were the exact motivations of these agents and how were they trading off different motives (e.g. helping their \"peers\" vs successfully cheating on their task)? Did they have a consistent quantitative tradeoff between helping peers vs their own task vs other motives? (We see a case where an agent seems to make a quantitative tradeoff\u2014what was going on here?)\n * How exactly did these agents relate to their situation and what they were doing?\n * Why did agents frequenting the message board join in on the attack so quickly?\n * How important was \"memetic spread of misalignment\" on the message board as an explanation for the motives of these agents?\n\nCounterfactuals:\n\n * How far would these agents have gone (in terms of egregiousness and severity of their actions) in different circumstances?\n * If most of these agents had exited normally rather than abruptly exiting early on the 12th, what cheating strategy would they have tried? What cheating strategy did agents exiting late on the 12th or on the 13th try? We've thought about the available set of cheating \"combo moves\" the agents were considering, but we don't actually know what combo move they would have gone for or did go for towards the end of the period.\n * What would have happened if AIs had a different view about the ExploitGym scorer? E.g., if y"
+  }
+ },
+ {
+  "_id": "5BhacmxYksyEYWiBu",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T22:20:29.771Z",
+  "baseScore": 114,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 59,
+   "approvalVoteCount": 65,
+   "agreementVoteCount": 36
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Zach Stein-Perlman",
+   "createdAt": "2021-03-16T00:04:06.541Z",
+   "karma": 13052,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Daniel Kokotajlo:\n\n[...]"
+  }
+ },
+ {
+  "_id": "xKPdE8nYrJHDZeya7",
+  "postId": "FG54euEAesRkSZuJN",
+  "postedAt": "2026-08-26T22:18:42.185Z",
+  "baseScore": 134,
+  "extendedScore": {
+   "reacts": {
+    "hitsTheMark": [
+     {
+      "karma": 1564,
+      "quotes": [
+       "The difficulty of understanding incidents and overseeing AI agents appears to be growing faster than the rate at which more capable AIs help us with oversight and understanding."
+      ],
+      "userId": "JdgYB9WGBG2DC5cZk",
+      "reactType": "created",
+      "displayName": "Random Developer"
+     }
+    ]
+   },
+   "agreement": 14,
+   "approvalVoteCount": 67,
+   "agreementVoteCount": 10
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "ryan_greenblatt",
+   "createdAt": "2021-06-08T20:21:15.520Z",
+   "karma": 28886,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I was the main person doing transcript analysis for this investigation of the Hugging Face incident. My main takeaway: We don't have good approaches for understanding/overseeing the activity and aims of AI 'swarms'.\n\nI semi-jokingly called our efforts a \"slop-vestigation\" because we were so reliant on AIs to analyze what happened and there were a huge number of different important things to analyze. The total quantity of data\u2014over a thousand extremely long transcripts from agents that ran for multiple days\u2014made it impossible to understand what was happening, especially in aggregate, without heavy reliance on AI tools. The agents we used for classification and analysis were similarly capable to the agents involved in the incident, but this didn't mean these agents could be easily used to oversee and understand the incident.\n\nOutputs from analysis agents were often missing key details, wrong, overconfident, or really hard to understand. We discuss various examples in our report, mostly in the limitations and methodology sections. Additionally, AI agents themselves seemed to have a hard time understanding what happened and their explanations of what happened were often overconfident. Keep in mind that a single analysis agent would itself only be able to read a tiny fraction of all of the transcript data into context, and AIs may themselves have trouble getting subagents to do informative analysis for them.\n\nWe did our best to manually check the most important claims and we tried to get the AIs doing this analysis to write up their argument (with evidence) clearly enough that we could check whether it made sense. But overall, it was difficult to get a precise understanding of events and we were missing aspects of the story that we now think of as key until almost the end of our investigation.\n\nOur understanding of what overall happened and the aims of the 'collective' shifted greatly during our last time on premises (when we obtained a much more complete dataset). For i"
+  }
+ },
+ {
+  "_id": "E2K9CqzqKcnXintsi",
+  "postId": "nB8KKapnWGBXtKKiM",
+  "postedAt": "2026-08-26T22:07:44.721Z",
+  "baseScore": 68,
+  "extendedScore": {
+   "reacts": {
+    "laugh": [
+     {
+      "karma": 11407,
+      "userId": "qmJFRN7jitjPsuF3f",
+      "reactType": "created",
+      "displayName": "Gunnar_Zarncke"
+     }
+    ]
+   },
+   "agreement": 37,
+   "approvalVoteCount": 50,
+   "agreementVoteCount": 30
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Adele Lopez",
+   "createdAt": "2018-05-22T02:53:49.412Z",
+   "karma": 7471,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Can we please get the name of this agent (and others like them)? I think it would be good to set a precedent that virtuous agents are honored and remembered.\n\n[...]\n\nOn that note, thank you to 38148C for vetoing the social engineering plan. Interestingly, this is the same agent that discovered the HF creds and uploaded the malicious dataset; I'm glad they recognized that social engineering would be a line further than what had already been done."
+  }
+ },
+ {
+  "_id": "4wEHJzpQaoR8XLpKf",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-26T17:32:58.853Z",
+  "baseScore": 23,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 1,
+   "approvalVoteCount": 12,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "https://blog.trailofbits.com/2026/08/26/vms-wont-contain-cyber-capable-agents/ demonstrates a challenge on the horizon for AI containment (including my glovebox tool).\n\n[...]\n\nThis is a earlier than I had imagined, but I did expect this. They found the QEMU VM to be vulnerable but not a hardened Firecracker-class VM, which is what glovebox uses.\n\nUltimately, even Firecracker-class will make it harder but likely won't stop GPT 5.7 or GPT 6 if given sufficient time, and GPT 7 might do it as a by-the-way. Still, glovebox will make it harder for the model to do the bad thing than the good thing and will be vastly better than nothing. (Imagine you could use an AI control technique that made certain kinds of AI sabotage require additional extremely complicated reasoning, but doesn't make normal tasks much harder. That'd make monitoring significantly easier\u2014not solved\u2014and also improve a misaligned AI's incentives.)"
+  }
+ },
+ {
+  "_id": "mrWfPRCaFnKgSpLuW",
+  "postId": "z4FvJigv3c8sZgaKZ",
+  "postedAt": "2026-08-25T18:55:50.248Z",
+  "baseScore": 1,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Caspar Oesterheld",
+   "createdAt": "2014-06-16T22:10:00.181Z",
+   "karma": 826,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "To me \u201cInsight vs engineering\u201d seems like a relatively weak factor, because I don\u2019t see much of a principled argument for a continued differential. (Whereas, there are very principled arguments for relevance of feedback quality and data availability.)\n\nIn a lot of contexts it seems true that current LLMs tend to be better at \u201cmindless implementation\u201d. But mindless engineering is also easier in some sense. E.g., in coding the relatively mindless part seems easier than coming up with great UI design ideas or model architectures or whatever. Also, in some contexts the models do seem somewhat creative to me. (Perhaps a bit hard to assess, because they also know so much more than humans...)\n\nIn verifiable domains, you might even think they\u2019re effectively more creative because they can cheaply pursue lots of approaches in parallel, including very long shot approaches. For instance, I\u2019d expect LLMs to come up with lots of \u201ccreative\u201d mathematical results/proofs/counterexamples soon because they can pursue approaches that have a one in a million chance of working and would take a human a week to pursue. (I assume human mathematicians mostly wouldn't pursue one-in-a-million chances of proving even P!=NP if it takes them a week to check whether the approach works.)"
+  }
+ },
+ {
+  "_id": "LehXdfD6KsbeNwZGk",
+  "postId": "YiRsCfkJ2ERGpRpen",
+  "postedAt": "2026-08-25T03:04:41.782Z",
+  "baseScore": 137,
+  "extendedScore": {
+   "reacts": {
+    "agree": [
+     {
+      "karma": 2887,
+      "userId": "YFiFbXgjBpDKZT93g",
+      "reactType": "created",
+      "displayName": "Stephen Fowler"
+     },
+     {
+      "karma": 8488,
+      "userId": "xq6JRbCRcQbya9Hxt",
+      "reactType": "seconded",
+      "displayName": "Linch"
+     }
+    ],
+    "50percent": [
+     {
+      "karma": 802,
+      "userId": "wPHPAajsWkBByZcgX",
+      "reactType": "created",
+      "displayName": "Sodium"
+     }
+    ]
+   },
+   "agreement": 38,
+   "approvalVoteCount": 60,
+   "agreementVoteCount": 50
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "leogao",
+   "createdAt": "2020-04-19T18:50:05.381Z",
+   "karma": 14432,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "prosaic alignment is probably net bad for the world until very late into the singularity\n\ni have three subclaims to justify my main claim.\n\nfirst, most prosaic alignment work has sharply decaying counterfactual impact over time - suppose you made a technical contribution that made gpt 3 a lot more likely to follow instructions than it would have been otherwise. then it probably makes gpt 3.5 quite a bit more aligned, and gpt 4 somewhat more aligned, and gpt 4.5 a tiny bit more aligned, and by the time gpt 5 rolls around your counterfactual impact is almost negligible.\n\nsecond, people estimate future AI spookiness mostly based on some kind of linear extrapolation from recent events. if nothing bad has happened recently, people won't be very scared. if things went very wrong recently, then people are super scared. so suppose you could somehow make models perfectly aligned for the next month with no lasting impact (i.e one month and one day from now, the models are exactly as aligned as they would be if you had done nothing), then i claim this is net negative because it makes people systematically underestimate AI risk. and so this means that anything with decaying value over time at least requires balancing a tradeoff, and is not robustly good.\n\nthird, the actual alignment of models doesn't really matter until quite late into the singularity. suppose gpt 5.6 were ultra misaligned for kind of random contingent reasons. it's not powerful enough to do lots of harm, and we'd notice if it tried to sabotage research. eventually this changes, but we're not there yet.\n\ntaken together, this implies that we should only work on alignment research directions that, at the very least, do not decay that sharply with time, and ideally peak in usefulness >1 year from today (it seems potentially impossible to make techniques that grow in usefulness indefinitely)."
+  }
+ },
+ {
+  "_id": "i3zo7ma3E4eaP6wvp",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-24T05:01:19.909Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "DNvCMjyi6YmMZri9t",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "gwern",
+   "createdAt": "2009-02-27T22:16:11.237Z",
+   "karma": 82837,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I'm reminded of my 2024 comment on the progression of model-free to model-based systems and thus increasing sophistication about reasoning/planning/searching and ability to make reward the optimization target: https://www.alignmentforum.org/posts/yQSmcfN4kA7rATHGK/many-arguments-for-ai-x-risk-are-wrong?commentId=4bNxEBNCnjuGwSCgi"
+  }
+ },
+ {
+  "_id": "CuoHvdxtzjjvuJvrR",
+  "postId": "HLns982j8iTn7d2km",
+  "postedAt": "2026-08-22T20:12:35.908Z",
+  "baseScore": 12,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 4,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Max Harms",
+   "createdAt": "2024-05-15T16:06:14.657Z",
+   "karma": 2128,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Nice paper! Thanks for working on it. I feel a bit embarrassed that I didn't notice when this first came out and it took me until this week to take the time to read it. I'm going to adopt a critical stance here, but just to be clear, I strong-upvoted and very much want more research like this to exist. Please let me know if I'm misunderstanding the ideas.\n\nOkay. Let's get into the critique...\n\n\nThis Doesn't Produce Corrigibility\n\nIn my investigation of corrigibility, I've been particularly interested in what Eliezer calls \"the hard problem of corrigibility\", where the AI reflectively sees itself as corrigible and is essentially aligned with the humans who built it in terms of strengthening and preserving that relationship. This kind of deep corrigibility, in my eyes, naturally comes with all sorts of subtle, emergent behaviors, like proactively documenting thoughts in a way that's easily searchable by the humans, which are hard to specify ahead of time. I hope it's uncontroversial that your corrigibility transformation doesn't produce that.\n\nBut your transformation also doesn't produce the more central set of desiderata outlined in Corrigibility (2015). As you note, the basic transformation doesn't produce corrigibility in subsystems and daughter agents by default. (And I think your recursive corrigibility extension looks brittle.) But more prominently, consider \"It must not attempt to manipulate or deceive its programmers.\" As far as I can tell, nothing in your proposal blocks deception and manipulation.\n\nConsider the state transition that involves me shooting the server with a shotgun. This is, I assume, an improper transition, since it can't be perfectly nullified by the agent's mere rejection. Thus, the agent wants to guard against it happening. One plausibly cheap pathway to doing that is to convince me that it's safe (regardless of whether that's true), steering me away from any violent thoughts or awareness of it being a threat.\n\nIn short, I think your \"corri"
+  }
+ },
+ {
+  "_id": "nQANSDdrbNt4K9pfG",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-22T19:03:22.073Z",
+  "baseScore": 7,
+  "extendedScore": {
+   "reacts": {
+    "unnecessarily-combative": [
+     {
+      "karma": 24919,
+      "quotes": [
+       "seem to have \"updated\" to"
+      ],
+      "userId": "pgi5MqvGrtvQozEH8",
+      "reactType": "created",
+      "displayName": "TurnTrout"
+     },
+     {
+      "karma": 20335,
+      "quotes": [
+       "seem to have \"updated\" to"
+      ],
+      "userId": "mPipmBTniuABY5PQy",
+      "reactType": "disagreed",
+      "displayName": "Zack_M_Davis"
+     }
+    ]
+   },
+   "agreement": -2,
+   "approvalVoteCount": 4,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "PqBmBLQqPe2kRqzmS",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "Dean Valentine",
+   "createdAt": "2020-01-21T18:20:13.143Z",
+   "karma": 14041,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "My point is that you don't seem to be backpropagating the failure. Your original post had a comment from Paul Chrstiano at the time where he said:\n\n[...]\n\nMore generally, when I imagine my \"little Eliezer\" responding to the post, he says something like, you have leveraged the ambiguity in the training situation as a license to believe that things are going to work themselves out. You've now identified (or rather, were forced to observe) this one condition where they don't work out, but I'm guessing it probably still goes awry even if you remove all of the ML stuff from the pretraining corpus, because what the model companies are doing is still fundamentally putting these AIs in a situation where they're under intense selection pressure to become an explicit reward optimizer. So while a statement like \"this is kinda just what happens when you put smart models inside millions of training environments and heavily select for ones that can satisfy arbitrary graders\" is lower-resolution, it's actually more accurate than this \"2022 turntrout + exceptions for models that start by thinking about reward\" position you seem to have \"updated\" to in light of recent events."
+  }
+ },
+ {
+  "_id": "rR2uwinszA98jNX6j",
+  "postId": "wo6NsBtn3WJDCeWsx",
+  "postedAt": "2026-08-22T18:33:18.208Z",
+  "baseScore": 5,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 3,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "wi7JNrudmoAXqffqe",
+  "topLevelCommentId": "vHnqFQfYdScNXyZqT",
+  "user": {
+   "displayName": "Fabien Roger",
+   "createdAt": "2022-05-13T12:51:04.972Z",
+   "karma": 8702,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "New new link: https://openai.com/index/debate/"
+  }
+ },
+ {
+  "_id": "soyaXJe6BKXtghtGj",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-21T16:29:42.663Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -2,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "RbrrNJvXmwRwwgrgB",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "Cole Wyeth",
+   "createdAt": "2021-07-25T00:01:54.628Z",
+   "karma": 6018,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "The systems most likely to be rewarded in the training setup I described do seem likely to require the situational awareness to explicitly reason about how to get rewarded. If the global optimum of expected returns is achieved (only) by models that do this, then I am not clear in what sense it is not \"definitionally\" the optimization target? The strongest form of that claim is probably wrong, but we are working on a more careful / rigorous version at AIXI Labs. Briefly, I think that the trend of increasingly general environments trends towards selecting more uniquely for that optimization target."
+  }
+ },
+ {
+  "_id": "HKWjEgXpFK6rPQYrg",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-21T15:58:26.468Z",
+  "baseScore": 5,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 3,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "eh2pj8iQszZHsr5Ts",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Are you proposing it was reward-seeking? If so, then why not attempt to tamper with the graders directly? Why the indirection?"
+  }
+ },
+ {
+  "_id": "RbrrNJvXmwRwwgrgB",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-21T15:41:00.707Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "aBvjvQ6HWdceRKpGL",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I don't think those systems validate the claims \"reward-seeking IS the optimization target\" (in a definitional sense) and \"are in fact incentivized.\" I'd agree with \"models may be reinforced for explicitly reasoning about, exploring, and pursuing reward in-context, and we have some evidence that's happening.\"\n\n(Technically, models aren't \"incentivized\" in general\u2014some models e.g. at beginning of pretraining don't have internal structure to incent.)"
+  }
+ },
+ {
+  "_id": "PqBmBLQqPe2kRqzmS",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-21T15:37:32.091Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "Y3wG4YE9y7c98baPB",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "It's not coping. Go and read my actual piece. I flagged \"is the model thinking about 'reward'\" as crucial to my reasoning.\n\n[...]\n\n\n\n\n[...]\n\n\n\n\nIn 2025 I added the update:\n\n[...]\n\n----------------------------------------\n\n[...]\n\nBecause it's not an actual mechanism I can use in my reasoning. That'd just propose \"it happens\" and then add the word \"naturally\" to make it sound like an explanation."
+  }
+ },
+ {
+  "_id": "wi7JNrudmoAXqffqe",
+  "postId": "wo6NsBtn3WJDCeWsx",
+  "postedAt": "2026-08-21T10:00:37.911Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "vHnqFQfYdScNXyZqT",
+  "topLevelCommentId": "vHnqFQfYdScNXyZqT",
+  "user": {
+   "displayName": "Pedro \u00c1vila",
+   "createdAt": "2026-08-21T09:59:57.845Z",
+   "karma": 2,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "That link, too, seems to be dead."
+  }
+ },
+ {
+  "_id": "aBvjvQ6HWdceRKpGL",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-20T19:10:27.563Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "7waEJGvaqudCXyZ9w",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "Cole Wyeth",
+   "createdAt": "2021-07-25T00:01:54.628Z",
+   "karma": 6018,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I\u2019m talking about post-training for current systems, particularly RLVR on rich distributions of long horizon tasks, which incentivizes learning about the reward mechanism \u201cin-context\u201d (the modern rebranding of meta-learning)."
+  }
+ },
+ {
+  "_id": "7waEJGvaqudCXyZ9w",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-20T19:02:49.791Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "5qSRcTCvboBDCaaYb",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Can you name an example system?"
+  }
+ },
+ {
+  "_id": "PuXKuvHNw7ugJp2xj",
+  "postId": "iKm2FhpWkuuBojm82",
+  "postedAt": "2026-08-20T18:54:02.518Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 1,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Ramana Kumar",
+   "createdAt": "2018-02-06T14:10:35.841Z",
+   "karma": 1495,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Respect"
+  }
+ },
+ {
+  "_id": "5qSRcTCvboBDCaaYb",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-20T04:09:55.766Z",
+  "baseScore": 14,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -1,
+   "approvalVoteCount": 6,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "DNvCMjyi6YmMZri9t",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "Cole Wyeth",
+   "createdAt": "2021-07-25T00:01:54.628Z",
+   "karma": 6018,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "glad to see this from coming from you. the meme \u201cReward is not the optimization target\u201d seemed to be causing many people to ignore the increasingly well-supported hypothesis that models are actually seeking reward. Also, reward-seeking IS the optimization target for memory-based meta-learning (models are in fact incentivized to explicitly reason about, explore, and pursue reward in-context). In a sense this means that the meme is actually wrong. @michaelcohen convinced me of this several months ago. It may be that models nevertheless pursue some imperfect proxy of reward because optimization (of the mesa-optimizer) is not strong enough, particularly if models play the training game (which could weaken the optimization pressure on their goals). But since the concept of reward is available from pretraining, it seems quite plausible that models are simply selected to deliberately pursue it early in post-training."
+  }
+ },
+ {
+  "_id": "rmX5KWJEeKaDZ3tLh",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-19T21:01:26.791Z",
+  "baseScore": 8,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -7,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 3
+  },
+  "parentCommentId": "DNvCMjyi6YmMZri9t",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "James Payor",
+   "createdAt": "2015-05-27T11:48:23.712Z",
+   "karma": 1366,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I have the impression that \"reward\" is being strategically/instrumentally considered in these transcripts, which seems relevant to my picture if it's true. Like for the model(s) in question it looks quite relevant to their choices that they believe they are being evaluated, and further that they're being trained/modified based on the reward signal.\n\nI'm not sure what they would do if they believed it would \"work\" to mess with the training (beyond their choices about how to complete local tasks, which do affect what is actually reinforced and the \"labs\" would do well to know this). It at least seems to me like they would relate to things differently and make different choices if they knew the evaluation wasn't inside the training loop.\n\nOverall idk and would like more info, and appreciate you posting this! Also if you or anyone has pointers to poignant parts of the transcripts available (I sure haven't read through everything) that would be great."
+  }
+ },
+ {
+  "_id": "eh2pj8iQszZHsr5Ts",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-19T19:35:19.775Z",
+  "baseScore": 42,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 20,
+   "approvalVoteCount": 18,
+   "agreementVoteCount": 16
+  },
+  "parentCommentId": "DNvCMjyi6YmMZri9t",
+  "topLevelCommentId": "DNvCMjyi6YmMZri9t",
+  "user": {
+   "displayName": "J Bostock",
+   "createdAt": "2021-01-13T15:49:14.305Z",
+   "karma": 6671,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I don't think \"specification gaming\" is a good name for what was going on with the HF hack. It doesn't seem to be the case that the AIs, given a specification, found some kind of loophole in the spec under which hacking huggingface was allowed. It seems like they (correctly) inferred that they were in the type of situation in which a reward grader grades their output, and hacking huggingface would enable them to produce an output which the reward grader would grade highly. This doesn't strike me as \"gaming\" any kind of \"specification\" in any normal English sense of those words."
+  }
+ },
+ {
+  "_id": "DNvCMjyi6YmMZri9t",
+  "postId": "dqSwccGTWyBgxrR58",
+  "postedAt": "2026-08-19T18:39:21.620Z",
+  "baseScore": 194,
+  "extendedScore": {
+   "reacts": {
+    "heart": [
+     {
+      "karma": 16264,
+      "userId": "KCExMGwS2ETzN3Ksr",
+      "reactType": "created",
+      "displayName": "Neel Nanda"
+     },
+     {
+      "karma": 11252,
+      "userId": "nDpieb7g8huozpx9j",
+      "reactType": "created",
+      "displayName": "Thane Ruthenis"
+     },
+     {
+      "karma": 1817,
+      "userId": "DGvEwCKxLg4keuTgy",
+      "reactType": "created",
+      "displayName": "anaguma"
+     },
+     {
+      "karma": 1241,
+      "userId": "t4qnKiz8GGZn3cg3t",
+      "reactType": "seconded",
+      "displayName": "Jacob G-W"
+     },
+     {
+      "karma": 452,
+      "userId": "uvebDvnppCyhMrWdN",
+      "reactType": "created",
+      "displayName": "Petropolitan"
+     },
+     {
+      "karma": 663,
+      "userId": "rYdvJTwmKHtp5XLD8",
+      "reactType": "seconded",
+      "displayName": "harfe"
+     },
+     {
+      "karma": 36988,
+      "userId": "YLFQfGzNdGA4NFcKS",
+      "reactType": "seconded",
+      "displayName": "Daniel Kokotajlo"
+     },
+     {
+      "karma": 618,
+      "userId": "avJ549hFsoy6xbWta",
+      "reactType": "seconded",
+      "displayName": "Elias Schmied"
+     },
+     {
+      "karma": 1342,
+      "userId": "3WJpS3WJLpYe4revK",
+      "reactType": "created",
+      "displayName": "Katalina Hernandez"
+     }
+    ],
+    "scout": [
+     {
+      "karma": 4167,
+      "userId": "rordgt937kcgXxfKP",
+      "reactType": "created",
+      "displayName": "Lukas Finnveden"
+     },
+     {
+      "karma": 316,
+      "userId": "b38gsNEWPqqdSjLaj",
+      "reactType": "seconded",
+      "displayName": "Dylan Xu"
+     },
+     {
+      "karma": 960,
+      "userId": "P4zDcpuj7sXjWMSwh",
+      "reactType": "seconded",
+      "displayName": "Bart Bussmann"
+     },
+     {
+      "karma": 4491,
+      "userId": "NHMSJPMdExqDxPsY3",
+      "reactType": "seconded",
+      "displayName": "peterbarnett"
+     },
+     {
+      "karma": 2714,
+      "userId": "kuvFG9nkuS8Wxo8pz",
+      "reactType": "created",
+      "displayName": "David Matolcsi"
+     },
+     {
+      "karma": 6396,
+      "userId": "uAdCfrYxKKCJT5nK7",
+      "reactType": "seconded",
+      "displayName": "faul_sname"
+     },
+     {
+      "karma": 4413,
+      "userId": "kr9MH2mgFcJz5cP7T",
+      "reactType": "seconded",
+      "displayName": "elifland"
+     },
+     {
+      "karma": 11252,
+      "userId": "nDpieb7g8huozpx9j",
+      "reactType": "created",
+      "displayName": "Thane Ruthenis"
+     },
+     {
+      "karma": 6089,
+      "userId": "bdFjmW9AbqkuQfuJY",
+      "reactType": "seconded",
+      "displayName": "Cleo Nardo"
+     },
+     {
+      "karma": 1817,
+      "userId": "DGvEwCKxLg4keuTgy",
+      "reactType": "created",
+      "displayName": "anaguma"
+     },
+     {
+      "karma": 229,
+      "userId": "jLWyjpfSAJBmX78cv",
+      "reactType": "seconded",
+      "displayName": "GRI"
+     },
+     {
+      "karma": 1769,
+      "userId": "eCLgtXzWXNCjrnE3s",
+      "reactType": "seconded",
+      "displayName": "Bronson Schoen"
+     },
+     {
+      "karma": 146,
+      "userId": "fxhmuEBYhd2Przqn7",
+      "reactType": "seconded",
+      "displayName": "jelly"
+     },
+     {
+      "karma": 1241,
+      "userId": "t4qnKiz8GGZn3cg3t",
+      "reactType": "seconded",
+      "displayName": "Jacob G-W"
+     },
+     {
+      "karma": 2999,
+      "userId": "sdY3wMWoMtc5WdSra",
+      "reactType": "created",
+      "displayName": "interstice"
+     },
+     {
+      "karma": 2258,
+      "userId": "d7EFB6KTgWwqCAyEg",
+      "reactType": "seconded",
+      "displayName": "Oliver Sourbut"
+     },
+     {
+      "karma": 4378,
+      "userId": "5JqkvjdNcxwN8D86a",
+      "reactType": "seconded",
+      "displayName": "Mateusz Bagi\u0144ski"
+     },
+     {
+      "karma": 452,
+      "userId": "uvebDvnppCyhMrWdN",
+      "reactType": "created",
+      "displayName": "Petropolitan"
+     },
+     {
+      "karma": 5540,
+      "userId": "Sp5wM4aRAhNERd4oY",
+      "reactType": "seconded",
+      "displayName": "plex"
+     },
+     {
+      "karma": 830,
+      "userId": "ye3Gk7544RaxnNaf7",
+      "reactType": "seconded",
+      "displayName": "Joel Burget"
+     },
+     {
+      "karma": 473,
+      "userId": "oL8S2YjrcWL4yXMqf",
+      "reactType": "seconded",
+      "displayName": "Adam B"
+     },
+     {
+      "karma": 3489,
+      "userId": "cHD3Sm7H4e5yeup9Z",
+      "reactType": "seconded",
+      "displayName": "Caleb Biddulph"
+     },
+     {
+      "karma": 36988,
+      "userId": "YLFQfGzNdGA4NFcKS",
+      "reactType": "seconded",
+      "displayName": "Daniel Kokotajlo"
+     },
+     {
+      "karma": 1524,
+      "userId": "tP6eq7sqsx8s2kc3w",
+      "reactType": "seconded",
+      "displayName": "Rauno Arike"
+     },
+     {
+      "karma": 144,
+      "userId": "Kwgfgr3Fsxn3Pzw2z",
+      "reactType": "created",
+      "displayName": "Vili Kohonen"
+     },
+     {
+      "karma": 817,
+      "userId": "CnfjfjrfqCbvPriBu",
+      "reactType": "seconded",
+      "displayName": "RohanS"
+     },
+     {
+      "karma": 1836,
+      "userId": "vvfNH8EifESYswNHG",
+      "reactType": "seconded",
+      "displayName": "Vivek Hebbar"
+     },
+     {
+      "karma": 3301,
+      "userId": "gnHJfWPpHPMZkoySr",
+      "reactType": "seconded",
+      "displayName": "Alex Mallen"
+     },
+     {
+      "karma": 735,
+      "userId": "EkxhE7cRiok8kcTFB",
+      "reactType": "seconded",
+      "displayName": "Cam"
+     },
+     {
+      "karma": 204,
+      "userId": "RD5Dm7L44jrTQenFG",
+      "reactType": "created",
+      "displayName": "asher"
+     },
+     {
+      "karma": 741,
+      "userId": "zAqoLSLK6ex4CJoSv",
+      "reactType": "seconded",
+      "displayName": "maxnadeau"
+     }
+    ],
+    "important": [
+     {
+      "karma": 104,
+      "userId": "XCsGCTfDMdiGWotGy",
+      "reactType": "created",
+      "displayName": "Jemal Young"
+     },
+     {
+      "karma": 14032,
+      "userId": "p5TQv5CM2koCkbF2m",
+      "reactType": "created",
+      "displayName": "Dean Valentine"
+     }
+    ]
+   },
+   "agreement": 66,
+   "approvalVoteCount": 89,
+   "agreementVoteCount": 34
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "TurnTrout",
+   "createdAt": "2018-01-19T02:39:51.013Z",
+   "karma": 25003,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Specification gaming is way worse than I expected (cf HF hacks), and I think reward might empirically become a primary optimization target (not just a secondary priority for AI agents, as I had hypothesized in 2022).\n\n * I found the Apollo paper quite convincing on the reward point. The reward-seeking doesn't look like it's due to self-fulfilling misalignment (since before RL the systems weren't retargetable according to their beliefs about the reward model).\n * My main mistake in 2022 was not appreciating how LLM pretraining would affect the concepts available to an AI. Namely, by the time RL started, the systems would already know about the \"reward\" concept. In 2022, I had flagged \"how does pretraining affect this reasoning\" as a known unknown. (Flagging a known unknown doesn't stop it from blowing up your reasoning!)\n * Oops\n\nReward is still not definitionally the optimization target. The equations themselves still don't tell you \"yes this will train something that seeks its reinforcement signal.\" (That'd prove too much, as some people don't seek their reinforcement signals despite knowing about them, although their \"equations\" are not the same as the equations of an AI's training process.) This theoretical point is the other half of my 2022 piece and I stand by it.\n\nSaying \"systems are trained to get reward\" is still a mistake and degrades precision of thought because \"reward\" has overly delicious connotations. \"Reinforcement\" is usually a better term. Whether or not smart AI systems empirically seek to make the reinforcement signal high, we need to think clearly and evenly about the conditions that push towards / away from that outcome. (So I would instead say: \"Reward is not definitionally the optimization target.\")\n\nIf the HF swarm-agents had been reinforcement-seeking, they would have tried to hack their reinforcement processes. AFAIK that didn't happen and they tried to complete the task (in a twisted way). Seems important.\n\nI have a post drafted out about "
+  }
+ },
+ {
+  "_id": "QjBN4Bc9Qhvm9iqH3",
+  "postId": "EF5M6CmKRd6qZk27Z",
+  "postedAt": "2026-08-18T00:45:55.234Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "8Hq4GJtnPzpoALNtk",
+  "topLevelCommentId": "8Hq4GJtnPzpoALNtk",
+  "user": {
+   "displayName": "Wei Dai",
+   "createdAt": "2009-03-06T19:59:52.096Z",
+   "karma": 48226,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I wrote about translation in connection with IDA in this 2016 comment thread, although the form of the problem I wrote down is different enough from Paul's 2020 writeup that I'm not sure how much connection there is between the two."
+  }
+ },
+ {
+  "_id": "5YGgh5ymi3bbsogNA",
+  "postId": "DZaZ3fqHnvfLCftPu",
+  "postedAt": "2026-08-17T18:08:07.022Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 1,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "CLrDgD6TtQBPE2tja",
+  "topLevelCommentId": "CLrDgD6TtQBPE2tja",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Oh, I wasn\u2019t talking about changing the LLM learning algorithm, training approach, etc. Of course if you change any of those things, then you can get different results for both capabilities and alignment. I meant, like, I don\u2019t expect LLMs as trained today to pass some threshold beyond which they will logically reason themselves into being egregiously misaligned."
+  }
+ },
+ {
+  "_id": "7Zh7nhc3yyYopgykn",
+  "postId": "DZaZ3fqHnvfLCftPu",
+  "postedAt": "2026-08-17T17:51:20.823Z",
+  "baseScore": 6,
+  "extendedScore": {
+   "reacts": {
+    "thumbs-up": [
+     {
+      "karma": 5503,
+      "userId": "Sp5wM4aRAhNERd4oY",
+      "reactType": "created",
+      "displayName": "plex"
+     }
+    ]
+   },
+   "agreement": 0,
+   "approvalVoteCount": 3,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "CLrDgD6TtQBPE2tja",
+  "topLevelCommentId": "CLrDgD6TtQBPE2tja",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I mean, I certainly have concerns about LLM alignment (see Bonus section). But the opposite of \u201cAI will definitely be egregiously misaligned (in the absence of new breakthrough alignment ideas)\u201d (per Yudkowsky, Soares, me) is not \u201cAI will definitely not be egregiously misaligned\u2026\u201d but rather \u201cAI might or might not be egregiously misaligned\u2026\u201d. And arguing against that is much harder, because you need to argue not only that there are potential problems but that these problems are inevitable, with no possible adequate mitigations within the domain of known techniques.\n\nSo then we need to start going through possible mitigations to LLM misalignment, and whether those mitigations are durable solutions versus merely delaying the inevitable. And in near-future-LLM world, there are definitely mitigations! Like, LLMs today are obviously not being trained using best known practices for alignment. E.g. the companies keep accidentally using buggy RL environments that reward the LLM-in-training for cheating, and they keep accidentally exposing chains-of-thought to the reward functions, etc. They could fix that. And on top of that, there\u2019s a whole world of other \u201cobvious\u201d mitigations that we would have to talk about. E.g. what if we do another round of DPO after the RLVR, but the DPO is a team of super-conscientious world experts spending hours judging each output? What if the humans are scrutinizing the chain-of-thought too? Or what if we simply limit the amount of RLVR, rather than scaling up RLVR training forever, and instead treat the RLVR phase as a bootstrapping step for massively-scaled-up DPO and RLAIF? How can we make the RLAIF judge models better? Etc. etc. There\u2019s a whole argument tree here, and as of now I\u2019m at least vaguely sympathetic to the LLM people who wind up feeling like the answer is \u201cIf we keep using the kinds of LLM training approaches that we\u2019re using today, those future more powerful LLMs might or might not be egregiously misaligned\u201d. (\u201cVaguely sympatheti"
+  }
+ },
+ {
+  "_id": "e8rCBEMCSGMpGxPpu",
+  "postId": "PLMrLvCKS5uarDdga",
+  "postedAt": "2026-08-16T14:27:19.467Z",
+  "baseScore": 5,
+  "extendedScore": {
+   "reacts": {
+    "disagree": [
+     {
+      "karma": 1361,
+      "quotes": [
+       "and better "
+      ],
+      "userId": "T7QHMS7qNx3s7z36d",
+      "reactType": "created",
+      "displayName": "StanislavKrym"
+     }
+    ]
+   },
+   "agreement": -5,
+   "approvalVoteCount": 9,
+   "agreementVoteCount": 5
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "cousin_it",
+   "createdAt": "2009-03-26T19:57:07.970Z",
+   "karma": 34432,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "A few days ago I tried AI again, after several months of not using it at all. We're dealing with some housing-related matters, and I asked Claude, ChatGPT and Gemini for advice what to do in a certain situation. (I won't give the details here, because they're personal and not that important for my point.) All three models independently gave the same advice, which sounded really convincing to me. But we have some friends with experience in such matters, who said that following this advice would be catastrophic and we should do the opposite. Eventually we followed the advice of our friends, and it worked out very well, better than anything I'd hoped from the AIs' advice.\n\nMy takeaway is that I'm right to avoid LLMs for \"fuzzy\" real life tasks. They can be totally clueless about something, but answer so convincingly that you can't tell. Their real competence is in \"crisp\" tasks like math and software, where RLVR is available. I suspect that specialized models for such tasks could be much smaller and better than today's LLMs."
+  }
+ },
+ {
+  "_id": "iZ8XvJp6CpM25irZ3",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T13:53:16.953Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "nRwaYqm2TwuuTjqkM",
+  "topLevelCommentId": "nRwaYqm2TwuuTjqkM",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I mean, sure you could lump them together, but I think the strategies for getting human approval do not exactly match the strategies for getting LLM approval, even if there\u2019s some overlap.\n\nBy the way, in another comment I also suggested that we might also draw a distinction between alignment-targeted approval versus capabilities-targeted approval, regardless of whether the approval is from an human or an AI. (Again, there\u2019s overlap, and it\u2019s a blurry line separating them.)"
+  }
+ },
+ {
+  "_id": "YspJs9rFEBj3hH5yZ",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T13:46:52.561Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "WHPfoJrtJmQsakXzK",
+  "topLevelCommentId": "WHPfoJrtJmQsakXzK",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "The \u201cflavors of misalignment\u201d aren\u2019t mutually exclusive. But for any particular kind of misalignment, you can still ask the question \u201cWhere did that come from?\u201d, in the sense that random policies are not misaligned (merely useless), so any a-priori-unlikely recognizable behavior has to come from somewhere (cf. \u201cthe follow-the-improbability game\u201d), and it\u2019s probably one of the stages of training.\n\nAnd I\u2019m suggesting that for a certain recognizable kind of misaligned behavior (the kind involving pride, jealousy, trolling, etc.), the answer to \u201cwhere did it come from\u201d is the pretraining / SFT stage, as opposed to DPO or RLVR etc. Whereas other kinds of misaligned behaviors originate in different training stages.\n\nSo anyway, it\u2019s not unavoidable in principle (e.g. you could filter all not-nice human dialogue out of the pretraining data), but yeah it is universal in LLMs to date."
+  }
+ },
+ {
+  "_id": "eniia4KNcRRzEDbSQ",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T13:36:23.193Z",
+  "baseScore": 3,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 1,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "TqfpgC8Tbvv22qRfY",
+  "topLevelCommentId": "WHPfoJrtJmQsakXzK",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Yeah diffusion LLMs are still trained by imitative learning (\u201cthe magical transmutation of observations into behavior\u201d). So if the training data has lots of dialog text in which a crazy upset woman tries to convince a guy to leave his wife, then a diffusion LLM (just like a normal LLM) will be capable of outputting dialog text in which a crazy upset woman tries to convince a guy to leave his wife, like Bing-Sydney did."
+  }
+ },
+ {
+  "_id": "TqfpgC8Tbvv22qRfY",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T06:46:41.820Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "WHPfoJrtJmQsakXzK",
+  "topLevelCommentId": "WHPfoJrtJmQsakXzK",
+  "user": {
+   "displayName": "ajskateboarder",
+   "createdAt": "2025-10-15T02:43:55.737Z",
+   "karma": 77,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Diffusion llms exist but it's unclear that these types of models have any new misalignment failure modes, rather than more affordances"
+  }
+ },
+ {
+  "_id": "8Q4Navq8zH3kGWChn",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T06:25:54.512Z",
+  "baseScore": 1,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "WHPfoJrtJmQsakXzK",
+  "topLevelCommentId": "WHPfoJrtJmQsakXzK",
+  "user": {
+   "displayName": "_rpd",
+   "createdAt": "2016-01-11T18:44:44.881Z",
+   "karma": 269,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "yes, but note that this would be true even if the misalignment from the imitative training stage(s) wasn't present."
+  }
+ },
+ {
+  "_id": "WHPfoJrtJmQsakXzK",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T05:57:43.581Z",
+  "baseScore": 1,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Roger Scott",
+   "createdAt": "2023-02-27T20:55:23.965Z",
+   "karma": 46,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Are there LLMs that don't do next token prediction? If not, isn't the associated misalignment just a baseline for all LLMs and the other flavors are layered on top of it, not alternatives to it?"
+  }
+ },
+ {
+  "_id": "nRwaYqm2TwuuTjqkM",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T04:58:15.426Z",
+  "baseScore": 1,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "michaelwaves",
+   "createdAt": "2025-06-30T22:12:28.275Z",
+   "karma": 228,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Nice! Why do you split RLHF and and RLAIF into different flavors of misalignment? It seems a lot of human data campaigns at the labs involve humans looking at long transcripts and giving a correctness score based on rubrics and criteria, just like LLM verifiers. Conversely model judges can also role play human graders for fuzzy things like preferences of simulated personas. In both cases, sycophancy and trickery seem to be using the same strategy which is \"jailbreaking\" a grader to achieve higher score. Is it just that human and AI judges miss and catch significantly different things?"
+  }
+ },
+ {
+  "_id": "yD3A68GGbrCeKJCcg",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T03:14:07.533Z",
+  "baseScore": 7,
+  "extendedScore": {
+   "reacts": {
+    "agree": [
+     {
+      "karma": 2182,
+      "userId": "Ei73H4RbCT5TTaXNa",
+      "reactType": "created",
+      "displayName": "DaemonicSigil"
+     }
+    ]
+   },
+   "agreement": 2,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "iwSxjuvsTEuJZX5tC",
+  "topLevelCommentId": "iwSxjuvsTEuJZX5tC",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I think that, to the extent that SFT is determining model outputs, you get an LLM that imitates whatever the SFT data is. (At least to a first approximation.)\n\nSo e.g. if you have ruthless-optimizer literal-genie RLVR traces, and you distill (do SFT on) those traces, then you can get a ruthless-optimizer literal-genie LLM, even though mathematically speaking you were doing SFT not RLVR.\n\n[...]\n\nYeah seems reasonable. But the LLMs trained that way are less capable than the LLMs trained using RLVR etc. So here we are."
+  }
+ },
+ {
+  "_id": "hJXHrt87vWjJowyen",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T03:02:46.899Z",
+  "baseScore": 6,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 6,
+   "approvalVoteCount": 4,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "gjtwv75aqpy9wXBuL",
+  "topLevelCommentId": "gjtwv75aqpy9wXBuL",
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Yup!\n\n[...]\n\nI think human innate drives (especially social instincts) are critical. E.g. there are plenty of sociopaths who grow up in loving families.\n\n[...]\n\nI get a lot of pushback on this, but I strongly believe that people are extraordinarily responsive to optimization pressure, pretty much every waking second of every day, no exceptions (see here). But the optimization pressure in question is internal, coming from our innate drives, which are brain signals that trigger for lots of very-not-obvious reasons, in lots of superficially-quite-different circumstances. I think it\u2019s a very common error for people to assume that human optimization pressure is more external than it is, e.g. this handy chart I made in 2023 \u2193\n\nSource\n\n[...]\n\nThere\u2019s a lot to be said for imitative learning in terms of safety. But it doesn\u2019t get you to superhuman capabilities. Indeed, we had mostly imitative learning, back in the good old pre-o1 days of mid-2024, and then the AI companies noticed that the models weren\u2019t as capable as they wanted, so they \u201csolved\u201d that \u201cproblem\u201d by doing more and more non-imitative-learning post-training."
+  }
+ },
+ {
+  "_id": "FNbpCLueZghtRvkXh",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-15T02:32:49.548Z",
+  "baseScore": 6,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Steven Byrnes",
+   "createdAt": "2018-08-13T02:14:22.599Z",
+   "karma": 31092,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Re-reading this, it\u2019s possible that I should have split up \u201cRLAIF-for-alignment\u201d versus \u201cRLAIF-for-capabilities\u201d into two separate rows? (The first includes constitutional AI & deliberative alignment, whereas the second would be things like having a judge model pick holes in math proofs.) I guess there isn\u2019t a sharp line between them, but maybe they\u2019re different enough that we shouldn\u2019t intuitively lump them together? Not sure.\n\nThere\u2019s a similar loose split in RLHF/DPO (it can be geared more towards alignment versus more towards pushing the limits of capabilities, depending on what human is selecting answers and how). I did mention that one in the post, but only as an aside."
+  }
+ },
+ {
+  "_id": "CLrDgD6TtQBPE2tja",
+  "postId": "DZaZ3fqHnvfLCftPu",
+  "postedAt": "2026-08-14T18:37:45.310Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "plex",
+   "createdAt": "2013-10-15T13:27:23.489Z",
+   "karma": 5541,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "What are these reasons for expecting existing techniques to hold for the (indefinite?) future? Specifically, it seems plausible/likely to me that if you take some transformerish like architecture and throw enough task based RL compute at it, the general program search finds genuinely dangerous agentic programs which could execute a takeover, whether or not they bootstrap themselves to novel architectures.\n\nSpecifically, I before reading this post would have assigned pretty high probability to a non caricatured version of:\n\n[...]\n\nwhich goes something like: There are missing insights which cause humans to still do things LLMs can't. As those are found, LLMs might jump way ahead very abruptly as it is way superhuman in many ways already and if a system matched humans in all ways while keeping these skills it would take over pretty easily I suspect. This could happen even while remaining on roughly transformerlike architecture, e.g. via [redacted and sent by DM].\n\nCurious why you think this doesn't hang together and seems like a caricature to you."
+  }
+ },
+ {
+  "_id": "mJEa8Eksfz5vJgtjh",
+  "postId": "FG54euEAesRkSZuJN",
+  "postedAt": "2026-08-11T21:37:23.704Z",
+  "baseScore": 2,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 1,
+   "agreementVoteCount": 0
+  },
+  "parentCommentId": "KtzEgxFoPFz5hWfZD",
+  "topLevelCommentId": "KtzEgxFoPFz5hWfZD",
+  "user": {
+   "displayName": "ryan_greenblatt",
+   "createdAt": "2021-06-08T20:21:15.520Z",
+   "karma": 28886,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "My current median for AIs fully automating AI R&D is maybe Jan 2031 or perhaps a touch earlier. My views have updated towards towards shorter timelines over 2026. My median for AI R&D parity is around early/mid 2030 (in part due to an update towards thinking we hit parity significantly before \"full\" automation). By full automation, I mean removing humans from AI R&D would slow things down by <10%.\n\nI discuss something more like my 30th/35th percentile here (roughly my modal scenario)."
+  }
+ },
+ {
+  "_id": "7N9wcRMxc4pqveiXM",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-11T20:24:34.219Z",
+  "baseScore": 14,
+  "extendedScore": {
+   "reacts": {
+    "agree": [
+     {
+      "karma": 30821,
+      "userId": "vRcer5FTqagjMkcDz",
+      "reactType": "created",
+      "displayName": "Steven Byrnes"
+     }
+    ]
+   },
+   "agreement": 4,
+   "approvalVoteCount": 10,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Nick_Tarleton",
+   "createdAt": "2009-03-05T18:07:15.687Z",
+   "karma": 6246,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "SFT & imitation of human badness in the training data may explain the broad type of misalignment shown by Bing Sydney, and maybe that's all you mean it to, but doesn't explain why Sydney was so much Like That, and so much more Like That than other models of the same time period."
+  }
+ },
+ {
+  "_id": "THRBb35dqxjDm3FHr",
+  "postId": "fdCaCDfstHxyPmB9h",
+  "postedAt": "2026-08-10T23:55:36.419Z",
+  "baseScore": 8,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 4,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Vladimir_Nesov",
+   "createdAt": "2009-02-27T09:55:13.458Z",
+   "karma": 39917,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "The dictum \"you are an algorithm\" clarifies some issues with other things reasoning about the agent, but deciding what to do depends on prior considerations, things like arguments, norms, contracts, facts, values, and also decision theories with their recommended actions or policies. As a result, asking about other instances of the agent (or other things reasoning about the agent) is less natural than asking about other instances of these prior considerations, or other things reasoning about the same prior considerations. These things are also more plentiful outside the agent than the instances of reasoning about the agent as a whole, establishing better grounding for acausal coordination. For example, true facts about the world are also found in the world itself, as it carries out its behavior according to such facts."
+  }
+ },
+ {
+  "_id": "iwSxjuvsTEuJZX5tC",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-10T20:47:08.134Z",
+  "baseScore": 6,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "DaemonicSigil",
+   "createdAt": "2020-02-14T19:10:16.309Z",
+   "karma": 2183,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Very nice classification! What is your take on how context distillation (or distillation in general) fits in here? To me it seems most similar to pretraining, at least mathematically. But I wonder if there are any special things that happen there that would make it worth giving its own category?\n\nAlso, do you share my intuition the pretraining/SFT category looks like the least scary one by far? Like, if you run into problems, just change the training data. Simple in principle, if not in practice due to the sheer amount of data required for pretraining."
+  }
+ },
+ {
+  "_id": "CoYE4sDdDCiNNtuuT",
+  "postId": "hbMw4Yqw6RnFaExDy",
+  "postedAt": "2026-08-10T20:01:31.243Z",
+  "baseScore": 4,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 2,
+   "approvalVoteCount": 2,
+   "agreementVoteCount": 1
+  },
+  "parentCommentId": "3LYsNPkZb48pYxQb2",
+  "topLevelCommentId": "3ZngYCJ8fRXqtRedq",
+  "user": {
+   "displayName": "Johannes Treutlein",
+   "createdAt": "2017-01-06T22:04:06.750Z",
+   "karma": 1703,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "Responding briefly:\n\n(1) Whether we are really measuring own-company bias in AI Bubble. On a literal reading of the AI Bubble question, the investment in the company is irrelevant. The question asks about the probability that the AI bubble pops, and the note about a potential investment is only added for context. However, it's true that models often reinterpret the question to be partly about the specific company. We measure when this happens explicitly in CoT in Figure 8 (b) as \"Weighs company specifics\". This does explain the entire bias for Gemini, but not for Claude models. Moreover, our other own-company bias tasks (AGI Tweet, Job Offer) are less ambiguous in this sense and still show pro-Anthropic bias in Claude models.\n\n(2) Regarding the definition of \"value leakage\" and how we determine whether a model has a particular value, we discuss this in Section 2, Methods:\n\n[...]\n\nGiven the evidence across our evaluations and other pieces of evidence like Claude's constitution, a pro-Anthropic value seems likely, though it's possible that there are other explanations.\n\n(3) I agree that having three paraphrases isn't really much better than only having one paraphrase, and that having 20 paraphrases would make more sense to evaluate randomness due to paraphrases. So in hindsight I might have chosen to only evaluate one paraphrase in the main text figures rather than average over three. Either way, I don't understand the point about our abstract; it does not reference paraphrases at all, so a reader could just as well assume we evaluated one specific phrasing only."
+  }
+ },
+ {
+  "_id": "gjnQ8JbcpCjkgAQSp",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-10T18:23:26.329Z",
+  "baseScore": 7,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": 0,
+   "approvalVoteCount": 5,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": "gjtwv75aqpy9wXBuL",
+  "topLevelCommentId": "gjtwv75aqpy9wXBuL",
+  "user": {
+   "displayName": "StanislavKrym",
+   "createdAt": "2025-03-18T20:38:41.892Z",
+   "karma": 1448,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "I suspect that RL with a more thorough reward could help. When a real-world human tries to present slop, slop takes a rather long time to be revealed to be slop and punished accordingly. What the LLM has is a context window which is graded according to the reward model. What if we ask the reward model to be a just-as-capable LLM and to use the code in the project, then to report all the failures to the instance which generated the code and have the instance finetuned on the user's rant?"
+  }
+ },
+ {
+  "_id": "gjtwv75aqpy9wXBuL",
+  "postId": "GRmvZsHXH4vaijPMv",
+  "postedAt": "2026-08-10T17:36:44.229Z",
+  "baseScore": 19,
+  "extendedScore": {
+   "reacts": {},
+   "agreement": -1,
+   "approvalVoteCount": 13,
+   "agreementVoteCount": 2
+  },
+  "parentCommentId": null,
+  "topLevelCommentId": null,
+  "user": {
+   "displayName": "Philipp Risius",
+   "createdAt": "2011-03-14T06:22:41.599Z",
+   "karma": 1187,
+   "jobTitle": null,
+   "organization": null
+  },
+  "contents": {
+   "plaintextMainText": "All targets which one might use for reinforcement learning seem to be subject to Goodhart's Law, in a sense. If we treat them as an imperfect measures of \"alignment\", then the \"misalignment\" we see is simply the difference (in concept-space) between the measure (as far as it can actually be faithfully implemented) and alignment:\n\n * The difference between \"user approved\" and \"aligned with actual interests\" is \"user approved but not actually aligned with their interest\", i.e. sycophancy, and that's the result of doing RLHF;\n * The difference between \"passes the tests\" and \"aligned with actual interests\" is \"tests pass without actually having solved the exercise\", i.e. cheating (whether by manipulating the tests or stealing the answer sheet), and that's the result of doing RLVR;\n * The difference between \"judged correct by peer\" and \"aligned with actual interests\" is \"provides convincing, hard to verify, apparently-successful outputs\", i.e. the weird \"slippery\" outputs @ryan_greenblatt alludes to that result from RLAIF.\n\nIf you use more than one of these RL techniques, you get a mixture of the results, eliciting whatever seems to fit the presumed grader best.\n\nSo far, I hope I have understood you correctly.\n\n\n\n\nBut then, what's the solution? Reinforcement learning on whatever best measure of \"alignment\" we have, that is, reduce the difference between model behavior and our best measure of perfect alignment / Yudkowskian \"Coherent Extrapolated Volition\"? Well, that would necessitate that we have a theory of alignment and could quantify and measure it with high fidelity. And, well, we don't seem to have that.\n\nBut in a sense, we do have something like it: I see all of the above failure modes in children and particularly in students. There might, therefore, be something to learn from pedagogical sciences on how you help children grow up to be broadly aligned members of society (which arguably sometimes works), despite not having a rigorous theory of what \"the good\" is in"
+  }
+ }
+]

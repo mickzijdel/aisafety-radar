@@ -1,1 +1,15 @@
 .worktrees/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+dist/
+.env
+.env.local
+out/
+
+# Coverage data written by `pytest --cov`; a per-run artifact, never committed.
+.coverage
+.coverage.*
+htmlcov/

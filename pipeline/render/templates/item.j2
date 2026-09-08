@@ -1,0 +1,7 @@
+- **{{ it.title|oneline }}** · {{ it.author|oneline }}{% if it.affiliation %}, {{ it.affiliation|oneline }}{% endif %} ({{ it.site_label|oneline }} · {{ it.date }}{% if it.score is not none %} · {{ it.score }} karma{% endif %} · {{ it.comment_count|plural('comment') }}{% if it.agreement_line %} · {{ it.agreement_line }}{% endif %}) · {{ it.url|oneline }}
+{% if it.degraded %}  (summary withheld: could not be verified against the source)
+{% else %}  {{ it.summary|oneline }}{% if it.author_stated_status %} Author's stated status: "{{ it.author_stated_status|oneline }}".{% endif %} Claim type: {{ it.claim_type|oneline }}.
+{% if it.discussion_signal %}  Discussion: {{ it.discussion_signal|oneline }}
+{% endif %}{% if it.novelty %}  Why it matters: {{ it.novelty|oneline }}
+{% endif %}{% endif %}{% for q in it.quotes %}  > "{{ q }}"
+{% endfor %}
