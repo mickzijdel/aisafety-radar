@@ -5,7 +5,10 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    # Phase branches too, so a long-lived branch is green before anyone opens the merge rather
+    # than at the moment it lands. `pull_request` stays main-only: adding phase branches there
+    # would run the whole workflow twice on the same commit of a phase-to-phase PR.
+    branches: [main, "phase-*"]
   pull_request:
     branches: [main]
 
@@ -30,7 +33,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked
 
       - name: Lint with ruff
         run: |
@@ -66,7 +69,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked
 
       - name: Run tests
         run: uv run pytest --tb=short
@@ -130,7 +133,7 @@ jobs:
       - name: Set up Python
         run: uv python install 3.12
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked
       - name: Dead code (vulture, incl. extensionless PEP 723 scripts)
         run: |
           # tracked .py + any tracked file with a python/uv shebang (e.g. bin/foo).
