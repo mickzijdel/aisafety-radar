@@ -17,7 +17,7 @@ README install matrix, `docs/go-live.md`).
 
 What that means concretely: LW/AF/EAF fetchers with the entry floor and comment refresh, the
 roundup split, triage, extraction with the substring verifier and URL provenance check, the
-injection scan, the six QA gates, the `31-today-forums.md` render, versioning, the publishing
+injection scan, the seven QA gates, the `31-today-forums.md` render, versioning, the publishing
 helpers (changelog, manifests, health issue, site) and the `daily`, `promote`, `pages`,
 `probe` and `ci` workflows. Nothing has run against the live API or a real runner yet, and
 nothing is published.
@@ -46,7 +46,9 @@ so they run after the merge rather than as part of the SDD task sequence.
    restrictions left off (the `promote` job pushes a SHA built in the runner that no check has
    ever run against; spec 6.9 now says this rather than implying the opposite).
 4. **The live steps**: part 2 of `docs/go-live.md`. Run `probe.yml` and record the table in
-   `docs/probe-results.md` (that file does not exist yet; the probe run creates it); run
+   `docs/probe-results.md` (that file does not exist yet, and the workflow does not create it:
+   `radar probe` writes only to `$GITHUB_STEP_SUMMARY`, and the operator copies the table out
+   of the job summary by hand, as `docs/go-live.md` step 4 says); run
    `daily.yml`; eyeball the pack on the `generated` branch during the 30-minute canary
    window; watch `promote`'s push step (the first push of `main` from a runner); verify Pages
    and `fetch-latest.sh`; install the marketplace plugin and smoke-test the skill.

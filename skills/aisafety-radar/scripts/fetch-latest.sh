@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Print the exact bytes of one published file or bundle after verifying its checksum.
-# Usage: fetch-latest.sh today.md | week.md | careers.md | map.md | 31-today-forums.md
+# Usage: fetch-latest.sh <file-or-bundle>
+# Phase 2 publishes one bundle, today.md, and the files 00-index.md, 31-today-forums.md and
+# 90-live-sources.md. The week.md, careers.md and map.md bundles are still accepted as arguments
+# and will 404 until the phase that fills them lands, which is why SKILL.md does not advertise
+# them; the index footer is the authoritative list of what exists on any given day.
 #
 # Two failure classes, two exit codes, because the caller's next move differs:
 #   1  the file itself could not be fetched (DNS, TLS, 404, timeout). Nothing was downloaded, so

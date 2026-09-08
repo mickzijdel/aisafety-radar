@@ -20,6 +20,6 @@ actionlint, node. Read versions from `uv.lock` and `mise.lock`, never from memor
   actionlint, zizmor, large files, exec bits, version sync). CI mirrors it in
   `.github/workflows/ci.yml`.
 - Key packages: anthropic 1.0.0, httpx 0.28.1, pydantic 2.13.4, jinja2 3.1.6,
-  beautifulsoup4 4.15.0, markdownify 1.2.3, pyyaml 6.0.3, python-dateutil 2.9.0. Dev group:
-  pytest 9.1.1, ruff 0.16.4, respx 0.23.1, pytest-httpx 0.36.2, vulture 2.16.
+  beautifulsoup4 4.15.0, markdownify 1.2.3. Dev group: pytest 9.1.1, ruff 0.16.4, respx 0.23.1,
+  pytest-httpx 0.36.2, vulture 2.16, pyyaml 6.0.3.
 - Dependency resolution runs on a 4 day cooldown (`[tool.uv] exclude-newer`).

@@ -1,6 +1,8 @@
 # Actions are pinned to a commit SHA with the release tag in a trailing comment (supply-chain
 # safety — see the github-actions skill's security-checklist.md). Bump with `pinact run -u` and
-# verify with scripts/check_action_refs.sh (see SKILL.md › "Keeping GitHub Actions current").
+# verify with that skill's check_action_refs.sh, which lives in the dev-hooks plugin and not in
+# this repo:
+#   bash "$CLAUDE_PLUGIN_ROOT/skills/dev-env-setup/scripts/check_action_refs.sh" .github/workflows
 name: ci
 
 on:

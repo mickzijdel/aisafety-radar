@@ -83,8 +83,12 @@ Full detail, including every source, prompt, gate and threshold, is in
 mise trust && uv sync
 uv run pytest
 uv run ruff check .
-uv run radar run --dry-run --fixtures tests/fixtures --out out/
+uv run radar run --dry-run --fixtures tests/fixtures/forummagnum --data out/data --out out/pack
 ```
+
+The last one is the offline end-to-end path: recorded payloads instead of the network and a
+canned model instead of the API, so it needs no API key. `--data` and `--out` are both required,
+and both are put under the gitignored `out/` here so a dry run leaves nothing behind.
 
 Pre-commit checks (ruff, pytest, vulture, jscpd, gitleaks, actionlint, zizmor) run through hk;
 CI mirrors them in `.github/workflows/ci.yml`:
@@ -103,9 +107,8 @@ Toolchain (`mise.toml`, locked in `mise.lock`): Python 3.12, uv, hk, pkl, gitlea
 actionlint and node, all tracked at latest on a 4 day release cooldown.
 
 Key packages (`pyproject.toml`, resolved in `uv.lock`): anthropic 1.0.0, httpx 0.28.1,
-pydantic 2.13.4, jinja2 3.1.6, beautifulsoup4 4.15.0, markdownify 1.2.3, pyyaml 6.0.3,
-python-dateutil 2.9.0. Dev group: pytest 9.1.1, ruff 0.16.4, respx 0.23.1, pytest-httpx 0.36.2,
-vulture 2.16.
+pydantic 2.13.4, jinja2 3.1.6, beautifulsoup4 4.15.0, markdownify 1.2.3. Dev group: pytest 9.1.1,
+ruff 0.16.4, respx 0.23.1, pytest-httpx 0.36.2, vulture 2.16, pyyaml 6.0.3.
 
 ## License
 

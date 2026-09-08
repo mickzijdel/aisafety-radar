@@ -1,6 +1,8 @@
 # Actions are pinned to a commit SHA with the release tag in a trailing comment (supply-chain
 # safety — see the github-actions skill's security-checklist.md). Bump with `pinact run -u` and
-# verify with scripts/check_action_refs.sh (see SKILL.md › "Keeping GitHub Actions current").
+# verify with that skill's check_action_refs.sh, which lives in the dev-hooks plugin and not in
+# this repo:
+#   bash "$CLAUDE_PLUGIN_ROOT/skills/dev-env-setup/scripts/check_action_refs.sh" .github/workflows
 #
 # Publishing is deliberately three jobs (spec 6.9). `generate` runs the pipeline and writes the
 # pack to the `generated` branch and nowhere else; `promote` sits behind the `production`

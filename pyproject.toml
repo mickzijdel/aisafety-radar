@@ -11,15 +11,23 @@ dependencies = [
   "jinja2>=3.1",
   "beautifulsoup4>=4.12",
   "markdownify>=0.13",
-  "pyyaml>=6.0",
-  "python-dateutil>=2.9",
 ]
 
 [project.scripts]
 radar = "pipeline.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8", "respx>=0.21", "ruff>=0.6", "pytest-httpx>=0.30", "vulture>=2.14"]
+# `pyyaml` is here rather than in the runtime dependencies because only the tests read YAML
+# (SKILL.md's frontmatter and the workflow files). Phase 5's config-driven source list makes it
+# a runtime dependency again; until then a runtime pin would ship a package nothing imports.
+dev = [
+  "pytest>=8",
+  "respx>=0.21",
+  "ruff>=0.6",
+  "pytest-httpx>=0.30",
+  "vulture>=2.14",
+  "pyyaml>=6.0",
+]
 
 [tool.uv]
 # Supply-chain cooldown: never resolve a release published in the last 4 days, so a malicious
@@ -36,9 +44,13 @@ packages = ["pipeline"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-# Ruff also formats Python code fences inside Markdown. The spec and plan under docs/ carry
-# illustrative snippets that are deliberately compact, so keep the formatter off Markdown;
-# CI runs `ruff format --check .` over the whole tree.
+# Ruff also formats Python code fences inside Markdown, and CI runs `ruff format --check .` over
+# the whole tree, so the exclusion is repo-wide rather than scoped to one directory. Two reasons,
+# and the second is the load-bearing one:
+#   - the spec and plan under docs/ carry illustrative snippets that are deliberately compact;
+#   - every generated pack under skills/aisafety-radar/references/ is pipeline output whose bytes
+#     are checksummed and served, so a formatter rewriting a fenced block there would break the
+#     published checksum and the render goldens at once.
 extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
