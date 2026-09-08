@@ -852,3 +852,65 @@ def test_a_run_without_clients_records_no_window_or_refresh_status(tmp_path):
     clients = _clients()
     report = run_daily(_inputs(tmp_path, None, fetchers=_fetchers(clients)))
     assert report.window_statuses == [] and report.refresh_status is None
+
+
+# --- the daily window: the fetch time, with deliberate overlap ------------------------------
+
+
+def test_the_run_window_ends_at_the_fetch_time_with_an_hour_of_overlap(tmp_path):
+    """`Window.for_day` tiled exactly against a boundary the cron never reaches. The job fires at
+    05:23 and fetches around 05:26, so a post published at 05:30 was inside today's window --
+    already fetched, so missed -- and outside tomorrow's, which started at 05:40. It was never
+    fetched, never marked seen, and vanished while the header claimed data through 05:40Z."""
+    day = date(2026, 8, 31)
+    fetched_at = datetime(2026, 8, 31, 5, 26, tzinfo=UTC)
+    window = pipeline.run._run_window(day, fetched_at)
+    assert window.end == fetched_at
+    assert (window.end - window.start).total_seconds() == 25 * 3600
+
+
+def test_consecutive_run_windows_overlap_rather_than_tile(tmp_path):
+    """Seen-ids already dedupes an overlap, so overlap is free and a gap is not."""
+    first = pipeline.run._run_window(date(2026, 8, 30), datetime(2026, 8, 30, 5, 26, tzinfo=UTC))
+    second = pipeline.run._run_window(date(2026, 8, 31), datetime(2026, 8, 31, 5, 31, tzinfo=UTC))
+    assert second.start < first.end, "no gap between one morning and the next"
+    assert second.start > first.start
+
+
+def test_a_run_for_an_earlier_day_keeps_the_fixed_boundary(tmp_path):
+    """A backfill or a fixture replay is not a run happening now: using the wall clock for its
+    window would fetch the last 25 hours and call it that day."""
+    window = pipeline.run._run_window(date(2026, 8, 1), datetime(2026, 8, 31, 5, 26, tzinfo=UTC))
+    assert window.end == datetime(2026, 8, 1, 5, 40, tzinfo=UTC)
+    assert (window.end - window.start).total_seconds() == 24 * 3600
+
+
+def test_the_pack_header_says_the_moment_the_run_actually_fetched(tmp_path):
+    day = FixtureClient.day_of(FIX)
+    fetched_at = datetime(day.year, day.month, day.day, 4, 20, tzinfo=UTC)
+    report = run_daily(_inputs(tmp_path, _clients(), now=fetched_at))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    rendered = (tmp_path / "out" / "31-today-forums.md").read_text()
+    assert f"data through {day:%Y-%m-%d}T04:20Z" in rendered
+    assert "05:40Z" not in rendered
+
+
+def test_a_post_in_the_overlap_hour_that_was_already_seen_does_not_render_twice(tmp_path):
+    """The other half of the overlap: it costs a refetch and nothing else."""
+    clients = _clients()
+    day_one = FixtureClient.day_of(FIX)
+    day_two = day_one + timedelta(days=1)
+    first_at = datetime(day_one.year, day_one.month, day_one.day, 4, 20, tzinfo=UTC)
+    second_at = datetime(day_two.year, day_two.month, day_two.day, 4, 0, tzinfo=UTC)
+
+    first = run_daily(_inputs(tmp_path, clients, now=first_at))
+    assert first.published and first.items_selected > 0
+
+    second = run_daily(_inputs(tmp_path, clients, day=day_two, now=second_at))
+    # The second window reaches back past the first window's end, so it refetches those posts...
+    overlap_start = pipeline.run._run_window(day_two, second_at).start
+    assert overlap_start < first_at, "precondition: the two windows overlap"
+    assert second.items_fetched > 0, "precondition: the overlap really did refetch posts"
+    # ...and every one of them is already spent, so nothing renders twice.
+    assert second.items_selected == 0
+    assert (tmp_path / "out" / "31-today-forums.md").read_text().count("\n- **") == 0

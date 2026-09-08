@@ -103,6 +103,11 @@ FORUMS_FILE = "31-today-forums.md"
 # outside it can no longer move the digest.
 WINDOW_LIMIT = 500
 
+# The daily window's length, in hours: 24 hours of new posts plus an hour of deliberate overlap
+# with the previous run. Exact tiling is what left the blind spot `_run_window` describes, and
+# the overlap costs one refetch of posts `seen` already holds while a gap costs a post for good.
+RUN_WINDOW_HOURS = 25
+
 
 def _judge_rng(seed: int, day: date) -> random.Random:
     """The judge sampler's generator, seeded from the day as well as the configured seed.
@@ -114,6 +119,29 @@ def _judge_rng(seed: int, day: date) -> random.Random:
     deterministic while moving the sample across days.
     """
     return random.Random(seed + day.toordinal())
+
+
+def _run_window(day: date, now: datetime | None = None) -> Window:
+    """The window this run fetches: ending at the fetch, starting 25 hours before it.
+
+    `Window.for_day`'s nominal 05:40 end tiled exactly against a boundary the pipeline never
+    actually reaches. The cron fires at 05:23 and the fetch lands around 05:26, so a post
+    published at 05:30 was inside today's window - already fetched, so missed - and outside
+    tomorrow's, which started at today's 05:40. Nothing ever fetched it, nothing marked it seen,
+    and the pack header claimed data through 05:40Z either way.
+
+    So the end is the real fetch time, and the start reaches back 25 hours rather than 24. The
+    asymmetry is deliberate: `seen` already dedupes anything the previous run published, so an
+    overlap costs one refetch of posts the run then discards, while a gap costs a post for good.
+
+    A run whose `day` is not today gets the nominal boundary instead. That is a backfill or a
+    fixture replay, and reading the wall clock for it would fetch the last 25 hours and label
+    them with a day they have nothing to do with.
+    """
+    now = now or datetime.now(UTC)
+    if now.date() != day:
+        return Window.for_day(day)
+    return Window.for_day(day, hours=RUN_WINDOW_HOURS, now=now)
 
 
 @dataclass
@@ -132,6 +160,9 @@ class RunInputs:
     # Regenerate a day whose items are already spent. Off by default, because the filter is what
     # stops a rerun republishing yesterday; see the docstring's note on the seen ids.
     ignore_seen: bool = False
+    # When this run is fetching, which is what its window ends at. None means "read the clock",
+    # which is what production does; a test passes it to drive `_run_window` deterministically.
+    now: datetime | None = None
 
 
 class RunReport(BaseModel):
@@ -254,7 +285,7 @@ def _window_posts(
 
 def run_daily(inputs: RunInputs) -> RunReport:
     settings, llm, archive, day = inputs.settings, inputs.llm, inputs.archive, inputs.day
-    window = Window.for_day(day)
+    window = _run_window(day, inputs.now)
     rng = _judge_rng(inputs.rng_seed, day)
     clients = inputs.clients or {}
 

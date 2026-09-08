@@ -37,6 +37,19 @@ def test_window_for_day():
     assert (w.end - w.start).total_seconds() == 24 * 3600
 
 
+def test_window_can_end_at_the_moment_of_the_fetch():
+    """The fixed 05:40 end is a boundary the cron never actually reaches: it fires at 05:23 and
+    fetches around 05:26, so a post published at 05:30 was inside a window nothing had fetched
+    and outside the next day's, which started at 05:40. `now` is what closes that."""
+    fetched_at = datetime(2026, 8, 30, 5, 26, tzinfo=UTC)
+    w = Window.for_day(date(2026, 8, 30), hours=25, now=fetched_at)
+    assert w.end == fetched_at
+    assert (w.end - w.start).total_seconds() == 25 * 3600
+    assert w.day == date(2026, 8, 30)
+    ten_minutes_ago = fetched_at - timedelta(minutes=10)
+    assert w.start <= ten_minutes_ago < w.end
+
+
 def test_raw_post_to_item_maps_fields():
     item = raw_post_to_item("lw", RAW)
     assert item.id == "lw:abc123" and item.site == "lw" and item.category == "forums"
