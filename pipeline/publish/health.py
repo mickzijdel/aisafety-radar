@@ -7,6 +7,8 @@ Three jobs, one report file:
   `scan_flagged`, `failed` -- get their own table with the ids in it. A count with no ids is a
   number nobody can act on. The 7-day source minimums get a table of their own for the same
   reason: that gate never blocks, so its failure reaches nobody unless the issue says it plainly.
+  So do the 14-day window fetch and the comment refresh: neither reaches a gate, and both fail
+  into a mover count of zero, which is also the correct value on day one and on a quiet day.
 * `refusal_reason` is the promote guard. It lives here, next to the issue body, because both read
   the same report and must agree about what a bad run looks like; it is a function rather than
   four lines of YAML so it can be tested.
@@ -76,6 +78,35 @@ def _minimum_rows(report: dict) -> list[str]:
     return lines
 
 
+def _side_rows(report: dict) -> list[str]:
+    """The per-site window fetch and the comment refresh, as their own section.
+
+    They are not in the `Sources` table because they are not sources: `statuses` is the raw daily
+    fetch, which is what the medians and the 7-day minimums are computed from. They get a section
+    rather than a log line because neither reaches a gate, and both fail into "0 movers" - the
+    same number a correct day one prints.
+    """
+    rows = list(report.get("window_statuses") or [])
+    refresh = report.get("refresh_status")
+    if refresh:
+        rows.append(refresh)
+    lines = [
+        "",
+        "## Window and refresh",
+        "",
+        "| source | ok | items | error |",
+        "|---|---|---|---|",
+    ]
+    if not rows:
+        return [*lines, "| (not recorded) | - | - | this run recorded no window or refresh |"]
+    for row in rows:
+        lines.append(
+            f"| {_cell(row['source'])} | {_yes(row['ok'])} | {row['items']} | "
+            f"{_cell(row.get('error') or '')} |"
+        )
+    return lines
+
+
 def render_issue_body(report: dict, outcome: str | None = None, run_url: str | None = None) -> str:
     """The pinned issue's body for one run's report.
 
@@ -97,6 +128,7 @@ def render_issue_body(report: dict, outcome: str | None = None, run_url: str | N
             f"| {_cell(status['source'])} | {_yes(status['ok'])} | {status['items']} | "
             f"{_cell(status.get('error') or '')} |"
         )
+    lines += _side_rows(report)
     lines += ["", "## Gates", "", "| gate | passed | blocking | details |", "|---|---|---|---|"]
     for gate in report.get("gates", []):
         lines.append(

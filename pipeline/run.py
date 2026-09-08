@@ -162,6 +162,11 @@ class RunReport(BaseModel):
     dropped: list[str] = Field(default_factory=list)
     scan_flagged: list[str] = Field(default_factory=list)
     failed: list[str] = Field(default_factory=list)
+    # The two fetches `statuses` does not cover, kept separate from it for the reason
+    # `_side_status` gives: `statuses` is the raw-fetch record the medians and the 7-day
+    # minimums are computed from, and these are neither.
+    window_statuses: list[SourceStatus] = Field(default_factory=list)
+    refresh_status: SourceStatus | None = None
 
 
 def _source_medians(archive: Archive, day: date) -> dict[str, int]:
@@ -184,10 +189,23 @@ def _trailing_cost_median(archive: Archive, day: date) -> float | None:
     return median(costs) if len(costs) >= 5 else None
 
 
+def _side_status(source: str, *, ok: bool, items: int, error: str | None = None) -> SourceStatus:
+    """A `SourceStatus` row for one of the two fetches `run_all` does not cover.
+
+    The window fetch and the comment refresh are isolated the way a fetcher is, but neither goes
+    through `run_all`, so neither used to produce a row anybody could read. `category` is
+    "forums" because that is the only category phase 2 has; the row is identified by `source`
+    (`lw-window`, `refresh`), and it is kept out of `RunReport.statuses` on purpose - that list
+    is what `_source_medians` and `gate_source_minimums` count raw fetched items from, and a
+    window row in it would corrupt both.
+    """
+    return SourceStatus(source=source, category="forums", ok=ok, items=items, error=error)
+
+
 def _window_posts(
     clients: dict[Site, ForumClient], day: date
-) -> tuple[list[Item], dict[str, datetime | None]]:
-    """The last `WINDOW_DAYS` of posts per site, and when each was last commented on.
+) -> tuple[list[Item], dict[str, datetime | None], list[SourceStatus]]:
+    """The last `WINDOW_DAYS` of posts per site, when each was last commented on, and a status row.
 
     Isolated per site, and all or nothing within one: this fetch feeds the ledger and the movers,
     so one forum being unreachable -- or sending a record that will not convert -- must cost that
@@ -202,9 +220,16 @@ def _window_posts(
     join the provenance gate's allowed set, which meant a fortnight of unrelated posts quietly
     vouching for hosts nothing in today's pack ever cited. A window post now vouches for its own
     url, title and author, which is exactly what the mover path renders.
+
+    Each site gets a `SourceStatus` row, on the same terms `run_all` gives the daily fetch one.
+    Isolation without a record is how a fetch fails silently for a month: this call reaches no
+    gate, and its only visible consequence is a mover count of zero, which is also the correct
+    value on day one and on any quiet day. The row goes into `RunReport` and into the pinned
+    health issue, where somebody can see that it has been zero every morning since a Tuesday.
     """
     items: list[Item] = []
     last_commented: dict[str, datetime | None] = {}
+    statuses: list[SourceStatus] = []
     for site, client in clients.items():
         try:
             posts = client.posts_since(
@@ -216,13 +241,15 @@ def _window_posts(
                 fields=POST_FIELDS_LEAN,
             )
             converted = [(raw_post_to_item(site, p), p.lastCommentedAt) for p in posts]
-        except Exception:  # noqa: BLE001 - isolation is the point
+        except Exception as exc:  # noqa: BLE001 - isolation is the point
             log.exception("%s: 14-day window fetch failed; no movers from this site today", site)
+            statuses.append(_side_status(f"{site}-window", ok=False, items=0, error=str(exc)))
             continue
         for item, commented_at in converted:
             items.append(item)
             last_commented[item.id] = commented_at
-    return items, last_commented
+        statuses.append(_side_status(f"{site}-window", ok=True, items=len(converted)))
+    return items, last_commented, statuses
 
 
 def run_daily(inputs: RunInputs) -> RunReport:
@@ -294,14 +321,17 @@ def run_daily(inputs: RunInputs) -> RunReport:
     assert judges.keys() <= records.keys(), "judged an item that never reached the render set"
 
     ledger = PostsLedger(archive.ledger_path).load()
-    window_items, last_commented = _window_posts(clients, day)
+    window_items, last_commented, window_statuses = _window_posts(clients, day)
     ledger.snapshot(day, rendered_items + window_items, last_commented)
     movers: list[Mover] = []
+    refresh_status: SourceStatus | None = None
     if clients:
         try:
             movers = refresh_comments(clients, ledger, archive, llm, settings, day)
-        except Exception:  # noqa: BLE001 - a lost refresh is not a lost run
+            refresh_status = _side_status("refresh", ok=True, items=len(movers))
+        except Exception as exc:  # noqa: BLE001 - a lost refresh is not a lost run
             log.exception("comment refresh failed; publishing without discussion movers")
+            refresh_status = _side_status("refresh", ok=False, items=0, error=str(exc))
 
     meta = PackMeta(version=inputs.version, generated_at=datetime.now(UTC), data_through=window.end)
     rendered = render_all(
@@ -367,6 +397,8 @@ def run_daily(inputs: RunInputs) -> RunReport:
         dropped=dropped,
         scan_flagged=[iid for iid, scan in scans.items() if scan.flagged],
         failed=failed,
+        window_statuses=window_statuses,
+        refresh_status=refresh_status,
     )
     archive.write_run(day, report.model_dump(mode="json"))
     if published:

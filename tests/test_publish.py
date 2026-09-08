@@ -529,3 +529,47 @@ def test_bundles_match_the_render_recipes():
     for parts in BUNDLES.values():
         for name in parts:
             assert name in APPENDIX_PURPOSE, name
+
+
+def test_issue_body_shows_the_window_and_refresh_statuses():
+    """Neither used to reach the issue at all: a window fetch that had been 403ing for a week
+    and a refresh that raised every morning both read as "0 movers", which is also day one's
+    correct value."""
+    body = render_issue_body(
+        _report(
+            window_statuses=[
+                {
+                    "source": "lw-window",
+                    "category": "forums",
+                    "ok": True,
+                    "items": 120,
+                    "error": None,
+                },
+                {
+                    "source": "af-window",
+                    "category": "forums",
+                    "ok": False,
+                    "items": 0,
+                    "error": "403 Forbidden",
+                },
+            ],
+            refresh_status={
+                "source": "refresh",
+                "category": "forums",
+                "ok": False,
+                "items": 0,
+                "error": "comment refresh is down",
+            },
+        )
+    )
+    assert "## Window and refresh" in body
+    section = body.split("## Window and refresh")[1]
+    assert "| lw-window | yes | 120 |" in section
+    assert "| af-window | NO | 0 | 403 Forbidden |" in section
+    assert "| refresh | NO | 0 | comment refresh is down |" in section
+
+
+def test_issue_body_says_so_when_no_window_or_refresh_status_was_recorded():
+    body = render_issue_body(_report())
+    section = body.split("## Window and refresh")[1]
+    assert "not recorded" in section

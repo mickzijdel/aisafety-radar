@@ -22,7 +22,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pipeline
@@ -30,10 +30,12 @@ from pipeline.archive import Archive
 from pipeline.config import load_settings, user_agent
 from pipeline.fetchers.base import Window, run_all
 from pipeline.fetchers.fixtures import FixtureClient
-from pipeline.fetchers.forummagnum import ForumClient
+from pipeline.fetchers.forummagnum import POST_FIELDS_LEAN, ForumClient
 from pipeline.fetchers.forums import MIN_ITEMS_7D, SOURCE_NAMES, ForumFetcher
+from pipeline.ledger import WINDOW_DAYS
 from pipeline.llm import LLM, CannedLLM
-from pipeline.run import RunInputs, run_daily
+from pipeline.models import SourceStatus
+from pipeline.run import WINDOW_LIMIT, RunInputs, run_daily
 from pipeline.versioning import next_letter, pack_version
 
 # A blocked run is not a crashed one, and argparse already owns 2 for a usage error, so the two
@@ -103,17 +105,72 @@ def cmd_run(args) -> int:
     return 0 if report.published else BLOCKED_EXIT
 
 
+def _row(source: str, *, ok: bool, items: int, error: str | None = None) -> SourceStatus:
+    return SourceStatus(source=source, category="forums", ok=ok, items=items, error=error)
+
+
+def probe_call_shapes(clients, day: date) -> list[SourceStatus]:
+    """The two call shapes the daily fetch does *not* make, one row each per site.
+
+    `_fetchers` sends `posts_since(view="top")` with the full field set, and that is all a probe
+    used to exercise. Production makes two more shapes every morning: the 14-day window fetch
+    (`view="new"`, `POST_FIELDS_LEAN`, a 500-post page) and `top_comments`, which is the
+    `postCommentsTop` view. Neither reaches a gate and neither is in `RunReport.statuses`, so
+    before this the first time either was sent from a GitHub runner was the first real daily run.
+
+    Read-only and no more traffic than one morning: two extra requests per site, and
+    `ForumClient` already paces itself between calls. Every failure becomes a row rather than a
+    traceback, because the table is the report - that is why `probe` exits 0 whatever happens.
+
+    The comment call needs a post to ask about, and the newest window post is the one most likely
+    to have a live thread. A site whose window call failed has none, which is itself the answer.
+    """
+    statuses: list[SourceStatus] = []
+    for site, client in clients.items():
+        try:
+            posts = client.posts_since(
+                day - timedelta(days=WINDOW_DAYS),
+                view="new",
+                limit=WINDOW_LIMIT,
+                # The AF is an AI-safety forum end to end and carries no AI tag to filter on.
+                require_ai_tag=site != "af",
+                fields=POST_FIELDS_LEAN,
+            )
+        except Exception as exc:  # noqa: BLE001 - the table is the report
+            statuses.append(_row(f"{site}-window", ok=False, items=0, error=str(exc)))
+            statuses.append(
+                _row(f"{site}-comments", ok=False, items=0, error="no window post to ask about")
+            )
+            continue
+        statuses.append(_row(f"{site}-window", ok=True, items=len(posts)))
+        if not posts:
+            statuses.append(
+                _row(f"{site}-comments", ok=False, items=0, error="the window returned no posts")
+            )
+            continue
+        newest = max(posts, key=lambda p: p.postedAt)
+        try:
+            comments = client.top_comments(newest.id)
+        except Exception as exc:  # noqa: BLE001 - the table is the report
+            statuses.append(_row(f"{site}-comments", ok=False, items=0, error=str(exc)))
+            continue
+        statuses.append(_row(f"{site}-comments", ok=True, items=len(comments)))
+    return statuses
+
+
 def cmd_probe(args) -> int:
     """Fetch from every live source and print a status table. Never fails the job.
 
     The point is to see which sources answer, so a source that raises has to show up as a row
-    rather than as a traceback; `run_all` already turns each failure into a not-ok status.
+    rather than as a traceback; `run_all` already turns each failure into a not-ok status, and
+    `probe_call_shapes` does the same for the two shapes `run_all` never sends.
     """
     clients = _clients(None, user_agent(pipeline.__version__))
-    window = Window.for_day(datetime.now(UTC).date(), hours=args.hours)
+    day = datetime.now(UTC).date()
+    window = Window.for_day(day, hours=args.hours)
     result = run_all(_fetchers(clients), window)
     print("| source | ok | items | error |\n|---|---|---|---|")
-    for status in result.statuses:
+    for status in [*result.statuses, *probe_call_shapes(clients, day)]:
         print(
             f"| {status.source} | {'yes' if status.ok else 'NO'} | "
             f"{status.items} | {status.error or ''} |"

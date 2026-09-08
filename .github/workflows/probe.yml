@@ -5,6 +5,13 @@
 # always exits 0: the point is to see which sources answer from a GitHub runner's IP (several
 # sit behind Cloudflare), so a source that fails has to show up as a row in the summary rather
 # than as a red job with a traceback.
+#
+# It sends all three of the call shapes the daily run sends, three rows per site: the daily
+# `view: top` fetch, the lean 14-day `view: new` window fetch that feeds the ledger, and
+# `postCommentsTop` on the newest window post, which is what the comment refresh reads. Two extra
+# read-only requests per site, paced by the client. Before that, the first time either of the
+# latter two was sent from a runner was the first real daily run - and both fail into "0 movers",
+# which is also a correct quiet morning.
 name: probe
 
 on:

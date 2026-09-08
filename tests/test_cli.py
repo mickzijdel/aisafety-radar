@@ -102,3 +102,42 @@ def test_cli_probe_prints_a_status_table_and_always_exits_0(monkeypatch, capsys)
     out = capsys.readouterr().out
     assert out.startswith("| source | ok | items | error |")
     assert "| lesswrong | yes |" in out
+
+
+class _BrokenWindow(FixtureClient):
+    """Serves the daily fetch and refuses the lean window call, the way a WAF would."""
+
+    def posts_since(self, after, view="top", limit=200, require_ai_tag=True, **kw):
+        if view == "new":
+            raise RuntimeError("403 Forbidden")
+        return super().posts_since(
+            after, view=view, limit=limit, require_ai_tag=require_ai_tag, **kw
+        )
+
+
+def _probe_clients(monkeypatch, overrides=None):
+    clients = {s: FixtureClient(s, Path(FIX)) for s in ("lw", "af", "eaf")}
+    clients.update(overrides or {})
+    monkeypatch.setattr("pipeline.cli._clients", lambda fixtures, ua: clients)
+
+
+def test_cli_probe_also_exercises_the_window_and_top_comment_call_shapes(monkeypatch, capsys):
+    """The daily fetch is `posts_since(view="top")` with the full field set. Production makes two
+    other shapes every morning - the lean `view="new"` window fetch and `postCommentsTop` - and
+    neither was ever sent from a runner before go-live."""
+    _probe_clients(monkeypatch)
+    assert main(["probe", "--hours", "24"]) == 0
+    out = capsys.readouterr().out
+    for site in ("lw", "af", "eaf"):
+        assert f"| {site}-window | yes |" in out
+        assert f"| {site}-comments |" in out
+
+
+def test_cli_probe_reports_a_failing_window_call_as_a_row_and_still_exits_0(monkeypatch, capsys):
+    _probe_clients(monkeypatch, {"lw": _BrokenWindow("lw", Path(FIX))})
+    assert main(["probe"]) == 0
+    out = capsys.readouterr().out
+    assert "| lw-window | NO | 0 | 403 Forbidden |" in out
+    # The other sites are unaffected, and the daily fetch table is still there.
+    assert "| af-window | yes |" in out
+    assert "| lesswrong | yes |" in out

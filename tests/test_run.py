@@ -376,8 +376,13 @@ WINDOW_BODY_URL = "https://aligned.substack.com/p/crisp-and-fuzzy-tasks"
 
 
 def test_the_window_fetch_asks_for_no_post_bodies(tmp_path):
-    items, last_commented = _window_posts(_clients(), FixtureClient.day_of(FIX))
+    items, last_commented, statuses = _window_posts(_clients(), FixtureClient.day_of(FIX))
     assert items, "precondition: the fixtures hold posts inside the 14-day window"
+    assert all(s.ok for s in statuses) and {s.source for s in statuses} == {
+        "lw-window",
+        "af-window",
+        "eaf-window",
+    }
     # Metadata is what the ledger and the movers read, and it is all still there.
     assert all(i.title and i.url for i in items)
     assert last_commented
@@ -417,7 +422,7 @@ def test_a_movers_url_without_the_window_posts_would_not_pass_provenance(tmp_pat
     """The other half of that contract: the window items are load-bearing, not incidental."""
     mover = _mover_from_an_older_window_post()
     monkeypatch.setattr("pipeline.run.refresh_comments", lambda *a, **kw: [mover])
-    monkeypatch.setattr("pipeline.run._window_posts", lambda clients, day: ([], {}))
+    monkeypatch.setattr("pipeline.run._window_posts", lambda clients, day: ([], {}, []))
     report = run_daily(_inputs(tmp_path, _clients()))
     assert not report.published
     provenance = next(g for g in report.gates if g.name == "provenance")
@@ -806,3 +811,44 @@ def test_one_refused_triage_call_still_publishes_the_day(tmp_path, caplog):
     assert rendered.count("\n- **") == report.items_selected
     assert report.failed[0].split(":", 1)[1] not in rendered
     assert (tmp_path / "data" / "seen-ids.json").exists()
+
+
+def test_a_failing_window_fetch_is_named_in_the_report(tmp_path):
+    """`log.exception` and "0 movers" were the only signal, and 0 movers is also the correct
+    day-one value. The window fetch now writes a status per site, so a site that has been
+    failing every morning shows up as a row rather than as a number nobody can read."""
+    clients = {**_clients(), "lw": _BrokenWindowFetch("lw", FIX)}
+    report = run_daily(_inputs(tmp_path, clients))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    by_source = {s.source: s for s in report.window_statuses}
+    assert set(by_source) == {"lw-window", "af-window", "eaf-window"}
+    assert not by_source["lw-window"].ok
+    assert "window fetch is down" in (by_source["lw-window"].error or "")
+    assert by_source["lw-window"].items == 0
+    assert by_source["af-window"].ok and by_source["eaf-window"].ok
+
+
+def test_a_failing_comment_refresh_is_named_in_the_report(tmp_path, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("comment refresh is down")
+
+    monkeypatch.setattr("pipeline.run.refresh_comments", boom)
+    report = run_daily(_inputs(tmp_path, _clients()))
+    assert report.published, [g.details for g in report.gates if not g.passed]
+    assert report.refresh_status is not None
+    assert report.refresh_status.source == "refresh" and not report.refresh_status.ok
+    assert "comment refresh is down" in (report.refresh_status.error or "")
+
+
+def test_a_working_refresh_reports_its_mover_count(tmp_path, monkeypatch):
+    mover = _mover_from_an_older_window_post()
+    monkeypatch.setattr("pipeline.run.refresh_comments", lambda *a, **kw: [mover])
+    report = run_daily(_inputs(tmp_path, _clients()))
+    assert report.refresh_status is not None
+    assert report.refresh_status.ok and report.refresh_status.items == 1
+
+
+def test_a_run_without_clients_records_no_window_or_refresh_status(tmp_path):
+    clients = _clients()
+    report = run_daily(_inputs(tmp_path, None, fetchers=_fetchers(clients)))
+    assert report.window_statuses == [] and report.refresh_status is None

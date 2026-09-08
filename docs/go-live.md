@@ -149,11 +149,25 @@ Run in order. Stop at the first failure and fix it before continuing.
 
    `radar probe` always exits 0 on purpose: a blocked source has to show up as a row in the
    job summary, not as a traceback. Copy the summary table into `docs/probe-results.md` with
-   the date. For every source marked `NO`, read the error:
+   the date.
+
+   The table has three rows per site, one per call shape the daily run makes, and all three
+   have to be `yes` before the first real run:
+   - `lesswrong` / `alignmentforum` / `eaforum`: the daily fetch (`posts_since`, `view: top`,
+     the full field set);
+   - `<site>-window`: the 14-day window fetch (`view: new`, a 500-post page, no post bodies),
+     which is what feeds the ledger and makes a discussion mover possible;
+   - `<site>-comments`: `top_comments` on the newest window post (the `postCommentsTop` view),
+     which is what the morning comment refresh reads.
+
+   For every row marked `NO`, read the error:
    - a Cloudflare 403 or challenge page: record it in the spec's 5.1 table and open the
      "self-hosted runner or Tailscale proxy" question in `.claude/current_plan.md`;
    - a GraphQL field error (for example `jobTitle`): remove the field from `USER_FIELDS`,
-     rerun the local tests, commit, and rerun the probe.
+     rerun the local tests, commit, and rerun the probe;
+   - `the window returned no posts` on a `-comments` row is not a failure of that call shape:
+     the site simply had nothing in the window to ask about. Rerun after checking the
+     `-window` row's item count.
 
 2. **The first real daily run.**
 
