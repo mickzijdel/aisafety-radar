@@ -129,7 +129,12 @@ def contains(source: str, needle: str) -> bool:
 
 
 def find_numbers_and_dates(text: str) -> list[str]:
-    """Return every number or date token, longest match first at each position."""
+    """Return every number or date token, first alternative that matches at each position.
+
+    Not longest-match: Python's alternation is ordered, so correctness rests on the hand-ordered
+    alternation in `_TOKEN_RE` (see the note above it) rather than on the engine preferring the
+    longest branch, which is POSIX behaviour and not what this runs on.
+    """
     return [m.group(1) for m in _TOKEN_RE.finditer(text)]
 
 

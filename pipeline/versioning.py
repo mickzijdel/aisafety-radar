@@ -52,6 +52,6 @@ def next_letter(existing_versions: Iterable[str], day: date) -> str:
 
 def plugin_version(pack: str) -> str:
     # Compare these numerically per component, never as strings: month-day is unpadded, so
-    # "2026.105.1" (Jan 5) sorts after "2026.1201.1" (Dec 1) lexically but before it numerically.
+    # "2026.830.1" (Aug 30) sorts after "2026.1201.1" (Dec 1) lexically but before it numerically.
     day, letter = parse_pack_version(pack)
     return f"{day.year}.{day.month}{day.day:02d}.{string.ascii_lowercase.index(letter) + 1}"

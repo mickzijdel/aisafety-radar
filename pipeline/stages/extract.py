@@ -1,15 +1,19 @@
 """Extraction: one Haiku call per selected item, checked against the source and retried once.
 
-The stage never returns `None`, and no judgement the model makes can cost an item its place. An
-item whose prose cannot be verified twice running is degraded -- summary, novelty and
-discussion_signal blanked -- rather than dropped, because a digest entry with a title, a claim
-type and a verified quote is still worth more to a reader than a silent gap. `_strict_schema`
-strips the 0-2 quote and 1-5 importance bounds from the schema the API sees, so the prompt states
-them and `extract` repairs what comes back through the `coerce_*` helpers, which are total: a
-constrained field that arrives null, out of range, or as the wrong JSON type lands on a valid
-value rather than raising. A reply that is not a JSON object at all still fails in
-`llm.structured`, and a missing required field still fails validation; those are transport
-failures rather than model judgement, and belong to the caller.
+No judgement the model makes about the *content* can cost an item its place. An item whose prose
+cannot be verified twice running is degraded -- summary, novelty and discussion_signal blanked --
+rather than dropped, because a digest entry with a title, a claim type and a verified quote is
+still worth more to a reader than a silent gap. `_strict_schema` strips the 0-2 quote and 1-5
+importance bounds from the schema the API sees, so the prompt states them and `extract` repairs
+what comes back through the `coerce_*` helpers, which are total: a *constrained* field that
+arrives null, out of range, or as the wrong JSON type lands on a valid value rather than raising.
+
+What is not total, stated plainly because the boundary matters: the unconstrained fields have no
+repair. `summary` arriving as a number, `entities` as a dict, or `relevant` missing altogether
+fails pydantic validation and raises, as does a reply that is not a JSON object at all and one
+truncated at `max_tokens` (both in `llm.structured`). Those are transport and schema failures
+rather than model judgement, and they belong to the caller: `run_daily` isolates them per item,
+so one of them costs its own item and nothing else.
 """
 
 from __future__ import annotations
@@ -61,9 +65,11 @@ _SCHEMA = Extraction.json_schema()
 def build_user_message(item: Item, comments: list[Comment] | None, feedback: str | None) -> str:
     """Lay the document, its comments and any retry feedback out as separate data blocks.
 
-    Everything remote-derived goes through `data_block`, which neutralises the angle brackets that
-    would let a hostile document close its own block and continue as if it were the system's own
-    instructions. The feedback is ours, but it is built from model output, so it goes the same way.
+    Everything remote-derived goes through `data_block`, which substitutes the characters a
+    hostile document would need to close its own block and continue as if it were the system's
+    own instructions: the angle brackets in a body, and the brackets, quotes and ampersands in an
+    attribute value, which sits inside our own open tag and could otherwise forge further
+    attributes. The feedback is ours, but it is built from model output, so it goes the same way.
     """
     parts = [
         data_block(

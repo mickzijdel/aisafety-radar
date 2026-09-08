@@ -255,3 +255,30 @@ def test_scan_record_of_a_record_with_nothing_model_written_is_free():
     record = rec(summary="", entities=[], key_quotes=[])
     assert scan_record(record, fake, S).flagged is False
     assert fake.calls == []
+
+
+def test_judge_message_leaves_out_the_fields_the_model_did_not_answer():
+    """`f"novelty: {None}"` renders the literal word "None", and the rubric then asks the judge
+    to trace that word back to the source document."""
+    msg = build_judge_message(rec(), make_item())
+    fields = msg.split("<summary_fields>")[1].split("</summary_fields>")[0]
+    assert "None" not in fields
+    assert "novelty" not in fields and "discussion_signal" not in fields
+    assert "summary: A summary." in fields and "claim_type: exploratory" in fields
+
+
+def test_the_scanner_is_told_what_happened_to_the_angle_brackets():
+    """It is the blocking gate, and `data_block` hands it a substituted copy of its own input.
+
+    Told nothing, it reads `‹tool_use›` as punctuation rather than as the tool-call syntax its
+    own prompt asks it to look for.
+    """
+    assert "‹" in SCAN_SYSTEM and "›" in SCAN_SYSTEM
+    assert "tool-call syntax" in SCAN_SYSTEM
+
+
+def test_the_judge_rubric_does_not_promise_a_comments_block():
+    """`build_judge_message` sends two blocks; a rubric that names a third invites the judge to
+    excuse an unsupported claim as coming from comments it never saw."""
+    assert "comments" not in JUDGE_SYSTEM
+    assert "<comments>" not in build_judge_message(rec(), make_item())

@@ -100,7 +100,11 @@ def raw_comment_to_comment(site: Site, raw: RawComment) -> Comment:
 
 
 def is_notable(m: Movement, settings: Settings) -> bool:
-    """Did this post's discussion move enough to be worth a refresh?
+    """Did this post's discussion move enough to show the reader as a mover?
+
+    Not what gets refreshed: `refresh_comments` refreshes on any change at all, because a stale
+    discussion_signal in the archive is wrong whether or not the movement was dramatic. This is
+    the second, much narrower cut, over the records that were refreshed anyway.
 
     Two independent axes. Comments only count upwards -- deletions can make `new_comments`
     negative, and a thread that shrank is not a discussion mover however the threshold is
