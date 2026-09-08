@@ -554,6 +554,15 @@ received, most of them on posts outside the window.
 briefings) are cut at their headings into sub-items, each carrying the parent URL plus its
 anchor and any outbound link it names. Sub-items then enter triage like any other item.
 
+**Not implemented in phase 2, by ruling.** The split does not exist in code or in tests, and it
+is deferred to phase 3 rather than built now. The roundups it was designed for - Zvi, the weekly
+briefings - are phase-3 sources, so a splitter built today would be tuned against forum
+crossposts alone and then tuned again against the real thing. What phase 2 does instead, stated
+so nobody assumes otherwise: a roundup is a single item. A crossposted one therefore carries one
+summary and up to two quotes for a very long post, its sub-items get no entry of their own, and
+the outbound links it names are just links inside a body nothing extracts. The split arrives in
+phase 3, alongside the sources that need it, and section 14 lists it there.
+
 **Triage** sees the title and the first ~500 tokens of each item and returns `relevant`
 (boolean), `primary_slug`, `secondary_slugs`, `importance` 1-5. Per-section caps then keep the
 pack bounded (for example 25 forum posts, 15 news items, 10 governance items, 10 papers per
@@ -888,11 +897,12 @@ per-area sub-packs; the Batch API as a split submit/collect workflow if cost eve
 1. **Skeleton and probe**: repo, manifests, SKILL.md, index, empty appendices, CI, `probe.yml`
    run once from a runner and every source's status recorded; `skills-ref validate`.
    Installable from day one even though the content is thin. Taxonomy frozen at the end.
-2. **Forums vertical slice**: LW/AF/EAF fetchers with entry floor and comment refresh, roundup
-   split, triage, extraction, provenance and injection gates, render `31-today-forums.md`,
-   two-step publish with health issue and Healthchecks. First real daily version.
+2. **Forums vertical slice**: LW/AF/EAF fetchers with entry floor and comment refresh, triage,
+   extraction, provenance and injection gates, render `31-today-forums.md`, two-step publish
+   with health issue and Healthchecks. First real daily version. (The roundup split moved to
+   phase 3 by ruling; see the deviation note in 6.3.)
 3. **Breadth**: news, labs, governance set, papers, the X-Risk Daily import, `30`, `32`, `33`,
-   `60`, bundles.
+   `60`, bundles, and the 6.3 roundup split, with the roundup sources it was designed for.
 4. **Rolling views and structured feeds**: `20`, `21`, `40` with deadlines, `41`, `50`.
 5. **Map, careers and field context**: hand-curated first pass of `10`-`16`, drift branch,
    80k scraping, wiki-driven glossary, opt-out and correction routes.

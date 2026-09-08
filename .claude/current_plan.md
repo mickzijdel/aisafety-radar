@@ -15,12 +15,16 @@ Phases 1 and 2 (skeleton and probe, forums vertical slice): **tasks 1 to 19 comp
 reviewed and closed clean in the ledger. Task 20's file work is done too (this checkpoint, the
 README install matrix, `docs/go-live.md`).
 
-What that means concretely: LW/AF/EAF fetchers with the entry floor and comment refresh, the
-roundup split, triage, extraction with the substring verifier and URL provenance check, the
-injection scan, the seven QA gates, the `31-today-forums.md` render, versioning, the publishing
-helpers (changelog, manifests, health issue, site) and the `daily`, `promote`, `pages`,
-`probe` and `ci` workflows. Nothing has run against the live API or a real runner yet, and
-nothing is published.
+What that means concretely: LW/AF/EAF fetchers with the entry floor and comment refresh,
+triage, extraction with the substring verifier and URL provenance check, the injection scan, the
+seven QA gates, the `31-today-forums.md` render, versioning, the publishing helpers (changelog,
+manifests, health issue, site) and the `daily`, `promote`, `pages`, `probe` and `ci` workflows.
+Nothing has run against the live API or a real runner yet, and nothing is published.
+
+**Not** the roundup split. Spec 6.3 makes it the first step of stage 1 and this checkpoint used
+to claim it was done; it does not exist in code or tests. It is deferred to phase 3 by ruling
+(final loop, wave 4), where the roundup sources it was designed for actually land. The spec now
+records that as a deliberate deviation in 6.3, and phase 2 treats a roundup as a single item.
 
 Task 20 was restructured by ruling: its live steps need repository secrets only Mick can set,
 so they run after the merge rather than as part of the SDD task sequence.
@@ -59,7 +63,15 @@ so they run after the merge rather than as part of the SDD task sequence.
    cost of a second generation, and is the fallback when the old run can no longer be rerun.
 5. **Write the Phase 3 plan**: news, labs, the governance set, papers, the X-Risk Daily
    import, appendices `30`, `32`, `33` and `60`, and the bundles. Feed into it whatever the
-   probe found and anything that misfired in the skill smoke test.
+   probe found and anything that misfired in the skill smoke test. Phase 3 also owns two things
+   phase 2 deliberately did not build, and both need to be first-class items in that plan rather
+   than assumptions:
+   - **The roundup split** (spec 6.3). Cut a roundup at its headings into sub-items carrying the
+     parent URL plus the anchor and any outbound link named. It belongs with Zvi and the weekly
+     briefings, which arrive in phase 3; until then a roundup is one item with one summary.
+   - **Top comments per selected item** at extraction time (spec 6.3), which is why every fresh
+     item's `discussion_signal` is null on the day it appears and is filled in only by the next
+     morning's mover refresh.
 
 Phases 4 to 6 (rolling views and structured feeds; map, careers and field context;
 portability) each need their own plan once phase 3 is written. Spec section 14 has the
@@ -67,7 +79,6 @@ phasing.
 
 ## Open decisions for Mick
 
-- `docs/versions/` retention: every published version is kept forever. Prune after N days?
 - Whether any forum source blocked from GitHub runners justifies a self-hosted runner or a
   Tailscale proxy. The probe run answers this.
 - `docs/` is published whole by the `pages` job, so `docs/superpowers/specs/` goes to the

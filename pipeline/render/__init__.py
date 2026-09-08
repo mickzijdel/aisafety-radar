@@ -35,6 +35,15 @@ cannot act as HTML once it is there. Any interpolation added to a template needs
 it is a number or one of this module's own constants. `tests/test_hostile_render.py` pushes one
 forgery payload through every field that reaches the pack and holds the rendered shape to the
 byte counts a clean pack produces.
+
+The quote slot (`item.j2`) is the one exception, and "quotes are verbatim" is only half the
+reason it is safe to pass a raw `<` there. The other half is that a quote with a raw `<` in it
+cannot reach the pack in the first place: the model only ever sees a source through `data_block`,
+which folds every `<` to a guillemet, so a quote it copies out of a bracket-bearing sentence is
+written with the guillemet, fails `verify`'s `contains` check against the unfolded source, and is
+dropped. What survives verification is therefore a substring of a document that had no `<` at
+that point. The slot is still contained rather than trusted -- the quote is flattened onto one
+line inside the `> "..."` the template owns -- but nothing has to escape it.
 """
 
 from __future__ import annotations

@@ -236,7 +236,15 @@ def gate_budgets(
     counter: Callable[[str], int],
     expected_items: dict[str, int],
 ) -> GateResult:
-    """Each file inside its token budget, and rendering as many items as the run selected."""
+    """Each file inside its token budget, and rendering exactly the items it was told to expect.
+
+    `expected_items` is not the selected count. `run_daily` passes the *rendered* item count plus
+    the movers, so this is a rendered-versus-rendered check: it catches a template that dropped or
+    duplicated an entry, not a pack that shrank between selection and rendering. The gap between
+    selected and rendered is deliberately somebody else's job -- `RunReport.dropped` names every
+    item that fell out, and `health.refusal_reason` is what refuses to promote a pack the drops
+    emptied. A gate that failed on a shrunken-but-honest pack would withhold a correct day.
+    """
     details: list[str] = []
     for name, text in rendered.items():
         stem = name.removesuffix(".md")

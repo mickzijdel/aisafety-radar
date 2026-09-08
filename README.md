@@ -64,12 +64,14 @@ authors, dates, karma and quotes are verbatim from the source.
 
 ## How the daily pipeline works
 
-At 05:23 UTC a workflow fetches the last 24 hours from each forum, drops anything under the
+At 05:23 UTC a workflow fetches from each forum everything published in the 25 hours to the
+moment it runs -- a day, plus an hour of overlap with yesterday's window, because a seen-ids
+ledger makes an overlap free and a gap loses a post for good -- drops anything under the
 per-source entry floor, triages what is left, and extracts a summary, tags and up to two
-quotes per item with an LLM that never writes a URL or a number itself. Six QA gates then
+quotes per item with an LLM that never writes a URL or a number itself. Seven QA gates then
 check link and number provenance, prompt injection, freshness, token budgets, a judge's read
-of the output, and cost against the trailing median; a run that fails a blocking gate
-publishes nothing and says why in the health issue. The day's raw data is committed to the
+of the output, cost against the trailing median, and each source's rolling 7-day item count;
+a run that fails a blocking gate publishes nothing and says why in the health issue. The day's raw data is committed to the
 public archive repository either way; what passes the gates is written to a `generated`
 branch, held there for a 30-minute canary window, and only then fast-forwarded onto `main`
 and deployed to GitHub Pages.
