@@ -35,7 +35,7 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install 3.12
+        run: uv python install # reads .python-version
 
       - name: Install dependencies
         run: uv sync --locked
@@ -78,7 +78,7 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install 3.12
+        run: uv python install # reads .python-version
 
       - name: Install dependencies
         run: uv sync --locked
@@ -143,7 +143,7 @@ jobs:
         with:
           enable-cache: true
       - name: Set up Python
-        run: uv python install 3.12
+        run: uv python install # reads .python-version
       - name: Install dependencies
         run: uv sync --locked
       - name: Dead code (vulture, incl. extensionless PEP 723 scripts)
@@ -186,7 +186,7 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install 3.12
+        run: uv python install # reads .python-version
 
       # skills-ref publishes no release artifact, so it is installed from git and pinned to a
       # commit SHA for the same reason every action above is: an unpinned HEAD is arbitrary

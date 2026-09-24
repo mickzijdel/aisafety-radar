@@ -24,6 +24,12 @@ paths = [
   '''^\.env''',                        # dotenv — gitignored
   '''^log/''', '''^tmp/''',            # Rails runtime artifacts
   '''^\.venv/''',                      # Python (shell/py stacks)
+  # Python bytecode and pytest state, at any depth — `tests/__pycache__/` as much as a
+  # top-level one. Not hypothetical: a .pyc holding a test file's credential-SHAPED
+  # fixtures matched the github-pat rule on bytes that happened to sit next to a `ghp_`
+  # prefix, so `pytest` before `git commit` blocked the commit on a finding in a file
+  # nobody staged, at a path with no obvious connection to the change.
+  '''(^|/)__pycache__/''', '''(^|/)\.pytest_cache/''',
   '''^node_modules/''', '''^vendor/''',
   '''^config/credentials/.*\.key$''',  # Rails master keys (the *.yml.enc blobs stay scanned)
 ]
