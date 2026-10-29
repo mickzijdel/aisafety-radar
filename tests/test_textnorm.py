@@ -102,7 +102,7 @@ def test_normalize_folds_extra_dash_and_quote_variants():
 
 def test_normalize_strips_invisible_characters():
     assert normalize("soft­hyphen") == "softhyphen"  # U+00AD soft hyphen
-    assert normalize("﻿zero​width‌‍") == "zerowidth"
+    assert normalize("﻿zero\u200bwidth‌‍") == "zerowidth"
 
 
 def test_contains_sees_through_dashes_and_invisibles():

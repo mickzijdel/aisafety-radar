@@ -89,7 +89,7 @@ def triage(items: list[Item], llm: LLM, settings: Settings) -> tuple[list[Triage
     for item in items:
         try:
             results.append(triage_item(item, llm, settings))
-        except Exception:  # noqa: BLE001 - one item is not the run
+        except Exception:  # one item is not the run
             log.exception("triage failed for %s; treating it as not relevant", item.id)
             failed.append(item.id)
     return results, failed

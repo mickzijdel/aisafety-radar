@@ -29,18 +29,18 @@ def rec(item_id, summary="s"):
 
 
 def make_comment(**over):
-    base = dict(
-        id="lw:c1",
-        post_id="lw:1",
-        site="lw",
-        author="A",
-        author_created_at=None,
-        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
-        score=4,
-        agreement=None,
-        parent_id=None,
-        text="body",
-    )
+    base = {
+        "id": "lw:c1",
+        "post_id": "lw:1",
+        "site": "lw",
+        "author": "A",
+        "author_created_at": None,
+        "posted_at": datetime(2026, 8, 30, tzinfo=UTC),
+        "score": 4,
+        "agreement": None,
+        "parent_id": None,
+        "text": "body",
+    }
     base.update(over)
     return Comment(**base)
 

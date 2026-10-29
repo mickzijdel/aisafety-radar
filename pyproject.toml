@@ -23,7 +23,7 @@ radar = "pipeline.cli:main"
 dev = [
   "pytest>=8",
   "respx>=0.21",
-  "ruff>=0.6",
+  "ruff>=0.17,<0.18",
   "pytest-httpx>=0.30",
   "vulture>=2.14",
   "pyyaml>=6.0",
@@ -54,7 +54,12 @@ target-version = "py312"
 extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+ignore = ["UP031"]  # %-format → .format(): style only, the fix doesn't produce f-strings
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["PLW1510"]  # tests assert returncode themselves
+"**/test_*.py" = ["PLW1510"]
+"**/conftest.py" = ["PLW1510"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -143,8 +143,10 @@ def render_issue_body(report: dict, outcome: str | None = None, run_url: str | N
         "",
         "## Items",
         "",
-        f"Selected {report.get('items_selected', 0)} item(s) for extraction; "
-        f"{report.get('movers', 0)} discussion mover(s).",
+        (
+            f"Selected {report.get('items_selected', 0)} item(s) for extraction; "
+            f"{report.get('movers', 0)} discussion mover(s)."
+        ),
         "",
         "| bucket | count | ids |",
         "|---|---|---|",

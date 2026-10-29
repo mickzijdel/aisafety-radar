@@ -170,7 +170,7 @@ class Archive:
         reuses that extraction rather than paying for it again, so the search walks backwards from
         `day` and stops at the first hit.
         """
-        for offset in range(0, lookback_days + 1):
+        for offset in range(lookback_days + 1):
             d = day - timedelta(days=offset)
             for rec in self.read_extractions(d):
                 if rec.extraction.item_id == item_id:

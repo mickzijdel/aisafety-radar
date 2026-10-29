@@ -301,6 +301,6 @@ def check_models(client: Any, settings: Settings) -> list[str]:
         try:
             client.models.retrieve(model_id)
             ok.append(model_id)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S112 - an unresolved model is left out
             continue
     return ok

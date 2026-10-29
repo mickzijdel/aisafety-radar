@@ -7,43 +7,43 @@ from pipeline.models import SLUGS, Comment, Extraction, Item, Usage
 
 
 def make_item(**over):
-    base = dict(
-        id="lw:abc123",
-        source="lesswrong",
-        site="lw",
-        category="forums",
-        url="https://www.lesswrong.com/posts/abc123/x",
-        title="T",
-        author="A",
-        author_affiliation=None,
-        published_at=datetime(2026, 8, 29, tzinfo=UTC),
-        score=45,
-        agreement=None,
-        comment_count=3,
-        curated=False,
-        frontpage=True,
-        author_created_at=None,
-        text="body",
-        markdown="body",
-    )
+    base = {
+        "id": "lw:abc123",
+        "source": "lesswrong",
+        "site": "lw",
+        "category": "forums",
+        "url": "https://www.lesswrong.com/posts/abc123/x",
+        "title": "T",
+        "author": "A",
+        "author_affiliation": None,
+        "published_at": datetime(2026, 8, 29, tzinfo=UTC),
+        "score": 45,
+        "agreement": None,
+        "comment_count": 3,
+        "curated": False,
+        "frontpage": True,
+        "author_created_at": None,
+        "text": "body",
+        "markdown": "body",
+    }
     base.update(over)
     return Item(**base)
 
 
 def make_comment(**over):
     """One comment on `lw:9`, the post id every mover fixture in this suite is built around."""
-    base = dict(
-        id="lw:c1",
-        post_id="lw:9",
-        site="lw",
-        author="Bob",
-        author_created_at=None,
-        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
-        score=83,
-        agreement=None,
-        parent_id=None,
-        text="body",
-    )
+    base = {
+        "id": "lw:c1",
+        "post_id": "lw:9",
+        "site": "lw",
+        "author": "Bob",
+        "author_created_at": None,
+        "posted_at": datetime(2026, 8, 30, tzinfo=UTC),
+        "score": 83,
+        "agreement": None,
+        "parent_id": None,
+        "text": "body",
+    }
     base.update(over)
     return Comment(**base)
 
@@ -54,19 +54,19 @@ def test_item_rejects_unknown_fields():
 
 
 def test_extraction_importance_bounds():
-    good = dict(
-        item_id="x",
-        summary="s",
-        key_quotes=[],
-        author_stated_status=None,
-        claim_type="exploratory",
-        novelty=None,
-        discussion_signal=None,
-        deadline=None,
-        entities=[],
-        slugs=["interp"],
-        importance=3,
-    )
+    good = {
+        "item_id": "x",
+        "summary": "s",
+        "key_quotes": [],
+        "author_stated_status": None,
+        "claim_type": "exploratory",
+        "novelty": None,
+        "discussion_signal": None,
+        "deadline": None,
+        "entities": [],
+        "slugs": ["interp"],
+        "importance": 3,
+    }
     Extraction(**good)
     with pytest.raises(ValidationError):
         Extraction(**{**good, "importance": 6})
@@ -117,19 +117,19 @@ def test_extraction_schema_omits_api_unsupported_keywords():
 
 
 def test_extraction_still_enforces_constraints_client_side():
-    good = dict(
-        item_id="x",
-        summary="s",
-        key_quotes=[],
-        author_stated_status=None,
-        claim_type="exploratory",
-        novelty=None,
-        discussion_signal=None,
-        deadline=None,
-        entities=[],
-        slugs=["interp"],
-        importance=3,
-    )
+    good = {
+        "item_id": "x",
+        "summary": "s",
+        "key_quotes": [],
+        "author_stated_status": None,
+        "claim_type": "exploratory",
+        "novelty": None,
+        "discussion_signal": None,
+        "deadline": None,
+        "entities": [],
+        "slugs": ["interp"],
+        "importance": 3,
+    }
     with pytest.raises(ValidationError):
         Extraction(**{**good, "importance": 6})
     with pytest.raises(ValidationError):

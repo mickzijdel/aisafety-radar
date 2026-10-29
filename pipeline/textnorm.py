@@ -12,7 +12,7 @@ _QUOTES = {"‘": "'", "’": "'", "“": '"', "”": '"', "′": "'", "″": '"
 _DASHES = {"‐": "-", "‑": "-", "‒": "-", "–": "-", "—": "-", "−": "-"}
 # Soft hyphen, zero-width space/non-joiner/joiner, and BOM. These survive NFKC but
 # would break a substring test, so they are deleted outright.
-_INVISIBLE = "­​‌‍﻿"
+_INVISIBLE = "­\u200b‌‍﻿"
 _FOLD = str.maketrans({**_QUOTES, **_DASHES, **dict.fromkeys(_INVISIBLE)})
 _WS = re.compile(r"\s+")
 

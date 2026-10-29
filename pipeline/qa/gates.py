@@ -392,8 +392,10 @@ def gate_cost(usage: Usage, trailing_median: float | None, multiplier: float) ->
         passed=False,
         blocking=False,
         details=[
-            f"run cost ${usage.cost_usd:.2f} exceeds "
-            f"{multiplier}x trailing median ${trailing_median:.2f}"
+            (
+                f"run cost ${usage.cost_usd:.2f} exceeds "
+                f"{multiplier}x trailing median ${trailing_median:.2f}"
+            )
         ],
     )
 

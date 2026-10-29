@@ -168,7 +168,7 @@ class ForumClient:
             # A 200 whose body is a list or a string is a proxy or a WAF answering, not the
             # forum. Named here, or it surfaces as an AttributeError from inside the client
             # that says neither which site answered nor what it said.
-            raise RuntimeError(f"{self.cfg.site} graphql: response body was not an object")
+            raise RuntimeError(f"{self.cfg.site} graphql: response body was not an object")  # noqa: TRY004 - a bad response
         if body.get("errors"):
             raise RuntimeError(f"{self.cfg.site} graphql: {body['errors']}")
         data = body.get("data")

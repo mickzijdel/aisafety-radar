@@ -31,18 +31,18 @@ def resp(summary, quotes=(), **over):
 
 
 def make_comment(**over):
-    base = dict(
-        id="c1",
-        post_id="lw:abc123",
-        site="lw",
-        author="Bob",
-        author_created_at=None,
-        posted_at=datetime(2026, 8, 30, tzinfo=UTC),
-        score=83,
-        agreement=None,
-        parent_id=None,
-        text="I disagree",
-    )
+    base = {
+        "id": "c1",
+        "post_id": "lw:abc123",
+        "site": "lw",
+        "author": "Bob",
+        "author_created_at": None,
+        "posted_at": datetime(2026, 8, 30, tzinfo=UTC),
+        "score": 83,
+        "agreement": None,
+        "parent_id": None,
+        "text": "I disagree",
+    }
     base.update(over)
     return Comment(**base)
 

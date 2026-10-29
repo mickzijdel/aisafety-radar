@@ -92,7 +92,7 @@ class FixtureClient:
         newest: datetime | None = None
         for path in Path(root).glob("*_posts.json"):
             for post in json.loads(path.read_text()):
-                moment = datetime.fromisoformat(post["postedAt"].replace("Z", "+00:00"))
+                moment = datetime.fromisoformat(post["postedAt"])
                 if moment.tzinfo is None:
                     moment = moment.replace(tzinfo=UTC)
                 newest = moment if newest is None or moment > newest else newest

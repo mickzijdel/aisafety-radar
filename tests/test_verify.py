@@ -8,19 +8,19 @@ SOURCE = 'We measured a 45% drop on 29 August 2026 across 12 models. "Figure 2" 
 
 
 def ex(**over):
-    base = dict(
-        item_id="x",
-        summary="A 45% drop across 12 models on 2026-08-29.",
-        key_quotes=[],
-        author_stated_status=None,
-        claim_type="confident-empirical",
-        novelty=None,
-        discussion_signal=None,
-        deadline=None,
-        entities=[],
-        slugs=["evals"],
-        importance=4,
-    )
+    base = {
+        "item_id": "x",
+        "summary": "A 45% drop across 12 models on 2026-08-29.",
+        "key_quotes": [],
+        "author_stated_status": None,
+        "claim_type": "confident-empirical",
+        "novelty": None,
+        "discussion_signal": None,
+        "deadline": None,
+        "entities": [],
+        "slugs": ["evals"],
+        "importance": 4,
+    }
     base.update(over)
     return Extraction(**base)
 
@@ -31,9 +31,9 @@ def test_quotes_verified_and_dropped():
 
 
 def test_numbers_and_dates_in_prose_must_exist():
-    e, r = verify(ex(summary="A 45% drop across 12 models on 29 August 2026."), SOURCE)
+    _e, r = verify(ex(summary="A 45% drop across 12 models on 29 August 2026."), SOURCE)
     assert r.ok and r.bad_tokens == []
-    e, r = verify(ex(summary="A 46% drop across 12 models."), SOURCE)
+    _e, r = verify(ex(summary="A 46% drop across 12 models."), SOURCE)
     assert not r.ok and r.bad_tokens == ["46%"]
 
 
@@ -48,7 +48,7 @@ def test_deadline_verified():
 
 
 def test_comments_text_counts_as_source_for_discussion_signal():
-    e, r = verify(
+    _e, r = verify(
         ex(summary="ok", discussion_signal="Top comment (83 karma) disagrees."),
         SOURCE,
         comments_text="Bob (83 karma): I disagree",

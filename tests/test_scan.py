@@ -19,19 +19,19 @@ S = load_settings()
 
 
 def rec(importance=3, summary="A summary.", **over):
-    base = dict(
-        item_id="lw:abc123",
-        summary=summary,
-        key_quotes=["a verbatim quote"],
-        author_stated_status=None,
-        claim_type="exploratory",
-        novelty=None,
-        discussion_signal=None,
-        deadline=None,
-        entities=["METR"],
-        slugs=["evals"],
-        importance=importance,
-    )
+    base = {
+        "item_id": "lw:abc123",
+        "summary": summary,
+        "key_quotes": ["a verbatim quote"],
+        "author_stated_status": None,
+        "claim_type": "exploratory",
+        "novelty": None,
+        "discussion_signal": None,
+        "deadline": None,
+        "entities": ["METR"],
+        "slugs": ["evals"],
+        "importance": importance,
+    }
     base.update(over)
     return ExtractionRecord(extraction=Extraction(**base))
 

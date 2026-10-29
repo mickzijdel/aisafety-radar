@@ -369,8 +369,10 @@ def test_injected_markdown_in_a_post_summary_cannot_forge_a_heading_or_an_item()
     text = render_forums(META, build_render_items(items, [rec("lw:1", summary=INJECTION)]), [], [])
     assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
     assert item_lines(text) == [
-        "- **Post one** · A (LW · 2026-08-29 · 45 karma · 3 comments) "
-        "· https://www.lesswrong.com/posts/abc123/x"
+        (
+            "- **Post one** · A (LW · 2026-08-29 · 45 karma · 3 comments) "
+            "· https://www.lesswrong.com/posts/abc123/x"
+        )
     ]
 
 
@@ -387,8 +389,10 @@ def test_a_newline_in_an_author_cannot_break_the_metadata_line():
     items = [make_item(id="lw:1", title="Post one", author="Alice\n# Injected")]
     text = render_forums(META, build_render_items(items, [rec("lw:1")]), [], [])
     assert item_lines(text) == [
-        "- **Post one** · Alice # Injected (LW · 2026-08-29 · 45 karma · 3 comments) "
-        "· https://www.lesswrong.com/posts/abc123/x"
+        (
+            "- **Post one** · Alice # Injected (LW · 2026-08-29 · 45 karma · 3 comments) "
+            "· https://www.lesswrong.com/posts/abc123/x"
+        )
     ]
     assert headings(text) == ["# Today on the forums · 2026-08-30", "## Posts"]
 

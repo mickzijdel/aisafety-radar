@@ -26,7 +26,7 @@ ALLOWED = {"name", "description", "license", "compatibility", "metadata", "allow
 
 def frontmatter():
     text = SKILL.read_text()
-    m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    m = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
     assert m, "SKILL.md must start with YAML frontmatter"
     return yaml.safe_load(m.group(1)), text
 

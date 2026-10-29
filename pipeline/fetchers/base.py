@@ -64,7 +64,7 @@ def run_all(fetchers: Sequence[Fetcher], window: Window) -> FetchResult:
     for f in fetchers:
         try:
             got = f.fetch(window)
-        except Exception as exc:  # noqa: BLE001 - isolation is the point
+        except Exception as exc:  # isolation is the point
             log.exception("fetcher %s failed", f.name)
             statuses.append(
                 SourceStatus(source=f.name, category=f.category, ok=False, items=0, error=str(exc))

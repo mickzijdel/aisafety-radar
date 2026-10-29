@@ -340,7 +340,7 @@ def _window_posts(
         try:
             posts = fetch_window_posts(client, site, day)
             converted = [(raw_post_to_item(site, p), p.lastCommentedAt) for p in posts]
-        except Exception as exc:  # noqa: BLE001 - isolation is the point
+        except Exception as exc:  # isolation is the point
             log.exception("%s: 14-day window fetch failed; no movers from this site today", site)
             statuses.append(_side_status(f"{site}-window", ok=False, items=0, error=str(exc)))
             continue
@@ -404,7 +404,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
                         }
                     )
             records[item.id] = record
-        except Exception:  # noqa: BLE001 - one item is not the run
+        except Exception:  # one item is not the run
             log.exception("item %s failed during extraction, scan or judging; skipping it", item.id)
             # `judges[id]` is set a few lines before `records[id]`, and the invariant that the
             # two agree is asserted outside this loop. An exception raised in that window would
@@ -428,7 +428,7 @@ def run_daily(inputs: RunInputs) -> RunReport:
         try:
             movers = refresh_comments(clients, ledger, archive, llm, settings, day)
             refresh_status = _side_status("refresh", ok=True, items=len(movers))
-        except Exception as exc:  # noqa: BLE001 - a lost refresh is not a lost run
+        except Exception as exc:  # a lost refresh is not a lost run
             log.exception("comment refresh failed; publishing without discussion movers")
             refresh_status = _side_status("refresh", ok=False, items=0, error=str(exc))
 

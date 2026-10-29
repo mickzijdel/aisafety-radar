@@ -94,19 +94,19 @@ def _comment(author: str) -> Comment:
 
 
 def _record(item_id: str, **over) -> ExtractionRecord:
-    base = dict(
-        item_id=item_id,
-        summary=CLEAN,
-        key_quotes=[CLEAN],
-        author_stated_status=CLEAN,
-        claim_type="exploratory",
-        novelty=CLEAN,
-        discussion_signal=CLEAN,
-        deadline=None,
-        entities=[],
-        slugs=["evals"],
-        importance=3,
-    )
+    base = {
+        "item_id": item_id,
+        "summary": CLEAN,
+        "key_quotes": [CLEAN],
+        "author_stated_status": CLEAN,
+        "claim_type": "exploratory",
+        "novelty": CLEAN,
+        "discussion_signal": CLEAN,
+        "deadline": None,
+        "entities": [],
+        "slugs": ["evals"],
+        "importance": 3,
+    }
     base.update(over)
     return ExtractionRecord(extraction=Extraction(**base))
 
