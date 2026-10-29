@@ -108,9 +108,9 @@ templates in `pipeline/render/templates/`, not the outputs. `SKILL.md` is hand-w
 Toolchain (`mise.toml`, locked in `mise.lock`): Python 3.12, uv, hk, pkl, gitleaks, zizmor,
 actionlint and node, all tracked at latest on a 4 day release cooldown.
 
-Key packages (`pyproject.toml`, resolved in `uv.lock`): anthropic 1.0.0, httpx 0.28.1,
-pydantic 2.13.4, jinja2 3.1.6, beautifulsoup4 4.15.0, markdownify 1.2.3. Dev group: pytest 9.1.1,
-ruff 0.16.4, respx 0.23.1, pytest-httpx 0.36.2, vulture 2.16, pyyaml 6.0.3.
+Key packages (`pyproject.toml`, resolved in `uv.lock`): anthropic 2.3.0, httpx 0.28.1,
+pydantic 2.14.1, jinja2 3.1.6, beautifulsoup4 4.15.0, markdownify 1.2.3. Dev group: pytest 9.1.1,
+ruff 0.17.2, respx 0.23.1, pytest-httpx 0.36.2, vulture 2.16, pyyaml 6.0.3.
 
 ## License
 
