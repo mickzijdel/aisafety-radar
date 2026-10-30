@@ -82,8 +82,6 @@ def load_settings(path: Path | None = None) -> Settings:
 
 
 def user_agent(version: str) -> str:
-    """Identify the pipeline to every host it fetches from, with a way to reach its owner."""
-    return (
-        f"aisafety-radar/{version} "
-        "(+https://github.com/mickzijdel/aisafety-radar; contact: claude@mickzijdel.com)"
-    )
+    """Name the pipeline to every host it fetches from, with no personal details: every host logs
+    it, so no email address, account name or URL that leads to the owner."""
+    return f"aisafety-radar/{version}"

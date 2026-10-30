@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, NoReturn
 
+from pipeline.config import user_agent
 from pipeline.fetchers.forummagnum import SITES, ForumClient
 
 
@@ -29,10 +30,7 @@ def usage(problem: str) -> NoReturn:
     raise SystemExit(2)
 
 
-UA = (
-    "aisafety-radar/dev (+https://github.com/mickzijdel/aisafety-radar; "
-    "contact: claude@mickzijdel.com)"
-)
+UA = user_agent("dev")
 
 if len(sys.argv) < 2:
     usage("missing the YYYY-MM-DD date to record from")

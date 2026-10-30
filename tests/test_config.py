@@ -13,9 +13,11 @@ def test_settings_load_defaults():
     assert s.budgets["31-today-forums"] == 9000
 
 
-def test_user_agent():
+def test_user_agent_names_the_pipeline_and_no_person():
     ua = user_agent("0.1.0")
-    assert ua.startswith("aisafety-radar/0.1.0 (") and "contact:" in ua
+    assert ua == "aisafety-radar/0.1.0"
+    # Every host logs it: no email address, account name or personal URL.
+    assert "@" not in ua and "mickzijdel" not in ua.lower()
 
 
 def test_every_configured_model_has_a_price():

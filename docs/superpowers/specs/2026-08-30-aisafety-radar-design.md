@@ -505,8 +505,9 @@ not a failed run. Every fetcher declares an expected minimum item count over a r
 window, and every *category* (forums, news, governance, papers, events, imports) has its own
 minimum; falling below either for three consecutive runs is a health failure (6.9). Anomaly
 detection also runs the other way: a source or author producing more than three times its
-30-day median in one day is flagged and capped. Requests carry a descriptive User-Agent with a
-contact address and respect per-host pacing (arXiv: 3 s).
+30-day median in one day is flagged and capped. Requests carry a User-Agent that names the
+pipeline and nothing personal (`aisafety-radar/<version>`: no contact address, account or URL)
+and respect per-host pacing (arXiv: 3 s).
 
 A Stage 0 that runs with a source down still writes that day's `posts-ledger.json` snapshot
 for the sources that worked, and marks the missing ones, so the comment refresh always has a
@@ -850,7 +851,7 @@ Imports and quotes are the newsletters' public archive content, quoted with attr
 link; the X-Risk Daily import is in full. Mick asks each imported or heavily used source (X-Risk
 Daily, CAIS, aisafety.com, 80k for a job-board key) for permission or a key as the feature
 ships, honours any objection by dropping to headline-plus-link, and records the answers in the
-README. Scraping etiquette: descriptive User-Agent with contact, feeds preferred over pages,
+README. Scraping etiquette: a User-Agent naming the pipeline with no personal details, feeds preferred over pages,
 bot mirrors where offered, arXiv's 3-second spacing, no use of aisafety.com's disallowed API,
 conditional GETs where ETags exist, quotes under 40 words. Workflow hardening follows the
 dev-hooks `github-actions` checklist.
